@@ -1,0 +1,15 @@
+node_modules/
+dist/
+coverage/
+.DS_Store
+*.log
+
+# Trellis local identity and external worktrees
+.trellis/.developer
+trellis-worktrees/
+
+# Local env
+.env
+.env.local
+.env.*
+!.env.example
