@@ -8,6 +8,7 @@ This repository follows the same policy as `AGENTS.md`.
 2. Create or select an OpenSpec change (`/opsx:new` or existing).
 3. Build and validate with project verify scripts.
 4. Record session with `/trellis:record-session`.
+5. Use branch `sbk-<owner>-<change>` and linked worktree for implementation.
 
 ## Required Gates
 

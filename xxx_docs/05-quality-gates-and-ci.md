@@ -62,5 +62,14 @@ Using one script for CI and local verification:
 - Config file: `workflow-policy.json`
 - Controls:
   - implementation-path mapping requirements
+  - branch naming and change-owner mapping
+  - linked worktree requirement for local implementation
   - session-evidence enforcement
+  - CI fail-closed base-ref behavior
   - indicator thresholds and token-cost requirement mode
+
+## CI Fail-Closed Note
+
+- CI must provide resolvable base ref (`WORKFLOW_BASE_REF`).
+- If base ref is missing/unresolvable, workflow policy gate fails CI (not warning).
+- Local `workflow:policy` may report warning for branch-delta availability when base ref is intentionally not provided.

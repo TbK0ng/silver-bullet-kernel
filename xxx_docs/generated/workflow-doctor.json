@@ -1,5 +1,5 @@
 ﻿{
-    "generatedAt":  "2026-02-12T10:03:37.3772890+00:00",
+    "generatedAt":  "2026-02-12T10:38:13.5595096+00:00",
     "overallPassed":  true,
     "checks":  [
                    {
@@ -16,61 +16,61 @@
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\silver-bullet-kernel\\.trellis\\spec\\guides\\constitution.md",
+                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-harden-fail-closed-owner-worktree-gates\\.trellis\\spec\\guides\\constitution.md",
                        "name":  "Path exists: .trellis/spec/guides/constitution.md",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\silver-bullet-kernel\\.trellis\\spec\\guides\\memory-governance.md",
+                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-harden-fail-closed-owner-worktree-gates\\.trellis\\spec\\guides\\memory-governance.md",
                        "name":  "Path exists: .trellis/spec/guides/memory-governance.md",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\silver-bullet-kernel\\.codex\\skills",
+                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-harden-fail-closed-owner-worktree-gates\\.codex\\skills",
                        "name":  "Path exists: .codex/skills",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\silver-bullet-kernel\\openspec\\specs",
+                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-harden-fail-closed-owner-worktree-gates\\openspec\\specs",
                        "name":  "Path exists: openspec/specs",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\silver-bullet-kernel\\scripts\\verify-ci.ps1",
+                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-harden-fail-closed-owner-worktree-gates\\scripts\\verify-ci.ps1",
                        "name":  "Path exists: scripts/verify-ci.ps1",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\silver-bullet-kernel\\scripts\\collect-metrics.ps1",
+                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-harden-fail-closed-owner-worktree-gates\\scripts\\collect-metrics.ps1",
                        "name":  "Path exists: scripts/collect-metrics.ps1",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\silver-bullet-kernel\\scripts\\workflow-policy-gate.ps1",
+                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-harden-fail-closed-owner-worktree-gates\\scripts\\workflow-policy-gate.ps1",
                        "name":  "Path exists: scripts/workflow-policy-gate.ps1",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\silver-bullet-kernel\\scripts\\workflow-indicator-gate.ps1",
+                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-harden-fail-closed-owner-worktree-gates\\scripts\\workflow-indicator-gate.ps1",
                        "name":  "Path exists: scripts/workflow-indicator-gate.ps1",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\silver-bullet-kernel\\workflow-policy.json",
+                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-harden-fail-closed-owner-worktree-gates\\workflow-policy.json",
                        "name":  "Path exists: workflow-policy.json",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\silver-bullet-kernel\\xxx_docs\\00-index.md",
+                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-harden-fail-closed-owner-worktree-gates\\xxx_docs\\00-index.md",
                        "name":  "Path exists: xxx_docs/00-index.md",
                        "passed":  true
                    },
@@ -82,7 +82,7 @@
                    },
                    {
                        "remediation":  "Run: npm run verify:fast or npm run verify:ci",
-                       "details":  "path=E:\\docc\\silver-bullet-kernel\\.metrics\\\\verify-runs.jsonl",
+                       "details":  "path=E:\\docc\\trellis-worktrees\\sbk-codex-harden-fail-closed-owner-worktree-gates\\.metrics\\\\verify-runs.jsonl",
                        "name":  "Verify telemetry present",
                        "passed":  true
                    },

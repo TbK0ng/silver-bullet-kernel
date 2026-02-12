@@ -9,6 +9,7 @@ Use isolated worktrees to increase parallel throughput while reducing merge conf
 Use this format:
 
 - `sbk-<owner>-<change>`
+- branch regex (policy gate): `^sbk-(?<owner>[a-z0-9]+)-(?<change>[a-z0-9][a-z0-9-]*)$`
 
 Examples:
 
@@ -20,6 +21,14 @@ Examples:
 - One OpenSpec change has one owner at a time.
 - Reviewer must be the non-owner collaborator.
 - Do not co-edit the same active change in two worktrees.
+- Branch `<change>` segment must match the active OpenSpec change id.
+- Session evidence must be recorded under `.trellis/workspace/<owner>/`.
+
+## Strict Enforcement
+
+- Implementation edits are blocked unless branch naming passes policy gate.
+- Local implementation from main worktree is blocked; use linked worktree only.
+- CI branch-delta checks are fail-closed when base ref is unavailable.
 
 ## Branching and Merge
 

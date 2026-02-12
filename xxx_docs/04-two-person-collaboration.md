@@ -10,8 +10,10 @@ Swap roles by change, not within same change.
 ## Parallel Strategy
 
 - One change = one branch = one worktree owner
+- Branch must match: `sbk-<owner>-<change>`
 - No dual ownership in a single active change
 - Rebase frequently on `main`
+- Local implementation must run from linked worktree, not the main worktree
 
 ## Merge Discipline
 
@@ -19,6 +21,7 @@ Swap roles by change, not within same change.
 - Larger changes: preserve atomic commits
 - Never merge failing verify gates
 - Never merge branch deltas missing session evidence updates under `.trellis/workspace/`
+- Session evidence path must match branch owner workspace (`.trellis/workspace/<owner>/`)
 
 ## Conflict Avoidance
 

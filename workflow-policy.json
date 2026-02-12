@@ -1,9 +1,18 @@
 {
   "workflowGate": {
     "requireActiveChangeForImplementationEdits": true,
+    "requireSingleActiveChangeForImplementationEdits": true,
     "requireCompleteActiveChangeArtifacts": true,
+    "requireBranchPatternForImplementationEdits": true,
+    "requireBranchChangeMatchesActiveChange": true,
+    "branchPattern": "^sbk-(?<owner>[a-z0-9]+)-(?<change>[a-z0-9][a-z0-9-]*)$",
+    "requireLinkedWorktreeForLocalImplementation": true,
+    "linkedWorktreeGitDirContains": "/.git/worktrees/",
     "requireChangeArtifactsInBranchDelta": true,
     "requireSessionRecordInBranchDelta": true,
+    "requireOwnerScopedSessionEvidence": true,
+    "ownerWorkspaceRoot": ".trellis/workspace/",
+    "ciRequireResolvableBaseRef": true,
     "implementationPathPrefixes": [
       "src/",
       "tests/",

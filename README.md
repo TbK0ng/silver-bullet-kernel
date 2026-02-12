@@ -44,9 +44,10 @@ npm run verify
 
 1. Start with Trellis context (`/trellis:start`).
 2. Track each non-trivial change in `openspec/changes/<name>/`.
-3. Implement and verify with project scripts.
-4. Archive completed changes to `openspec/changes/archive/`.
-5. Record sessions via `/trellis:record-session`.
+3. Implement on linked worktree branch `sbk-<owner>-<change>`.
+4. Verify with project scripts and policy gates.
+5. Archive completed changes to `openspec/changes/archive/`.
+6. Record sessions via `/trellis:record-session`.
 
 ## Documentation
 

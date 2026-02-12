@@ -33,3 +33,13 @@ Memory governance SHALL require session evidence artifacts for implementation ch
 - **THEN** policy gate requires corresponding session evidence updates under `.trellis/workspace/`
 - **AND** CI fails when session evidence is missing
 
+### Requirement: Owner-Scoped Session Evidence
+
+Memory governance SHALL enforce that session evidence aligns with the branch owner identity.
+
+#### Scenario: Implementation branch owner is `alice`
+
+- **WHEN** policy gate inspects session evidence paths
+- **THEN** evidence must be under `.trellis/workspace/alice/`
+- **AND** non-owner session paths do not satisfy the enforcement check
+

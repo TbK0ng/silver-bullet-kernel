@@ -29,6 +29,8 @@ Keep this managed block so 'trellis update' can refresh the instructions.
 - Every non-trivial change MUST map to one OpenSpec change directory under `openspec/changes/<name>/`.
 - Do not start implementation before proposal and design exist.
 - Verification fails when implementation edits are not traceable to OpenSpec artifacts.
+- Branch must follow `sbk-<owner>-<change>` and `<change>` must match active change id.
+- Local implementation must run from linked worktree (not main worktree).
 
 ## Verification
 
@@ -44,5 +46,6 @@ Keep this managed block so 'trellis update' can refresh the instructions.
 - Source of truth for execution policy: Trellis specs and guides.
 - Session memory must be recorded with `/trellis:record-session` at end of work sessions.
 - Implementation changes in CI must include session evidence updates under `.trellis/workspace/`.
+- Session evidence path must match branch owner workspace (`.trellis/workspace/<owner>/`).
 - Never store secrets in memory artifacts; redact before recording.
 - Generate weekly observability report with `npm run metrics:collect`.

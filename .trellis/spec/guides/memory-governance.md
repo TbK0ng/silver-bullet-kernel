@@ -39,4 +39,5 @@ At end of meaningful work session:
 ## CI Evidence Rule
 
 - For implementation changes, branch delta must include session evidence under `.trellis/workspace/`.
+- Session evidence must align with branch owner path: `.trellis/workspace/<owner>/`.
 - Keep entries concise and factual: change id, decisions, failures, and verify evidence.

@@ -49,12 +49,28 @@ Fix:
 Cause:
 
 - implementation edits exist but no active OpenSpec change or incomplete change artifacts.
+- branch naming or owner mapping violates strict policy.
+- local implementation is running in main worktree instead of linked worktree.
 
 Fix:
 
 - create/continue change: `openspec new change <name>`
 - ensure `proposal.md`, `design.md`, `tasks.md`, and spec deltas exist
+- use compliant branch name: `sbk-<owner>-<change>`
+- run in linked worktree:
+  - `git worktree add ..\\trellis-worktrees\\sbk-<owner>-<change> sbk-<owner>-<change>`
 - re-run `npm run workflow:policy`
+
+## CI Policy Gate Fails: Base Ref Unavailable
+
+Cause:
+
+- `WORKFLOW_BASE_REF` missing or remote base branch not fetched.
+
+Fix:
+
+- ensure CI step sets `WORKFLOW_BASE_REF` (for PR: `origin/<base_ref>`, for push: `origin/main`)
+- ensure checkout fetches full history (`fetch-depth: 0`)
 
 ## Indicator Gate Fails on Drift or Rework
 

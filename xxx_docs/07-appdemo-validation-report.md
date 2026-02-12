@@ -37,12 +37,15 @@ Validate that the workflow kernel can deliver a runnable application artifact wi
   - `openspec archive add-workflow-doctor-and-advanced-metrics -y` succeeded and merged doctor/advanced-metrics deltas.
   - `openspec status --change enforce-workflow-policy-gates` reached `4/4 artifacts complete` before archive.
   - `openspec archive enforce-workflow-policy-gates -y` succeeded and merged policy-gate deltas.
+  - `openspec status --change harden-fail-closed-owner-worktree-gates` reached `4/4 artifacts complete` before archive.
+  - `openspec archive harden-fail-closed-owner-worktree-gates -y` succeeded and merged strict-owner/worktree policy deltas.
   - `openspec validate --all --strict --no-interactive` passed for canonical specs.
   - `openspec list` returns no active changes after second archive.
   - `openspec list` returns no active changes after third archive.
   - `openspec list` returns no active changes after fourth archive.
+  - `openspec list` returns no active changes after fifth archive.
   - `xxx_docs/generated/workflow-metrics-weekly.md` generated with 100% success rate in the current 7-day sample.
-  - `xxx_docs/generated/workflow-policy-gate.md` generated with PASS/WARN-level governance diagnostics.
+  - `xxx_docs/generated/workflow-policy-gate.md` generated with `mode=ci` and `outcome=PASS` under strict fail-closed configuration.
   - `xxx_docs/generated/workflow-indicator-gate.md` generated with PASS threshold checks.
 - Remediation performed during validation:
   - Fixed typed-lint parser setup in `eslint.config.js`.
@@ -50,3 +53,4 @@ Validate that the workflow kernel can deliver a runnable application artifact wi
   - Hardened PowerShell verify scripts to fail fast on non-zero command exit codes.
   - Fixed telemetry object mutation and metrics script strict-mode counting bugs.
   - Fixed PowerShell parameter-order parser errors in newly added gate scripts.
+  - Fixed strict-mode empty-array handling in workflow policy gate for CI branch-delta edge cases.

@@ -28,6 +28,7 @@ This document maps `ai-coding-workflow-silver-bullet-plan.md` requirements to co
 - Worktree policy codified in `.trellis/spec/guides/worktree-policy.md`.
 - `.trellis/worktree.yaml` updated with `npm ci` and `npm run verify:fast`.
 - Two-person SOP documented in `xxx_docs/04-two-person-collaboration.md`.
+- Strict branch/owner/worktree enforcement implemented in `scripts/workflow-policy-gate.ps1`.
 
 ## Phase 4: Memory and Knowledge Governance
 
@@ -63,3 +64,4 @@ This document maps `ai-coding-workflow-silver-bullet-plan.md` requirements to co
   - `openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/`
   - `openspec/changes/archive/2026-02-12-add-workflow-doctor-and-advanced-metrics/`
   - `openspec/changes/archive/2026-02-12-enforce-workflow-policy-gates/`
+  - `openspec/changes/archive/2026-02-12-harden-fail-closed-owner-worktree-gates/`

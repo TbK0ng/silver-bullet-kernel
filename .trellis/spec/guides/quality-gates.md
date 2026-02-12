@@ -48,6 +48,8 @@ Do not archive a change with unresolved verify failures.
 
 - Implementation edits must be traceable to `openspec/changes/<name>/` artifacts.
 - Active change artifacts must include proposal/design/tasks/spec delta before verify succeeds.
+- Branch must match `sbk-<owner>-<change>` and `<change>` must map to active change.
+- Local implementation must run in linked worktree (`.git/worktrees/...`).
 - CI branch delta must include:
   - OpenSpec change artifacts for implementation edits.
-  - Session evidence updates under `.trellis/workspace/`.
+  - Session evidence updates under owner path `.trellis/workspace/<owner>/`.

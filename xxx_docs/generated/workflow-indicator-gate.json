@@ -1,5 +1,5 @@
 ﻿{
-    "generatedAt":  "2026-02-12T10:04:46.5701085+00:00",
+    "generatedAt":  "2026-02-12T10:38:11.6818851+00:00",
     "outcome":  "PASS",
     "checks":  [
                    {
@@ -14,7 +14,7 @@
                        "name":  "Lead time P90 within threshold",
                        "severity":  "warn",
                        "passed":  true,
-                       "observed":  "9.22 h",
+                       "observed":  "10.11 h",
                        "threshold":  "\u003c= 72 h",
                        "remediation":  "Split oversized changes and archive in smaller batches."
                    },

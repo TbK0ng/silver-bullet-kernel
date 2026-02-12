@@ -91,23 +91,20 @@ function Get-BranchDeltaInfo {
   if ([string]::IsNullOrWhiteSpace($resolvedBaseRef)) {
     $resolvedBaseRef = $env:WORKFLOW_BASE_REF
   }
+  if ([string]::IsNullOrWhiteSpace($resolvedBaseRef) -and -not [string]::IsNullOrWhiteSpace($env:GITHUB_BASE_REF)) {
+    $resolvedBaseRef = "origin/$($env:GITHUB_BASE_REF.Trim())"
+  }
   if ([string]::IsNullOrWhiteSpace($resolvedBaseRef)) {
     git -C $RepoRoot rev-parse --verify --quiet origin/main *> $null
     if ($LASTEXITCODE -eq 0) {
       $resolvedBaseRef = "origin/main"
     }
   }
-  if ([string]::IsNullOrWhiteSpace($resolvedBaseRef) -and $Mode -eq "ci") {
-    git -C $RepoRoot rev-parse --verify --quiet HEAD^ *> $null
-    if ($LASTEXITCODE -eq 0) {
-      $resolvedBaseRef = "HEAD^"
-    }
-  }
 
   if ([string]::IsNullOrWhiteSpace($resolvedBaseRef)) {
     return [ordered]@{
       available = $false
-      reason = "No base ref available (set WORKFLOW_BASE_REF or fetch origin/main)."
+      reason = "No base ref available (set WORKFLOW_BASE_REF or ensure origin base branch is fetched)."
       baseRef = ""
       mergeBase = ""
       files = @()
@@ -140,7 +137,7 @@ function Get-BranchDeltaInfo {
 
 function Get-ImplementationFiles {
   param(
-    [Parameter(Mandatory = $true)][string[]]$Files,
+    [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$Files,
     [Parameter(Mandatory = $true)][string[]]$IgnorePrefixes,
     [Parameter(Mandatory = $true)][string[]]$ImplementationPrefixes,
     [Parameter(Mandatory = $true)][string[]]$ImplementationFilesExact
@@ -162,6 +159,102 @@ function Get-ImplementationFiles {
     }
   }
   return @($result | Select-Object -Unique)
+}
+
+function Get-CurrentBranchName {
+  param(
+    [Parameter(Mandatory = $true)][string]$RepoRoot
+  )
+
+  $branch = (git -C $RepoRoot rev-parse --abbrev-ref HEAD | Select-Object -First 1).Trim()
+  if ($branch -eq "HEAD") {
+    if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_HEAD_REF)) {
+      return $env:GITHUB_HEAD_REF.Trim()
+    }
+    if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_REF_NAME)) {
+      return $env:GITHUB_REF_NAME.Trim()
+    }
+  }
+  return $branch
+}
+
+function Get-BranchIdentity {
+  param(
+    [Parameter(Mandatory = $true)][string]$BranchName,
+    [Parameter(Mandatory = $true)][string]$BranchPattern
+  )
+
+  if ([string]::IsNullOrWhiteSpace($BranchName)) {
+    return [ordered]@{
+      valid = $false
+      branch = $BranchName
+      owner = ""
+      change = ""
+      reason = "Branch name is empty."
+    }
+  }
+
+  $regex = [regex]::new($BranchPattern)
+  $match = $regex.Match($BranchName)
+  if (-not $match.Success) {
+    return [ordered]@{
+      valid = $false
+      branch = $BranchName
+      owner = ""
+      change = ""
+      reason = "Branch name does not match pattern '$BranchPattern'."
+    }
+  }
+
+  $owner = ""
+  $change = ""
+  try {
+    $owner = [string]$match.Groups["owner"].Value
+    $change = [string]$match.Groups["change"].Value
+  } catch {
+    $owner = ""
+    $change = ""
+  }
+
+  if ([string]::IsNullOrWhiteSpace($owner) -or [string]::IsNullOrWhiteSpace($change)) {
+    return [ordered]@{
+      valid = $false
+      branch = $BranchName
+      owner = $owner
+      change = $change
+      reason = "Pattern must provide non-empty named groups 'owner' and 'change'."
+    }
+  }
+
+  return [ordered]@{
+    valid = $true
+    branch = $BranchName
+    owner = $owner
+    change = $change
+    reason = ""
+  }
+}
+
+function Get-GitDirInfo {
+  param(
+    [Parameter(Mandatory = $true)][string]$RepoRoot,
+    [Parameter(Mandatory = $true)][string]$LinkedMarker
+  )
+
+  $gitDirRaw = (git -C $RepoRoot rev-parse --git-dir | Select-Object -First 1).Trim()
+  $gitDirFull = $gitDirRaw
+  if (-not [System.IO.Path]::IsPathRooted($gitDirRaw)) {
+    $gitDirFull = Join-Path $RepoRoot $gitDirRaw
+  }
+  $normalized = (Normalize-RepoPath -Path $gitDirFull).ToLowerInvariant()
+  $marker = $LinkedMarker.ToLowerInvariant()
+  $isLinked = $normalized.Contains($marker)
+
+  return [ordered]@{
+    gitDirRaw = $gitDirRaw
+    gitDirFull = $gitDirFull
+    isLinkedWorktree = $isLinked
+  }
 }
 
 function Join-PathsForDetails {
@@ -187,6 +280,19 @@ $config = Get-Content -Path $configPath -Encoding UTF8 | ConvertFrom-Json
 $implementationPrefixes = @($config.workflowGate.implementationPathPrefixes)
 $implementationFilesExact = @($config.workflowGate.implementationPathFiles)
 $ignorePrefixes = @($config.workflowGate.ignorePathPrefixes)
+$branchPattern = [string]$config.workflowGate.branchPattern
+$ownerWorkspaceRoot = [string]$config.workflowGate.ownerWorkspaceRoot
+if ([string]::IsNullOrWhiteSpace($ownerWorkspaceRoot)) {
+  $ownerWorkspaceRoot = ".trellis/workspace/"
+}
+$linkedMarker = [string]$config.workflowGate.linkedWorktreeGitDirContains
+if ([string]::IsNullOrWhiteSpace($linkedMarker)) {
+  $linkedMarker = "/.git/worktrees/"
+}
+
+$currentBranch = Get-CurrentBranchName -RepoRoot $repoRoot
+$branchIdentity = Get-BranchIdentity -BranchName $currentBranch -BranchPattern $branchPattern
+$gitDirInfo = Get-GitDirInfo -RepoRoot $repoRoot -LinkedMarker $linkedMarker
 
 $workingTreeFiles = @(Get-WorkingTreeFiles -RepoRoot $repoRoot)
 $workingImplementationFiles = @(Get-ImplementationFiles `
@@ -261,16 +367,83 @@ if ([bool]$branchDelta.available) {
       -ImplementationPrefixes $implementationPrefixes `
       -ImplementationFilesExact $implementationFilesExact)
 }
+$branchHasArchiveArtifacts = @($branchDelta.files | Where-Object {
+    $_.StartsWith("openspec/changes/archive/", [System.StringComparison]::OrdinalIgnoreCase)
+  }).Count -gt 0
+$implementationFilesForMode = if ($Mode -eq "ci") { @($branchImplementationFiles) } else { @($workingImplementationFiles) }
+$hasArchiveContextForMode = if ($Mode -eq "ci") { $branchHasArchiveArtifacts } else { $workingHasArchiveArtifacts }
+$needsOwnerContext = @($implementationFilesForMode).Count -gt 0
 
-$branchChecksFailClosed = ($Mode -eq "ci" -and $branchDelta.baseRef -ne "HEAD^")
-$branchDeltaAvailabilitySeverity = if ($branchChecksFailClosed) { "fail" } else { "warn" }
-$branchRuleSeverity = if ($branchChecksFailClosed) { "fail" } else { "warn" }
+if ([bool]$config.workflowGate.requireBranchPatternForImplementationEdits) {
+  Add-Check -Checks $checks `
+    -Name "Implementation branch matches owner/change pattern" `
+    -Severity "fail" `
+    -Passed ((-not $needsOwnerContext) -or [bool]$branchIdentity.valid) `
+    -Details ("branch=$currentBranch; valid=$($branchIdentity.valid); owner=$($branchIdentity.owner); change=$($branchIdentity.change); reason=$($branchIdentity.reason)") `
+    -Remediation "Use branch format from workflow policy config (for example: sbk-codex-<change>)."
+}
+
+if ([bool]$config.workflowGate.requireSingleActiveChangeForImplementationEdits) {
+  $mustHaveSingleActive = $needsOwnerContext -and (-not $hasArchiveContextForMode)
+  Add-Check -Checks $checks `
+    -Name "Implementation scope maps to exactly one active change" `
+    -Severity "fail" `
+    -Passed ((-not $mustHaveSingleActive) -or ($activeChanges.Count -eq 1)) `
+    -Details ("active_changes=$($activeChanges.Count); has_archive_context=$hasArchiveContextForMode") `
+    -Remediation "Keep one active OpenSpec change per implementation branch."
+}
+
+if ([bool]$config.workflowGate.requireBranchChangeMatchesActiveChange) {
+  $mustMatchActiveChange = $needsOwnerContext -and ($activeChanges.Count -eq 1) -and [bool]$branchIdentity.valid
+  $activeName = if ($activeChanges.Count -eq 1) { $activeChanges[0].Name } else { "" }
+  $matches = $false
+  if ($mustMatchActiveChange) {
+    $matches = $branchIdentity.change.Equals($activeName, [System.StringComparison]::OrdinalIgnoreCase)
+  }
+  Add-Check -Checks $checks `
+    -Name "Branch change id matches active change" `
+    -Severity "fail" `
+    -Passed ((-not $mustMatchActiveChange) -or $matches) `
+    -Details ("branch_change=$($branchIdentity.change); active_change=$activeName") `
+    -Remediation "Rename branch or active change so branch `<change>` segment matches active OpenSpec change id."
+}
+
+if ($Mode -eq "local" -and [bool]$config.workflowGate.requireLinkedWorktreeForLocalImplementation) {
+  $mustBeLinked = $workingImplementationFiles.Count -gt 0
+  Add-Check -Checks $checks `
+    -Name "Local implementation runs from linked worktree" `
+    -Severity "fail" `
+    -Passed ((-not $mustBeLinked) -or [bool]$gitDirInfo.isLinkedWorktree) `
+    -Details ("git_dir_raw=$($gitDirInfo.gitDirRaw); git_dir_full=$($gitDirInfo.gitDirFull); is_linked=$($gitDirInfo.isLinkedWorktree)") `
+    -Remediation "Run implementation in linked worktree (`git worktree add`) using one branch per change."
+}
+
+if ($Mode -eq "local" -and [bool]$config.workflowGate.requireOwnerScopedSessionEvidence) {
+  $needsLocalSessionEvidence = $workingImplementationFiles.Count -gt 0
+  $ownerPrefix = if ([bool]$branchIdentity.valid) { "$ownerWorkspaceRoot$($branchIdentity.owner)/" } else { "" }
+  $hasOwnerSessionEvidence = $false
+  if (-not [string]::IsNullOrWhiteSpace($ownerPrefix)) {
+    $hasOwnerSessionEvidence = @($workingTreeFiles | Where-Object {
+        $_.StartsWith($ownerPrefix, [System.StringComparison]::OrdinalIgnoreCase)
+      }).Count -gt 0
+  }
+  Add-Check -Checks $checks `
+    -Name "Local implementation includes owner-scoped session evidence" `
+    -Severity "fail" `
+    -Passed ((-not $needsLocalSessionEvidence) -or ([bool]$branchIdentity.valid -and $hasOwnerSessionEvidence)) `
+    -Details ("owner_prefix=$ownerPrefix; has_owner_session_evidence=$hasOwnerSessionEvidence") `
+    -Remediation "Update session evidence under $ownerPrefix before verify."
+}
+
+$ciFailClosed = ($Mode -eq "ci" -and [bool]$config.workflowGate.ciRequireResolvableBaseRef)
+$branchDeltaAvailabilitySeverity = if ($ciFailClosed) { "fail" } else { "warn" }
+$branchRuleSeverity = if ($Mode -eq "ci") { "fail" } else { "warn" }
 Add-Check -Checks $checks `
   -Name "Branch delta available for governance checks" `
   -Severity $branchDeltaAvailabilitySeverity `
   -Passed ([bool]$branchDelta.available) `
   -Details ("available=$($branchDelta.available); base_ref=$($branchDelta.baseRef); merge_base=$($branchDelta.mergeBase); reason=$($branchDelta.reason)") `
-  -Remediation "Fetch base branch and/or set WORKFLOW_BASE_REF to enable branch-delta governance checks."
+  -Remediation "Set WORKFLOW_BASE_REF and ensure base branch history is fetched in CI."
 
 if ([bool]$branchDelta.available -and [bool]$config.workflowGate.requireChangeArtifactsInBranchDelta) {
   $branchNeedsMapping = $branchImplementationFiles.Count -gt 0
@@ -287,15 +460,21 @@ if ([bool]$branchDelta.available -and [bool]$config.workflowGate.requireChangeAr
 
 if ([bool]$branchDelta.available -and [bool]$config.workflowGate.requireSessionRecordInBranchDelta) {
   $branchNeedsSessionEvidence = $branchImplementationFiles.Count -gt 0
+  $expectedOwnerPrefix = if ([bool]$branchIdentity.valid) { "$ownerWorkspaceRoot$($branchIdentity.owner)/" } else { ".trellis/workspace/" }
   $branchHasSessionEvidence = @($branchDelta.files | Where-Object {
-      $_.StartsWith(".trellis/workspace/", [System.StringComparison]::OrdinalIgnoreCase)
+      $_.StartsWith($expectedOwnerPrefix, [System.StringComparison]::OrdinalIgnoreCase)
     }).Count -gt 0
+  $sessionCheckPassed = if ([bool]$config.workflowGate.requireOwnerScopedSessionEvidence) {
+    ((-not $branchNeedsSessionEvidence) -or ([bool]$branchIdentity.valid -and $branchHasSessionEvidence))
+  } else {
+    ((-not $branchNeedsSessionEvidence) -or $branchHasSessionEvidence)
+  }
   Add-Check -Checks $checks `
     -Name "Branch implementation delta includes session evidence" `
     -Severity $branchRuleSeverity `
-    -Passed ((-not $branchNeedsSessionEvidence) -or $branchHasSessionEvidence) `
-    -Details ("implementation_files=$($branchImplementationFiles.Count); has_session_evidence=$branchHasSessionEvidence") `
-    -Remediation "Record session evidence under `.trellis/workspace/<owner>/` before merge."
+    -Passed $sessionCheckPassed `
+    -Details ("implementation_files=$($branchImplementationFiles.Count); expected_owner_prefix=$expectedOwnerPrefix; has_session_evidence=$branchHasSessionEvidence") `
+    -Remediation "Record session evidence under owner workspace path before merge."
 }
 
 $failedChecks = @($checks | Where-Object { -not $_.passed -and $_.severity -eq "fail" })
@@ -306,6 +485,9 @@ $summary = [ordered]@{
   generatedAt = [DateTimeOffset]::UtcNow.ToString("o")
   mode = $Mode
   outcome = $outcome
+  currentBranch = $currentBranch
+  branchIdentity = $branchIdentity
+  gitDirInfo = $gitDirInfo
   branchDelta = $branchDelta
   activeChanges = $activeChangeNames
   workingImplementationFiles = $workingImplementationFiles

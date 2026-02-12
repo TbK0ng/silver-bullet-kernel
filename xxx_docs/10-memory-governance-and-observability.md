@@ -16,6 +16,7 @@ Operational rules:
 1. Record key session outcomes in Trellis workspace journals.
 2. Keep secrets out of all persisted memory artifacts.
 3. Promote stable lessons to guides/docs, not ephemeral chat memory.
+4. Keep session evidence owner-scoped (`.trellis/workspace/<owner>/`) to satisfy strict policy gate checks.
 
 ## Observability
 

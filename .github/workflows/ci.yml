@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -25,6 +27,16 @@ jobs:
       - name: Install OpenSpec CLI
         run: npm install -g @fission-ai/openspec@latest
 
-      - name: Verify
+      - name: Verify (PR)
+        if: github.event_name == 'pull_request'
         shell: pwsh
+        env:
+          WORKFLOW_BASE_REF: origin/${{ github.base_ref }}
+        run: ./scripts/verify-ci.ps1
+
+      - name: Verify (Push)
+        if: github.event_name != 'pull_request'
+        shell: pwsh
+        env:
+          WORKFLOW_BASE_REF: origin/main
         run: ./scripts/verify-ci.ps1
