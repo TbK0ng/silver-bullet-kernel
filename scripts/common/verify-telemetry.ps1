@@ -1,5 +1,37 @@
 Set-StrictMode -Version Latest
 
+function Resolve-VerifyRunsPath {
+  param(
+    [Parameter(Mandatory = $true)][string]$RepoRoot
+  )
+
+  $override = $env:WORKFLOW_VERIFY_RUNS_PATH
+  if (-not [string]::IsNullOrWhiteSpace($override)) {
+    if ([System.IO.Path]::IsPathRooted($override)) {
+      return $override
+    }
+    return (Join-Path $RepoRoot $override)
+  }
+
+  $defaultPath = ".metrics/verify-runs.jsonl"
+  $configPath = Join-Path $RepoRoot "workflow-policy.json"
+  if (Test-Path $configPath) {
+    try {
+      $config = Get-Content -Path $configPath -Encoding UTF8 | ConvertFrom-Json
+      if ($null -ne $config.telemetry -and -not [string]::IsNullOrWhiteSpace([string]$config.telemetry.defaultVerifyRunsPath)) {
+        $defaultPath = [string]$config.telemetry.defaultVerifyRunsPath
+      }
+    } catch {
+      # Keep fallback defaults when policy config cannot be parsed.
+    }
+  }
+
+  if ([System.IO.Path]::IsPathRooted($defaultPath)) {
+    return $defaultPath
+  }
+  return (Join-Path $RepoRoot $defaultPath)
+}
+
 function New-VerifyRun {
   param(
     [Parameter(Mandatory = $true)][string]$Mode,
@@ -58,8 +90,8 @@ function Write-VerifyRun {
     [Parameter(Mandatory = $true)][string]$RepoRoot
   )
 
-  $metricsDir = Join-Path $RepoRoot ".metrics"
-  $metricsPath = Join-Path $metricsDir "verify-runs.jsonl"
+  $metricsPath = Resolve-VerifyRunsPath -RepoRoot $RepoRoot
+  $metricsDir = Split-Path -Path $metricsPath -Parent
   if (-not (Test-Path $metricsDir)) {
     New-Item -ItemType Directory -Path $metricsDir | Out-Null
   }

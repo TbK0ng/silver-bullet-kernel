@@ -1,12 +1,56 @@
+param(
+  [string]$MetricsPath = ""
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$metricsPath = Join-Path $repoRoot ".metrics\\verify-runs.jsonl"
 $docsGeneratedDir = Join-Path $repoRoot "xxx_docs\\generated"
 $reportPath = Join-Path $docsGeneratedDir "workflow-metrics-weekly.md"
 $jsonPath = Join-Path $docsGeneratedDir "workflow-metrics-latest.json"
 $tokenCostPath = Join-Path $repoRoot ".metrics\\token-cost.json"
+
+function Resolve-MetricsPath {
+  param(
+    [Parameter(Mandatory = $true)][string]$RepoRoot,
+    [Parameter(Mandatory = $false)][string]$OverridePath
+  )
+
+  if (-not [string]::IsNullOrWhiteSpace($OverridePath)) {
+    if ([System.IO.Path]::IsPathRooted($OverridePath)) {
+      return $OverridePath
+    }
+    return (Join-Path $RepoRoot $OverridePath)
+  }
+
+  if (-not [string]::IsNullOrWhiteSpace($env:WORKFLOW_VERIFY_RUNS_PATH)) {
+    if ([System.IO.Path]::IsPathRooted($env:WORKFLOW_VERIFY_RUNS_PATH)) {
+      return $env:WORKFLOW_VERIFY_RUNS_PATH
+    }
+    return (Join-Path $RepoRoot $env:WORKFLOW_VERIFY_RUNS_PATH)
+  }
+
+  $defaultMetricsPath = ".metrics/verify-runs.jsonl"
+  $policyPath = Join-Path $RepoRoot "workflow-policy.json"
+  if (Test-Path $policyPath) {
+    try {
+      $policy = Get-Content -Path $policyPath -Encoding UTF8 | ConvertFrom-Json
+      if ($null -ne $policy.telemetry -and -not [string]::IsNullOrWhiteSpace([string]$policy.telemetry.defaultVerifyRunsPath)) {
+        $defaultMetricsPath = [string]$policy.telemetry.defaultVerifyRunsPath
+      }
+    } catch {
+      # Keep fallback default path.
+    }
+  }
+
+  if ([System.IO.Path]::IsPathRooted($defaultMetricsPath)) {
+    return $defaultMetricsPath
+  }
+  return (Join-Path $RepoRoot $defaultMetricsPath)
+}
+
+$metricsPath = Resolve-MetricsPath -RepoRoot $repoRoot -OverridePath $MetricsPath
 
 if (-not (Test-Path $docsGeneratedDir)) {
   New-Item -ItemType Directory -Path $docsGeneratedDir | Out-Null
@@ -162,6 +206,7 @@ foreach ($mode in $modes) {
 
 $summary = [ordered]@{
   generatedAt = $now.ToString("o")
+  metricsSourcePath = $metricsPath
   totals = [ordered]@{
     allRuns = $totalRuns
     last7DaysRuns = $lastWeekTotal
@@ -198,6 +243,7 @@ $report = @()
 $report += "# Workflow Metrics (Last 7 Days)"
 $report += ""
 $report += "- generated_at_utc: $($now.ToString("u"))"
+$report += "- metrics_source_path: $metricsPath"
 $report += "- total_runs_all_time: $totalRuns"
 $report += "- runs_last_7_days: $lastWeekTotal"
 $report += "- success_rate_last_7_days: $successRate%"
@@ -239,6 +285,7 @@ $report += ""
 $report += "- lead-time uses pre-archive proposal history when available; otherwise falls back to archive metadata + commit timestamps."
 $report += "- drift detection counts src commits in last 30 days without openspec spec/change updates."
 $report += "- token cost is reported only when `.metrics/token-cost.json` is present."
+$report += "- metrics source path can be overridden via `WORKFLOW_VERIFY_RUNS_PATH` or `-MetricsPath`."
 
 Set-Content -Path $reportPath -Encoding UTF8 -Value $report
 Set-Content -Path $jsonPath -Encoding UTF8 -Value ($summary | ConvertTo-Json -Depth 10)

@@ -1,12 +1,13 @@
 ﻿# Workflow Indicator Gate
 
-- generated_at_utc: 2026-02-12 11:31:03Z
+- generated_at_utc: 2026-02-12 12:25:58Z
 - outcome: PASS
 
 ## Checks
 
 | Check | Severity | Status | Observed | Threshold | Remediation |
 | --- | --- | --- | --- | --- | --- |
+| Metrics source path resolved | warn | PASS | E:\docc\trellis-worktrees\sbk-codex-strict-plan13-philosophy\.metrics\verify-runs.jsonl | recommended: non-empty path | Run metrics collection with deterministic telemetry path configuration. |
 | Verify failure rate within threshold | fail | PASS | 0% | <= 5% | Investigate top failed steps and stabilize verify gates before adding new scope. |
 | Lead time P90 within threshold | warn | PASS | 11.48 h | <= 72 h | Split oversized changes and archive in smaller batches. |
 | Rework count within threshold | fail | PASS | 0 | <= 2 | Strengthen proposal/design clarity and pre-implementation acceptance checks. |

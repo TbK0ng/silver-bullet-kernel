@@ -34,7 +34,12 @@ Every OpenSpec task must include:
 - `Verify`: command(s) run
 - `Done`: observable outcome
 
-`tasks.md` table headers are enforced by policy gate and must include these columns.
+`tasks.md` evidence is enforced by policy gate:
+
+- required heading: `Task Evidence`
+- required columns: `Files`, `Action`, `Verify`, `Done`
+- at least one non-empty data row
+- bounded granularity per row (`maxFilesPerTaskRow`, `maxActionLength` from `workflow-policy.json`)
 
 ## Failure Handling
 
@@ -58,3 +63,10 @@ Do not archive a change with unresolved verify failures.
 - CI branch delta must include:
   - OpenSpec change artifacts for implementation edits.
   - Session evidence updates under owner path `.trellis/workspace/<owner>/`.
+- Session evidence files must include disclosure metadata markers:
+  - `Memory Sources`, `Disclosure Level`, `Source IDs`.
+- Security policy is fail-closed:
+  - implementation deltas cannot touch denylisted sensitive paths.
+  - durable artifacts are scanned for secret-like patterns.
+- Dispatcher orchestrator must remain thin:
+  - forbidden write-capable tools in `.claude/agents/dispatch.md` fail policy gate.

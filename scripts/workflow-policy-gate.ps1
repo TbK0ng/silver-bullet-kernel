@@ -194,51 +194,357 @@ function Get-ImplementationFiles {
   return @($result | Select-Object -Unique)
 }
 
-function Test-TasksEvidenceSchema {
+function Split-MarkdownTableColumns {
+  param(
+    [Parameter(Mandatory = $true)][string]$Line
+  )
+
+  return @($Line.Trim().Trim("|").Split("|") | ForEach-Object { $_.Trim() })
+}
+
+function Get-TaskEvidenceTable {
   param(
     [Parameter(Mandatory = $true)][string]$TasksPath,
-    [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$RequiredColumns
+    [Parameter(Mandatory = $true)][string]$RequiredHeading
   )
 
   if (-not (Test-Path $TasksPath)) {
     return [ordered]@{
-      passed = $false
+      found = $false
       reason = "tasks.md missing"
-      matchedHeader = ""
+      header = @()
+      rows = @()
+      headingLine = -1
     }
   }
 
   $lines = Get-Content -Path $TasksPath -Encoding UTF8
-  foreach ($line in $lines) {
-    $trimmed = $line.Trim()
-    if (-not $trimmed.StartsWith("|")) { continue }
-    if ($trimmed -match "^\|\s*[-: ]+\|") { continue }
+  $headingLine = -1
+  $headingRegex = "^\s*#{1,6}\s*" + [regex]::Escape($RequiredHeading) + "\s*$"
 
-    $columns = @($trimmed.Trim('|').Split('|') | ForEach-Object { $_.Trim() })
-    if ($columns.Count -eq 0) { continue }
+  for ($i = 0; $i -lt $lines.Count; $i++) {
+    if ($lines[$i] -match $headingRegex) {
+      $headingLine = $i
+      break
+    }
+  }
 
-    $allMatched = $true
-    foreach ($required in $RequiredColumns) {
-      $found = @($columns | Where-Object { $_.Equals($required, [System.StringComparison]::OrdinalIgnoreCase) }).Count -gt 0
-      if (-not $found) {
-        $allMatched = $false
-        break
+  if ($headingLine -lt 0) {
+    return [ordered]@{
+      found = $false
+      reason = "Required heading '$RequiredHeading' not found."
+      header = @()
+      rows = @()
+      headingLine = -1
+    }
+  }
+
+  $headerColumns = @()
+  $rows = @()
+  $tableStarted = $false
+  $separatorSeen = $false
+
+  for ($lineIndex = $headingLine + 1; $lineIndex -lt $lines.Count; $lineIndex++) {
+    $trimmed = $lines[$lineIndex].Trim()
+    if ($trimmed.StartsWith("#")) {
+      break
+    }
+    if ([string]::IsNullOrWhiteSpace($trimmed)) {
+      if ($tableStarted) { break }
+      continue
+    }
+    if (-not $trimmed.StartsWith("|")) {
+      if ($tableStarted) { break }
+      continue
+    }
+
+    if (-not $tableStarted) {
+      $tableStarted = $true
+      $headerColumns = Split-MarkdownTableColumns -Line $trimmed
+      continue
+    }
+
+    if (-not $separatorSeen) {
+      if ($trimmed -match "^\|\s*[-: ]+\|") {
+        $separatorSeen = $true
+        continue
+      }
+
+      return [ordered]@{
+        found = $false
+        reason = "Task evidence table is missing markdown separator row."
+        header = $headerColumns
+        rows = @()
+        headingLine = $headingLine + 1
       }
     }
 
-    if ($allMatched) {
+    $rows += ,(Split-MarkdownTableColumns -Line $trimmed)
+  }
+
+  if (-not $tableStarted) {
+    return [ordered]@{
+      found = $false
+      reason = "No markdown table found under heading '$RequiredHeading'."
+      header = @()
+      rows = @()
+      headingLine = $headingLine + 1
+    }
+  }
+
+  return [ordered]@{
+    found = $true
+    reason = ""
+    header = $headerColumns
+    rows = $rows
+    headingLine = $headingLine + 1
+  }
+}
+
+function Get-FilesCellCount {
+  param(
+    [Parameter(Mandatory = $true)][string]$Value
+  )
+
+  $normalized = ($Value -replace "<br\s*/?>", "," -replace ";", ",").Trim()
+  if ([string]::IsNullOrWhiteSpace($normalized)) {
+    return 0
+  }
+
+  $parts = @($normalized.Split(",") | ForEach-Object { $_.Trim() } | Where-Object { $_.Length -gt 0 })
+  return $parts.Count
+}
+
+function Test-TasksEvidenceSchema {
+  param(
+    [Parameter(Mandatory = $true)][string]$TasksPath,
+    [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$RequiredColumns,
+    [Parameter(Mandatory = $true)][string]$RequiredHeading,
+    [Parameter(Mandatory = $true)][bool]$RequireNonEmptyRows,
+    [Parameter(Mandatory = $true)][int]$MaxFilesPerTaskRow,
+    [Parameter(Mandatory = $true)][int]$MaxActionLength
+  )
+
+  $table = Get-TaskEvidenceTable -TasksPath $TasksPath -RequiredHeading $RequiredHeading
+  if (-not [bool]$table.found) {
+    return [ordered]@{
+      passed = $false
+      reason = $table.reason
+      matchedHeader = ""
+      rowCount = 0
+      violations = @()
+    }
+  }
+
+  $columns = @($table.header)
+  $allRequiredPresent = $true
+  foreach ($required in $RequiredColumns) {
+    $found = @($columns | Where-Object { $_.Equals($required, [System.StringComparison]::OrdinalIgnoreCase) }).Count -gt 0
+    if (-not $found) {
+      $allRequiredPresent = $false
+      break
+    }
+  }
+
+  if (-not $allRequiredPresent) {
+    return [ordered]@{
+      passed = $false
+      reason = "Task evidence table is missing required columns."
+      matchedHeader = ($columns -join ", ")
+      rowCount = 0
+      violations = @()
+    }
+  }
+
+  $rows = @($table.rows)
+  if ($RequireNonEmptyRows -and $rows.Count -eq 0) {
+    return [ordered]@{
+      passed = $false
+      reason = "Task evidence table must contain at least one data row."
+      matchedHeader = ($columns -join ", ")
+      rowCount = 0
+      violations = @()
+    }
+  }
+
+  $columnIndex = @{}
+  for ($i = 0; $i -lt $columns.Count; $i++) {
+    $columnIndex[$columns[$i].ToLowerInvariant()] = $i
+  }
+
+  $violations = @()
+  for ($rowIndex = 0; $rowIndex -lt $rows.Count; $rowIndex++) {
+    $row = @($rows[$rowIndex])
+
+    $filesValue = ""
+    $actionValue = ""
+    $verifyValue = ""
+    $doneValue = ""
+    if ($columnIndex.ContainsKey("files") -and $columnIndex["files"] -lt $row.Count) {
+      $filesValue = [string]$row[$columnIndex["files"]]
+    }
+    if ($columnIndex.ContainsKey("action") -and $columnIndex["action"] -lt $row.Count) {
+      $actionValue = [string]$row[$columnIndex["action"]]
+    }
+    if ($columnIndex.ContainsKey("verify") -and $columnIndex["verify"] -lt $row.Count) {
+      $verifyValue = [string]$row[$columnIndex["verify"]]
+    }
+    if ($columnIndex.ContainsKey("done") -and $columnIndex["done"] -lt $row.Count) {
+      $doneValue = [string]$row[$columnIndex["done"]]
+    }
+
+    if ([string]::IsNullOrWhiteSpace($filesValue) -or [string]::IsNullOrWhiteSpace($actionValue) -or [string]::IsNullOrWhiteSpace($verifyValue) -or [string]::IsNullOrWhiteSpace($doneValue)) {
+      $violations += "row#$($rowIndex + 1): Files/Action/Verify/Done must be non-empty."
+    }
+
+    $filesCount = Get-FilesCellCount -Value $filesValue
+    if ($MaxFilesPerTaskRow -gt 0 -and $filesCount -gt $MaxFilesPerTaskRow) {
+      $violations += "row#$($rowIndex + 1): files count $filesCount exceeds max $MaxFilesPerTaskRow."
+    }
+
+    if ($MaxActionLength -gt 0 -and $actionValue.Length -gt $MaxActionLength) {
+      $violations += "row#$($rowIndex + 1): action length $($actionValue.Length) exceeds max $MaxActionLength."
+    }
+  }
+
+  return [ordered]@{
+    passed = ($violations.Count -eq 0)
+    reason = if ($violations.Count -eq 0) { "" } else { "Task evidence row validation failed." }
+    matchedHeader = ($columns -join ", ")
+    rowCount = $rows.Count
+    violations = @($violations)
+  }
+}
+
+function Test-SessionDisclosureMetadata {
+  param(
+    [Parameter(Mandatory = $true)][string]$FilePath,
+    [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$RequiredMarkers
+  )
+
+  if (-not (Test-Path $FilePath)) {
+    return [ordered]@{
+      passed = $false
+      missing = @("file-missing")
+    }
+  }
+
+  $content = Get-Content -Path $FilePath -Encoding UTF8 -Raw
+  $missing = @()
+  foreach ($marker in $RequiredMarkers) {
+    if ([string]::IsNullOrWhiteSpace($marker)) { continue }
+    if (-not [regex]::IsMatch($content, [regex]::Escape($marker), [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)) {
+      $missing += $marker
+    }
+  }
+
+  return [ordered]@{
+    passed = ($missing.Count -eq 0)
+    missing = @($missing)
+  }
+}
+
+function Test-PathMatchesRegexes {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$Regexes
+  )
+
+  foreach ($pattern in $Regexes) {
+    if ([string]::IsNullOrWhiteSpace($pattern)) { continue }
+    $match = [regex]::Match($Path, $pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    if ($match.Success) {
       return [ordered]@{
-        passed = $true
-        reason = ""
-        matchedHeader = ($columns -join ", ")
+        matched = $true
+        pattern = $pattern
       }
     }
   }
 
   return [ordered]@{
-    passed = $false
-    reason = "No table header contains required columns."
-    matchedHeader = ""
+    matched = $false
+    pattern = ""
+  }
+}
+
+function Find-SecretMatchesInFile {
+  param(
+    [Parameter(Mandatory = $true)][string]$FullPath,
+    [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$SecretRegexes
+  )
+
+  if (-not (Test-Path $FullPath)) {
+    return @()
+  }
+
+  $item = Get-Item -Path $FullPath
+  if ($item.PSIsContainer) {
+    return @()
+  }
+
+  $content = Get-Content -Path $FullPath -Encoding UTF8 -Raw
+  $hits = @()
+  foreach ($pattern in $SecretRegexes) {
+    if ([string]::IsNullOrWhiteSpace($pattern)) { continue }
+    $found = [regex]::Match($content, $pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    if ($found.Success) {
+      $hits += $pattern
+    }
+  }
+  return @($hits | Select-Object -Unique)
+}
+
+function Get-AgentFrontmatterTools {
+  param(
+    [Parameter(Mandatory = $true)][string]$FilePath
+  )
+
+  if (-not (Test-Path $FilePath)) {
+    return [ordered]@{
+      available = $false
+      tools = @()
+      reason = "agent file missing"
+    }
+  }
+
+  $lines = Get-Content -Path $FilePath -Encoding UTF8
+  $start = -1
+  $end = -1
+  for ($i = 0; $i -lt $lines.Count; $i++) {
+    if ($lines[$i].Trim() -eq "---") {
+      if ($start -lt 0) {
+        $start = $i
+      } else {
+        $end = $i
+        break
+      }
+    }
+  }
+
+  if ($start -lt 0 -or $end -lt 0 -or $end -le $start) {
+    return [ordered]@{
+      available = $false
+      tools = @()
+      reason = "frontmatter not found"
+    }
+  }
+
+  $tools = @()
+  for ($lineIndex = $start + 1; $lineIndex -lt $end; $lineIndex++) {
+    $line = $lines[$lineIndex].Trim()
+    if (-not $line.StartsWith("tools:")) { continue }
+
+    $rawValue = $line.Substring("tools:".Length).Trim()
+    if ([string]::IsNullOrWhiteSpace($rawValue)) { break }
+
+    $tools = @($rawValue.Split(",") | ForEach-Object { $_.Trim() } | Where-Object { $_.Length -gt 0 })
+    break
+  }
+
+  return [ordered]@{
+    available = $true
+    tools = @($tools | Select-Object -Unique)
+    reason = ""
   }
 }
 
@@ -364,8 +670,33 @@ $ignorePrefixes = @($config.workflowGate.ignorePathPrefixes)
 $branchPattern = [string]$config.workflowGate.branchPattern
 $ownerWorkspaceRoot = [string]$config.workflowGate.ownerWorkspaceRoot
 $requiredTaskEvidenceColumns = @($config.workflowGate.requiredTaskEvidenceColumns)
+$requiredTaskEvidenceHeading = [string]$config.workflowGate.requiredTaskEvidenceHeading
+$requireNonEmptyTaskEvidenceRows = [bool]$config.workflowGate.requireNonEmptyTaskEvidenceRows
+$maxFilesPerTaskRow = 0
+$maxActionLength = 0
+if ($null -ne $config.workflowGate.taskEvidenceGranularity) {
+  $maxFilesPerTaskRow = [int]$config.workflowGate.taskEvidenceGranularity.maxFilesPerTaskRow
+  $maxActionLength = [int]$config.workflowGate.taskEvidenceGranularity.maxActionLength
+}
+$requireSessionDisclosureMetadata = [bool]$config.workflowGate.requireSessionDisclosureMetadata
+$requiredSessionDisclosureMarkers = @($config.workflowGate.requiredSessionDisclosureMarkers)
 if ($requiredTaskEvidenceColumns.Count -eq 0) {
   $requiredTaskEvidenceColumns = @("Files", "Action", "Verify", "Done")
+}
+if ([string]::IsNullOrWhiteSpace($requiredTaskEvidenceHeading)) {
+  $requiredTaskEvidenceHeading = "Task Evidence"
+}
+if ($null -eq $config.workflowGate.requireNonEmptyTaskEvidenceRows) {
+  $requireNonEmptyTaskEvidenceRows = $true
+}
+if ($maxFilesPerTaskRow -le 0) {
+  $maxFilesPerTaskRow = 4
+}
+if ($maxActionLength -le 0) {
+  $maxActionLength = 220
+}
+if ($requiredSessionDisclosureMarkers.Count -eq 0) {
+  $requiredSessionDisclosureMarkers = @("Memory Sources", "Disclosure Level", "Source IDs")
 }
 if ([string]::IsNullOrWhiteSpace($ownerWorkspaceRoot)) {
   $ownerWorkspaceRoot = ".trellis/workspace/"
@@ -373,6 +704,21 @@ if ([string]::IsNullOrWhiteSpace($ownerWorkspaceRoot)) {
 $linkedMarker = [string]$config.workflowGate.linkedWorktreeGitDirContains
 if ([string]::IsNullOrWhiteSpace($linkedMarker)) {
   $linkedMarker = "/.git/worktrees/"
+}
+
+$securityEnabled = ($null -ne $config.securityGate) -and [bool]$config.securityGate.enabled
+$securityDenySensitivePaths = $securityEnabled -and [bool]$config.securityGate.denySensitivePathEdits
+$securitySensitivePathRegexes = @($config.securityGate.sensitivePathRegexes)
+$securitySecretScanEnabled = $securityEnabled -and [bool]$config.securityGate.scanDurableArtifactsForSecrets
+$securitySecretScanPrefixes = @($config.securityGate.durableArtifactPathPrefixes)
+$securitySecretScanIgnorePrefixes = @($config.securityGate.secretScanIgnorePathPrefixes)
+$securitySecretRegexes = @($config.securityGate.secretRegexes)
+
+$orchestratorEnabled = ($null -ne $config.orchestratorGate) -and [bool]$config.orchestratorGate.enabled
+$orchestratorDispatchPaths = @($config.orchestratorGate.dispatchAgentPaths)
+$orchestratorForbiddenTools = @($config.orchestratorGate.forbiddenTools)
+if ($orchestratorForbiddenTools.Count -eq 0) {
+  $orchestratorForbiddenTools = @("Write", "Edit", "MultiEdit")
 }
 
 $currentBranch = Get-CurrentBranchName -RepoRoot $repoRoot
@@ -431,13 +777,19 @@ if ([bool]$config.workflowGate.requireCompleteActiveChangeArtifacts) {
       -Details ("proposal=$(Test-Path $proposal); design=$(Test-Path $design); tasks=$(Test-Path $tasks); delta_specs=$($deltaSpecs.Count)") `
       -Remediation "Ensure proposal.md, design.md, tasks.md, and at least one spec delta file exist under the active change."
 
-    $taskSchema = Test-TasksEvidenceSchema -TasksPath $tasks -RequiredColumns $requiredTaskEvidenceColumns
+    $taskSchema = Test-TasksEvidenceSchema `
+      -TasksPath $tasks `
+      -RequiredColumns $requiredTaskEvidenceColumns `
+      -RequiredHeading $requiredTaskEvidenceHeading `
+      -RequireNonEmptyRows $requireNonEmptyTaskEvidenceRows `
+      -MaxFilesPerTaskRow $maxFilesPerTaskRow `
+      -MaxActionLength $maxActionLength
     Add-Check -Checks $checks `
       -Name "Active change '$($change.Name)' tasks evidence schema is complete" `
       -Severity "fail" `
       -Passed ([bool]$taskSchema.passed) `
-      -Details ("required=" + ($requiredTaskEvidenceColumns -join ", ") + "; matched_header=$($taskSchema.matchedHeader); reason=$($taskSchema.reason)") `
-      -Remediation "Use a tasks table header that includes: $($requiredTaskEvidenceColumns -join ', ')."
+      -Details ("required_heading=$requiredTaskEvidenceHeading; required_columns=" + ($requiredTaskEvidenceColumns -join ", ") + "; matched_header=$($taskSchema.matchedHeader); row_count=$($taskSchema.rowCount); reason=$($taskSchema.reason); violations=" + (Join-PathsForDetails -Paths @($taskSchema.violations) -MaxItems 4)) `
+      -Remediation "Use heading '$requiredTaskEvidenceHeading' with non-empty task evidence rows and bounded granularity."
   }
 }
 
@@ -463,9 +815,85 @@ if ([bool]$branchDelta.available) {
 $branchHasArchiveArtifacts = @($branchDelta.files | Where-Object {
     $_.StartsWith("openspec/changes/archive/", [System.StringComparison]::OrdinalIgnoreCase)
   }).Count -gt 0
-$implementationFilesForMode = if ($Mode -eq "ci") { @($branchImplementationFiles) } else { @($workingImplementationFiles) }
+$implementationFilesForMode = @(if ($Mode -eq "ci") { @($branchImplementationFiles) } else { @($workingImplementationFiles) })
+$filesForMode = @(if ($Mode -eq "ci") { @($branchDelta.files) } else { @($workingTreeFiles) })
 $hasArchiveContextForMode = if ($Mode -eq "ci") { $branchHasArchiveArtifacts } else { $workingHasArchiveArtifacts }
 $needsOwnerContext = @($implementationFilesForMode).Count -gt 0
+$ownerPrefixForMode = if ([bool]$branchIdentity.valid) { "$ownerWorkspaceRoot$($branchIdentity.owner)/" } else { "$ownerWorkspaceRoot" }
+$sessionEvidenceFilesForMode = @($filesForMode | Where-Object {
+    $_.StartsWith($ownerPrefixForMode, [System.StringComparison]::OrdinalIgnoreCase)
+  })
+
+if ($securityDenySensitivePaths) {
+  $sensitivePathHits = @()
+  foreach ($file in $implementationFilesForMode) {
+    $match = Test-PathMatchesRegexes -Path $file -Regexes $securitySensitivePathRegexes
+    if ([bool]$match.matched) {
+      $sensitivePathHits += "$file=>pattern:$($match.pattern)"
+    }
+  }
+
+  Add-Check -Checks $checks `
+    -Name "Implementation delta excludes denylisted sensitive paths" `
+    -Severity "fail" `
+    -Passed (($sensitivePathHits.Count -eq 0) -or (-not $needsOwnerContext)) `
+    -Details ("implementation_files=$($implementationFilesForMode.Count); sensitive_hits=" + (Join-PathsForDetails -Paths $sensitivePathHits)) `
+    -Remediation "Remove edits to denylisted sensitive files or update policy with explicit reviewed exception."
+}
+
+if ($securitySecretScanEnabled) {
+  $scanTargets = @()
+  foreach ($file in $filesForMode) {
+    $shouldInclude = @($securitySecretScanPrefixes | Where-Object {
+        $file.StartsWith($_, [System.StringComparison]::OrdinalIgnoreCase)
+      }).Count -gt 0
+    if (-not $shouldInclude) { continue }
+
+    $ignored = @($securitySecretScanIgnorePrefixes | Where-Object {
+        $file.StartsWith($_, [System.StringComparison]::OrdinalIgnoreCase)
+      }).Count -gt 0
+    if ($ignored) { continue }
+
+    $scanTargets += $file
+  }
+
+  $secretHits = @()
+  foreach ($target in $scanTargets) {
+    $fullPath = Join-Path $repoRoot ($target -replace "/", "\")
+    $hitPatterns = @(Find-SecretMatchesInFile -FullPath $fullPath -SecretRegexes $securitySecretRegexes)
+    foreach ($pattern in $hitPatterns) {
+      $secretHits += "$target=>pattern:$pattern"
+    }
+  }
+
+  Add-Check -Checks $checks `
+    -Name "Durable artifact secret-pattern scan passes" `
+    -Severity "fail" `
+    -Passed ($secretHits.Count -eq 0) `
+    -Details ("scan_targets=$($scanTargets.Count); secret_hits=" + (Join-PathsForDetails -Paths $secretHits)) `
+    -Remediation "Redact credential-like material from durable artifacts and rerun verify."
+}
+
+if ($orchestratorEnabled) {
+  foreach ($dispatchPath in $orchestratorDispatchPaths) {
+    $fullDispatchPath = Join-Path $repoRoot ($dispatchPath -replace "/", "\")
+    $dispatchInfo = Get-AgentFrontmatterTools -FilePath $fullDispatchPath
+    $forbiddenFound = @()
+    foreach ($forbidden in $orchestratorForbiddenTools) {
+      $exists = @($dispatchInfo.tools | Where-Object { $_.Equals($forbidden, [System.StringComparison]::OrdinalIgnoreCase) }).Count -gt 0
+      if ($exists) {
+        $forbiddenFound += $forbidden
+      }
+    }
+
+    Add-Check -Checks $checks `
+      -Name "Dispatcher '$dispatchPath' keeps thin orchestrator tool boundary" `
+      -Severity "fail" `
+      -Passed ([bool]$dispatchInfo.available -and $forbiddenFound.Count -eq 0) `
+      -Details ("available=$($dispatchInfo.available); tools=" + (Join-PathsForDetails -Paths @($dispatchInfo.tools)) + "; forbidden_found=" + (Join-PathsForDetails -Paths $forbiddenFound) + "; reason=$($dispatchInfo.reason)") `
+      -Remediation "Keep dispatch agent read/route-only; remove forbidden write-capable tools from frontmatter."
+  }
+}
 
 if ([bool]$config.workflowGate.requireBranchPatternForImplementationEdits) {
   Add-Check -Checks $checks `
@@ -526,6 +954,29 @@ if ($Mode -eq "local" -and [bool]$config.workflowGate.requireOwnerScopedSessionE
     -Passed ((-not $needsLocalSessionEvidence) -or ([bool]$branchIdentity.valid -and $hasOwnerSessionEvidence)) `
     -Details ("owner_prefix=$ownerPrefix; has_owner_session_evidence=$hasOwnerSessionEvidence") `
     -Remediation "Update session evidence under $ownerPrefix before verify."
+}
+
+if ($requireSessionDisclosureMetadata) {
+  $metadataCandidateFiles = @($sessionEvidenceFilesForMode | Where-Object { $_ -match "/journal-\d+\.md$" })
+  $metadataApplicable = $needsOwnerContext -and ($metadataCandidateFiles.Count -gt 0)
+  $metadataViolations = @()
+
+  if ($metadataApplicable) {
+    foreach ($relativePath in $metadataCandidateFiles) {
+      $fullPath = Join-Path $repoRoot ($relativePath -replace "/", "\")
+      $disclosureCheck = Test-SessionDisclosureMetadata -FilePath $fullPath -RequiredMarkers $requiredSessionDisclosureMarkers
+      if (-not [bool]$disclosureCheck.passed) {
+        $metadataViolations += "$relativePath=>missing:" + (($disclosureCheck.missing -join ", "))
+      }
+    }
+  }
+
+  Add-Check -Checks $checks `
+    -Name "Owner session evidence includes disclosure metadata" `
+    -Severity "fail" `
+    -Passed ((-not $metadataApplicable) -or ($metadataViolations.Count -eq 0)) `
+    -Details ("required_markers=" + ($requiredSessionDisclosureMarkers -join ", ") + "; files_checked=$($metadataCandidateFiles.Count); violations=" + (Join-PathsForDetails -Paths $metadataViolations)) `
+    -Remediation "Add disclosure metadata markers to owner session evidence: $($requiredSessionDisclosureMarkers -join ', ')."
 }
 
 $ciFailClosed = ($Mode -eq "ci" -and [bool]$config.workflowGate.ciRequireResolvableBaseRef)

@@ -77,12 +77,53 @@ Fix:
 
 Cause:
 
-- active change `tasks.md` does not include required evidence columns.
+- active change `tasks.md` is missing strict evidence requirements (heading/columns/non-empty rows/granularity bounds).
 
 Fix:
 
-- use table header with required columns:
+- use required heading and table format:
+  - `### Task Evidence`
   - `| ID | Status | Files | Action | Verify | Done |`
+- ensure at least one non-empty data row exists
+- keep row granularity within policy (`maxFilesPerTaskRow`, `maxActionLength`)
+- re-run `npm run workflow:policy`
+
+## Policy Gate Fails: Session Disclosure Metadata
+
+Cause:
+
+- owner session evidence exists but required markers are missing.
+
+Fix:
+
+- add markers in `.trellis/workspace/<owner>/journal-*.md`:
+  - `Memory Sources`
+  - `Disclosure Level`
+  - `Source IDs`
+- re-run `npm run workflow:policy`
+
+## Policy Gate Fails: Security Secret Scan
+
+Cause:
+
+- durable artifact contains a credential-like token pattern.
+
+Fix:
+
+- redact the token from affected file
+- replace with safe placeholder (for example `<redacted>`)
+- re-run `npm run workflow:policy`
+
+## Policy Gate Fails: Dispatcher Orchestrator Boundary
+
+Cause:
+
+- `.claude/agents/dispatch.md` frontmatter includes forbidden write-capable tools.
+
+Fix:
+
+- keep dispatcher tools route/read-only
+- remove forbidden tools (`Write`, `Edit`, `MultiEdit`)
 - re-run `npm run workflow:policy`
 
 ## Repeated Local Verify Failures
@@ -121,6 +162,17 @@ Fix:
 - inspect `xxx_docs/generated/workflow-indicator-gate.md`
 - remediate top failing indicators (drift backfill, rework reduction, WIP limit)
 - regenerate metrics with `npm run metrics:collect`
+
+## CI Indicator Looks Inconsistent with Local History
+
+Cause:
+
+- CI intentionally uses isolated telemetry path to avoid local history contamination.
+
+Fix:
+
+- trust CI `verify:ci` result for merge gating
+- for trend analysis, use local weekly routine (`npm run metrics:collect` + `npm run workflow:gate`)
 
 ## Token Cost Shows Unavailable
 

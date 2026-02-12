@@ -1,11 +1,12 @@
 ﻿{
-    "generatedAt":  "2026-02-12T11:31:00.6492651+00:00",
+    "generatedAt":  "2026-02-12T12:25:55.1456406+00:00",
+    "metricsSourcePath":  "E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\.metrics\\verify-runs.jsonl",
     "totals":  {
-                   "allRuns":  0,
-                   "last7DaysRuns":  0,
-                   "last7DaysPassed":  0,
+                   "allRuns":  4,
+                   "last7DaysRuns":  4,
+                   "last7DaysPassed":  4,
                    "last7DaysFailed":  0,
-                   "last7DaysSuccessRate":  0,
+                   "last7DaysSuccessRate":  100,
                    "last7DaysFailureRate":  0
                },
     "indicators":  {
@@ -14,8 +15,8 @@
                        "reworkCountLast7Days":  0,
                        "parallelThroughput":  {
                                                   "activeChanges":  0,
-                                                  "archivedChangesLast7Days":  6,
-                                                  "archivedChangesTotal":  6
+                                                  "archivedChangesLast7Days":  7,
+                                                  "archivedChangesTotal":  7
                                               },
                        "specDriftEventsLast30Days":  1,
                        "tokenCost":  {
@@ -26,15 +27,15 @@
     "modeStats":  [
                       {
                           "mode":  "fast",
-                          "count":  0,
-                          "averageDurationMs":  0,
-                          "passRate":  0
+                          "count":  2,
+                          "averageDurationMs":  12367,
+                          "passRate":  100
                       },
                       {
                           "mode":  "full",
-                          "count":  0,
-                          "averageDurationMs":  0,
-                          "passRate":  0
+                          "count":  2,
+                          "averageDurationMs":  33162,
+                          "passRate":  100
                       },
                       {
                           "mode":  "ci",

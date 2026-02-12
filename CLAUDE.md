@@ -18,8 +18,13 @@ This repository follows the same policy as `AGENTS.md`.
 - `npm run verify:ci`
 - `npm run workflow:policy`
 - `npm run workflow:gate`
+- `npm run memory:context -- -Stage index`
 
 ## Source of Truth
 
 - Execution and quality policy: `.trellis/spec/guides/`
 - Change artifacts and requirements: `openspec/`
+- Owner session evidence must include disclosure markers:
+  - `Memory Sources`
+  - `Disclosure Level`
+  - `Source IDs`

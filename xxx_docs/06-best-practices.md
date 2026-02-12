@@ -19,7 +19,10 @@
 
 - Never skip proposal/design for non-trivial changes.
 - Keep active change artifacts complete (proposal/design/tasks/spec delta) before verify.
-- Keep active change `tasks.md` evidence table columns complete: `Files`, `Action`, `Verify`, `Done`.
+- Keep active change `tasks.md` evidence strict:
+  - `Task Evidence` heading is required
+  - columns `Files`, `Action`, `Verify`, `Done` are required
+  - rows must be non-empty and within configured granularity bounds
 - Do not claim completion before verify passes.
 - For repeated local failures, use bounded loop and capture diagnostics evidence:
   - `npm run verify:loop -- -Profile fast -MaxAttempts 2`
@@ -27,6 +30,8 @@
 - Treat `.trellis/spec/guides/constitution.md` as non-negotiable.
 - Review weekly metrics and tune workflow by measured failure trends.
 - Treat `workflow-policy.json` as reviewed policy-as-code, not local preference.
+- Keep dispatcher orchestrator thin (no write-capable tools in dispatch frontmatter).
+- Treat security gate failures as redaction incidents, not optional warnings.
 
 ## Collaboration
 
@@ -34,6 +39,10 @@
 - Keep branch lifetime short.
 - Capture session learnings with `/trellis:record-session`.
 - Include `.trellis/workspace/` evidence updates for implementation branches.
+- In owner session evidence, include `Memory Sources`, `Disclosure Level`, `Source IDs` markers.
+- Use progressive disclosure memory retrieval before heavy context injection:
+  - `npm run memory:context -- -Stage index`
+  - `npm run memory:context -- -Stage detail -Ids <id-list>`
 
 ## Documentation
 

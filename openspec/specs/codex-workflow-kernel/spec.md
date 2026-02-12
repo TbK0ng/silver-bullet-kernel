@@ -66,11 +66,13 @@ The kernel SHALL block verification when implementation changes are not traceabl
 
 The kernel SHALL require complete active-change artifacts before verify succeeds.
 
-#### Scenario: Active change tasks miss evidence schema
+#### Scenario: Active change tasks evidence table is decorative only
 
 - **WHEN** policy gate validates active change artifacts
-- **THEN** `tasks.md` must include evidence columns `Files`, `Action`, `Verify`, and `Done`
-- **AND** verify fails if required evidence columns are missing
+- **THEN** `tasks.md` must contain a canonical `Task Evidence` table with required
+  columns (`Files`, `Action`, `Verify`, `Done`)
+- **AND** the table must include at least one non-empty data row
+- **AND** verify fails when schema or row-level evidence is missing
 
 ### Requirement: CI Branch Governance Fail-Closed
 
@@ -112,4 +114,24 @@ The kernel SHALL provide a semantic refactor path for TypeScript symbol rename o
 - **WHEN** contributor executes semantic rename command with file/line/column and new symbol name
 - **THEN** rename is resolved by TypeScript compiler APIs (not plain text replace)
 - **AND** command fails with explicit error when symbol resolution is invalid
+
+### Requirement: Task Granularity Policy Enforcement
+
+The kernel SHALL enforce bounded task granularity for active-change evidence rows.
+
+#### Scenario: Task evidence row is oversized
+
+- **WHEN** policy gate parses active change task-evidence rows
+- **THEN** each row is checked against configured bounds (files count/action length)
+- **AND** verify fails with remediation when bounds are exceeded
+
+### Requirement: Orchestrator Boundary Governance
+
+The kernel SHALL enforce thin orchestrator boundaries as policy-as-code.
+
+#### Scenario: Dispatcher agent exposes write-capable tools
+
+- **WHEN** policy gate validates orchestrator contracts
+- **THEN** dispatcher toolset is checked against forbidden tool rules
+- **AND** verify fails if forbidden tools are present
 

@@ -1,4 +1,9 @@
 {
+  "telemetry": {
+    "defaultVerifyRunsPath": ".metrics/verify-runs.jsonl",
+    "ciVerifyRunsPath": ".metrics/verify-runs-ci.jsonl",
+    "memoryContextAuditPath": ".metrics/memory-context-audit.jsonl"
+  },
   "workflowGate": {
     "requireActiveChangeForImplementationEdits": true,
     "requireSingleActiveChangeForImplementationEdits": true,
@@ -18,6 +23,18 @@
       "Action",
       "Verify",
       "Done"
+    ],
+    "requiredTaskEvidenceHeading": "Task Evidence",
+    "requireNonEmptyTaskEvidenceRows": true,
+    "taskEvidenceGranularity": {
+      "maxFilesPerTaskRow": 4,
+      "maxActionLength": 220
+    },
+    "requireSessionDisclosureMetadata": true,
+    "requiredSessionDisclosureMarkers": [
+      "Memory Sources",
+      "Disclosure Level",
+      "Source IDs"
     ],
     "implementationPathPrefixes": [
       "src/",
@@ -41,6 +58,45 @@
     "ignorePathPrefixes": [
       "xxx_docs/generated/",
       ".metrics/"
+    ]
+  },
+  "securityGate": {
+    "enabled": true,
+    "denySensitivePathEdits": true,
+    "sensitivePathRegexes": [
+      "(^|/)\\.env(\\.|$|/)",
+      "(^|/)\\.npmrc$",
+      "(^|/)(id_rsa|id_ed25519)(\\.pub)?$",
+      "(^|/).+\\.(pem|p12|pfx|key)$",
+      "(^|/)secrets?(/|$)",
+      "(^|/)(credential|credentials)(/|$)"
+    ],
+    "scanDurableArtifactsForSecrets": true,
+    "durableArtifactPathPrefixes": [
+      ".trellis/workspace/",
+      "openspec/",
+      "xxx_docs/"
+    ],
+    "secretScanIgnorePathPrefixes": [
+      "openspec/changes/archive/"
+    ],
+    "secretRegexes": [
+      "(?i)AKIA[0-9A-Z]{16}",
+      "(?i)ghp_[A-Za-z0-9]{36}",
+      "(?i)AIza[0-9A-Za-z\\-_]{35}",
+      "(?i)-----BEGIN (RSA|OPENSSH|EC|DSA|PGP) PRIVATE KEY-----",
+      "(?i)(token|api[-_ ]?key|password|secret)\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-\\/+=]{8,}['\\\"]"
+    ]
+  },
+  "orchestratorGate": {
+    "enabled": true,
+    "dispatchAgentPaths": [
+      ".claude/agents/dispatch.md"
+    ],
+    "forbiddenTools": [
+      "Write",
+      "Edit",
+      "MultiEdit"
     ]
   },
   "indicatorGate": {

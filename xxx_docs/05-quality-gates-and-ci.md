@@ -33,11 +33,17 @@ Using one script for CI and local verification:
 - `Verify`: exact command(s) run
 - `Done`: objective outcome
 
-Policy gate now fails if active change `tasks.md` does not include these columns.
+Policy gate fails when active change `tasks.md` does not satisfy strict evidence rules:
+
+- required heading: `Task Evidence`
+- required columns: `Files`, `Action`, `Verify`, `Done`
+- at least one non-empty data row
+- row-level granularity limits from `workflow-policy.json`
 
 ## Telemetry
 
 - Verify scripts append run telemetry to `.metrics/verify-runs.jsonl` (local only, gitignored).
+- CI verify isolates telemetry to policy-configured path (`telemetry.ciVerifyRunsPath`) for deterministic indicator evaluation.
 - Weekly report generation:
   - `npm run metrics:collect`
   - outputs:
@@ -68,8 +74,12 @@ Policy gate now fails if active change `tasks.md` does not include these columns
   - implementation-path mapping requirements
   - branch naming and change-owner mapping
   - linked worktree requirement for local implementation
-  - required task evidence columns (`requiredTaskEvidenceColumns`)
+  - task evidence schema + heading + granularity (`requiredTaskEvidence*`, `taskEvidenceGranularity`)
   - session-evidence enforcement
+  - session disclosure metadata markers (`requiredSessionDisclosureMarkers`)
+  - security denylist + secret scan (`securityGate`)
+  - thin orchestrator enforcement (`orchestratorGate`)
+  - telemetry paths (`telemetry.defaultVerifyRunsPath`, `telemetry.ciVerifyRunsPath`)
   - CI fail-closed base-ref behavior
   - indicator thresholds and token-cost requirement mode
 

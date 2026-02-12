@@ -28,7 +28,7 @@ Each active change must contain:
 
 - `proposal.md`: why and scope
 - `design.md`: decisions and trade-offs
-- `tasks.md`: executable checklist with verify evidence table columns `Files`, `Action`, `Verify`, `Done`
+- `tasks.md`: executable checklist with `Task Evidence` tables containing columns `Files`, `Action`, `Verify`, `Done`
 - `specs/<capability>/spec.md`: requirement deltas
 
 ## Brownfield Rule
@@ -51,4 +51,7 @@ For existing repositories:
 - `npm run verify:loop -- -Profile fast -MaxAttempts 2` is the preferred bounded verify/fix loop for repeated local failures.
 - `npm run verify:ci` enforces policy + indicator gates for merge readiness.
 - For implementation branches, include session evidence updates under `.trellis/workspace/`.
+- Session evidence updates must include disclosure metadata markers:
+  - `Memory Sources`, `Disclosure Level`, `Source IDs`
+- CI telemetry is isolated to policy-configured path (`telemetry.ciVerifyRunsPath`) for deterministic indicator evaluation.
 - CI push pipelines must pass event-correct base ref (`github.event.before`) to preserve branch-delta governance fidelity.

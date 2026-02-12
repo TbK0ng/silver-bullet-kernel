@@ -40,6 +40,7 @@ Keep this managed block so 'trellis update' can refresh the instructions.
 - CI gate: `npm run verify:ci`
 - Policy gate: `npm run workflow:policy`
 - Indicator gate: `npm run workflow:gate`
+- Progressive disclosure memory context: `npm run memory:context -- -Stage index`
 
 ## Artifact and Memory Discipline
 
@@ -48,7 +49,15 @@ Keep this managed block so 'trellis update' can refresh the instructions.
 - Session memory must be recorded with `/trellis:record-session` at end of work sessions.
 - Implementation changes in CI must include session evidence updates under `.trellis/workspace/`.
 - Session evidence path must match branch owner workspace (`.trellis/workspace/<owner>/`).
+- Session evidence must include disclosure metadata markers:
+  - `Memory Sources`
+  - `Disclosure Level`
+  - `Source IDs`
 - Never store secrets in memory artifacts; redact before recording.
+- Security policy gate blocks:
+  - denylisted sensitive path edits
+  - secret-like patterns in durable artifacts (`.trellis/workspace/`, `openspec/`, `xxx_docs/`)
 - Generate weekly observability report with `npm run metrics:collect`.
+- Active change `tasks.md` must use `Task Evidence` heading with non-empty evidence rows.
 - Use semantic rename command for symbol-level rename refactors:
   - `npm run refactor:rename -- --file <path> --line <n> --column <n> --newName <name> --dryRun`

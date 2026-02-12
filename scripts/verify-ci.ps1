@@ -4,6 +4,41 @@ $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 . (Join-Path $PSScriptRoot "common\\verify-telemetry.ps1")
 
+function Resolve-CiMetricsPath {
+  param(
+    [Parameter(Mandatory = $true)][string]$RepoRoot
+  )
+
+  $relativePath = ".metrics/verify-runs-ci.jsonl"
+  $policyPath = Join-Path $RepoRoot "workflow-policy.json"
+  if (Test-Path $policyPath) {
+    try {
+      $policy = Get-Content -Path $policyPath -Encoding UTF8 | ConvertFrom-Json
+      if ($null -ne $policy.telemetry -and -not [string]::IsNullOrWhiteSpace([string]$policy.telemetry.ciVerifyRunsPath)) {
+        $relativePath = [string]$policy.telemetry.ciVerifyRunsPath
+      }
+    } catch {
+      # Keep fallback path.
+    }
+  }
+
+  if ([System.IO.Path]::IsPathRooted($relativePath)) {
+    return $relativePath
+  }
+  return (Join-Path $RepoRoot $relativePath)
+}
+
+$ciMetricsPath = Resolve-CiMetricsPath -RepoRoot $repoRoot
+$ciMetricsDir = Split-Path -Path $ciMetricsPath -Parent
+if (-not (Test-Path $ciMetricsDir)) {
+  New-Item -ItemType Directory -Path $ciMetricsDir | Out-Null
+}
+if (Test-Path $ciMetricsPath) {
+  Remove-Item -Path $ciMetricsPath -Force
+}
+$env:WORKFLOW_VERIFY_RUNS_PATH = $ciMetricsPath
+Write-Host "[verify-ci] telemetry_path=$ciMetricsPath"
+
 $run = New-VerifyRun -Mode "ci" -RepoRoot $repoRoot
 
 function Invoke-Step {

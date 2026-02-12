@@ -43,8 +43,17 @@ if (-not (Test-Path $metricsJsonPath)) {
 
 $config = Get-Content -Path $configPath -Encoding UTF8 | ConvertFrom-Json
 $metrics = Get-Content -Path $metricsJsonPath -Encoding UTF8 | ConvertFrom-Json
+$metricsSourcePath = [string]$metrics.metricsSourcePath
 
 $checks = New-Object 'System.Collections.Generic.List[object]'
+
+Add-Check -Checks $checks `
+  -Name "Metrics source path resolved" `
+  -Severity "warn" `
+  -Passed (-not [string]::IsNullOrWhiteSpace($metricsSourcePath)) `
+  -Observed $(if ([string]::IsNullOrWhiteSpace($metricsSourcePath)) { "missing" } else { $metricsSourcePath }) `
+  -Threshold "recommended: non-empty path" `
+  -Remediation "Run metrics collection with deterministic telemetry path configuration."
 
 $failureRate = [double]$metrics.totals.last7DaysFailureRate
 $maxFailureRate = [double]$config.indicatorGate.maxFailureRateLast7Days

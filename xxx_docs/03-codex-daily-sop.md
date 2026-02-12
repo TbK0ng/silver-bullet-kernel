@@ -9,6 +9,8 @@
    - `openspec status --change <name>`
 4. Run `npm run verify:fast`
 5. Run `npm run workflow:policy`
+6. Build compact memory index:
+   - `npm run memory:context -- -Stage index`
 
 ## During Implementation
 
@@ -16,6 +18,10 @@
 2. Keep tasks and specs synchronized with real code progress.
 3. Run `npm run verify:fast` after each meaningful code batch.
 4. Keep active change artifacts complete before moving to implementation-heavy edits.
+5. Keep owner session evidence markers present when journaling:
+   - `Memory Sources`
+   - `Disclosure Level`
+   - `Source IDs`
 
 ## Before PR
 

@@ -21,8 +21,10 @@ This document maps `ai-coding-workflow-silver-bullet-plan.md` requirements to co
 
 - Verify scripts enforce lint/typecheck/test/build and OpenSpec strict validation.
 - Verify scripts enforce workflow policy gate for artifact/session discipline.
-- Active change task evidence schema (`Files/Action/Verify/Done`) enforced in policy gate.
+- Active change task evidence strict schema (`Task Evidence` heading + `Files/Action/Verify/Done` + non-empty rows + granularity bounds) enforced in policy gate.
 - CI gate in `.github/workflows/ci.yml` uses `scripts/verify-ci.ps1`.
+- Security policy-as-code (`securityGate`) enforced in policy gate (sensitive path denylist + durable artifact secret scan).
+- Thin orchestrator policy enforced via dispatcher frontmatter tool checks (`orchestratorGate`).
 
 ## Phase 3: Parallel and Conflict Governance
 
@@ -37,6 +39,10 @@ This document maps `ai-coding-workflow-silver-bullet-plan.md` requirements to co
 - Constitution and memory governance policy added:
   - `.trellis/spec/guides/constitution.md`
   - `.trellis/spec/guides/memory-governance.md`
+- Progressive disclosure memory tooling added:
+  - `scripts/memory-context.ps1`
+  - `.codex/skills/memory-context/SKILL.md`
+- Session evidence disclosure metadata markers enforced by policy gate.
 - Session recovery sample committed:
   - `.trellis/workspace/sample-owner/index.md`
   - `.trellis/workspace/sample-owner/journal-1.md`
@@ -46,7 +52,9 @@ This document maps `ai-coding-workflow-silver-bullet-plan.md` requirements to co
 
 - `scripts/map-codebase.ps1` generates `xxx_docs/generated/codebase-map.md`.
 - Verify scripts emit telemetry to `.metrics/verify-runs.jsonl`.
+- CI verify isolates telemetry to `.metrics/verify-runs-ci.jsonl` for deterministic indicator evaluation.
 - `scripts/verify-loop.ps1` emits verify/fix loop evidence to `.metrics/verify-fix-loop.jsonl`.
+- `scripts/memory-context.ps1` emits retrieval audit to `.metrics/memory-context-audit.jsonl`.
 - `scripts/semantic-rename.ts` provides TypeScript semantic refactor command for deterministic rename operations.
 - `scripts/collect-metrics.ps1` generates:
   - `xxx_docs/generated/workflow-metrics-weekly.md`
@@ -69,3 +77,4 @@ This document maps `ai-coding-workflow-silver-bullet-plan.md` requirements to co
   - `openspec/changes/archive/2026-02-12-enforce-workflow-policy-gates/`
   - `openspec/changes/archive/2026-02-12-harden-fail-closed-owner-worktree-gates/`
   - `openspec/changes/archive/2026-02-12-close-gap-13-thought-enforcement/`
+  - `openspec/changes/archive/2026-02-12-strict-plan13-philosophy/`

@@ -17,13 +17,22 @@ Operational rules:
 2. Keep secrets out of all persisted memory artifacts.
 3. Promote stable lessons to guides/docs, not ephemeral chat memory.
 4. Keep session evidence owner-scoped (`.trellis/workspace/<owner>/`) to satisfy strict policy gate checks.
+5. Use progressive disclosure memory retrieval:
+   - index first: `npm run memory:context -- -Stage index`
+   - details by ID: `npm run memory:context -- -Stage detail -Ids S001,S003`
+6. Keep disclosure markers in owner session evidence:
+   - `Memory Sources`
+   - `Disclosure Level`
+   - `Source IDs`
 
 ## Observability
 
 Telemetry source:
 
 - `.metrics/verify-runs.jsonl` (local, gitignored)
+- `.metrics/verify-runs-ci.jsonl` (CI-isolated deterministic source)
 - `.metrics/verify-fix-loop.jsonl` (bounded verify/fix loop evidence)
+- `.metrics/memory-context-audit.jsonl` (progressive disclosure audit)
 
 Generation command:
 

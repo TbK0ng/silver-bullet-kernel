@@ -1,17 +1,4 @@
-# memory-governance-policy Specification
-
-## Purpose
-Define enforceable memory source, retention, and redaction rules for workflow artifacts.
-## Requirements
-### Requirement: Memory Source Governance
-
-The workflow SHALL explicitly define approved memory sources and their responsibilities.
-
-#### Scenario: Agent determines what context to inject
-
-- **WHEN** an agent starts or resumes work
-- **THEN** it references approved sources (`.trellis/workspace/`, `openspec/`, `xxx_docs/`)
-- **AND** it avoids ad-hoc undocumented context stores
+## MODIFIED Requirements
 
 ### Requirement: Retention and Redaction Policy
 
@@ -23,25 +10,7 @@ The workflow SHALL enforce retention boundaries and sensitive-data redaction.
 - **THEN** secret-pattern scan runs against configured paths
 - **AND** verify fails when redaction rules are violated
 
-### Requirement: Session Evidence for Implemented Changes
-
-Memory governance SHALL require session evidence artifacts for implementation changes.
-
-#### Scenario: CI validates implementation branch delta
-
-- **WHEN** implementation files are changed in branch delta
-- **THEN** policy gate requires corresponding session evidence updates under `.trellis/workspace/`
-- **AND** CI fails when session evidence is missing
-
-### Requirement: Owner-Scoped Session Evidence
-
-Memory governance SHALL enforce that session evidence aligns with the branch owner identity.
-
-#### Scenario: Implementation branch owner is `alice`
-
-- **WHEN** policy gate inspects session evidence paths
-- **THEN** evidence must be under `.trellis/workspace/alice/`
-- **AND** non-owner session paths do not satisfy the enforcement check
+## ADDED Requirements
 
 ### Requirement: Progressive Disclosure Retrieval Contract
 
@@ -72,4 +41,3 @@ Memory governance SHALL require disclosure metadata in owner-scoped session evid
 - **WHEN** policy gate validates owner-scoped session evidence files
 - **THEN** required disclosure metadata fields are present
 - **AND** verify fails if disclosure metadata is missing
-
