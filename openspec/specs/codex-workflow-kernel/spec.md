@@ -17,17 +17,11 @@ The repository SHALL provide a Codex-first workflow while retaining Claude Code 
 
 The repository SHALL provide deterministic verify entry points and enforce them in CI.
 
-#### Scenario: Developer runs local fast gate
+#### Scenario: Contributor runs bounded verify/fix loop
 
-- **WHEN** the developer executes `npm run verify:fast`
-- **THEN** lint and typecheck run
-- **AND** the command exits non-zero if any check fails
-
-#### Scenario: CI runs full verification
-
-- **WHEN** CI executes `npm run verify:ci`
-- **THEN** lint, typecheck, tests, e2e, build, and OpenSpec strict validation run
-- **AND** merge is blocked on failure
+- **WHEN** contributor executes `npm run verify:loop`
+- **THEN** loop performs bounded verify attempts with diagnostics after failed attempts
+- **AND** command exits non-zero when attempts are exhausted
 
 ### Requirement: Parallel Collaboration Policy
 
@@ -72,21 +66,22 @@ The kernel SHALL block verification when implementation changes are not traceabl
 
 The kernel SHALL require complete active-change artifacts before verify succeeds.
 
-#### Scenario: Active change exists but required artifacts are missing
+#### Scenario: Active change tasks miss evidence schema
 
-- **WHEN** policy gate evaluates active changes
-- **THEN** each active change must include proposal, design, tasks, and spec deltas
-- **AND** verify fails if artifact completeness is not met
+- **WHEN** policy gate validates active change artifacts
+- **THEN** `tasks.md` must include evidence columns `Files`, `Action`, `Verify`, and `Done`
+- **AND** verify fails if required evidence columns are missing
 
 ### Requirement: CI Branch Governance Fail-Closed
 
-The kernel SHALL fail CI policy checks when branch-delta governance context is unavailable.
+The kernel SHALL fail CI policy checks when branch-delta governance context is unavailable or degenerate.
 
-#### Scenario: CI cannot resolve base branch for delta checks
+#### Scenario: CI base ref resolves to current HEAD
 
 - **WHEN** `verify:ci` runs policy gate
-- **THEN** missing or unresolved base ref causes policy failure
-- **AND** CI does not degrade this condition to warning
+- **AND** configured base ref resolves to the same commit as `HEAD`
+- **THEN** policy gate fails as invalid branch-delta context
+- **AND** remediation instructs operators to provide an event-correct base ref
 
 ### Requirement: Owner/Change Branch Mapping Enforcement
 
@@ -107,4 +102,14 @@ The kernel SHALL enforce linked worktree usage for local implementation changes.
 - **WHEN** local policy gate detects implementation edits
 - **THEN** it fails if current git directory is not a linked worktree
 - **AND** remediation points to creating/using per-change worktree
+
+### Requirement: Tool-Deterministic Refactor Path
+
+The kernel SHALL provide a semantic refactor path for TypeScript symbol rename operations.
+
+#### Scenario: Contributor performs symbol rename
+
+- **WHEN** contributor executes semantic rename command with file/line/column and new symbol name
+- **THEN** rename is resolved by TypeScript compiler APIs (not plain text replace)
+- **AND** command fails with explicit error when symbol resolution is invalid
 

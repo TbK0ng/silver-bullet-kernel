@@ -1,5 +1,5 @@
 ﻿{
-    "generatedAt":  "2026-02-12T10:38:11.6818851+00:00",
+    "generatedAt":  "2026-02-12T11:26:53.2266091+00:00",
     "outcome":  "PASS",
     "checks":  [
                    {
@@ -14,7 +14,7 @@
                        "name":  "Lead time P90 within threshold",
                        "severity":  "warn",
                        "passed":  true,
-                       "observed":  "10.11 h",
+                       "observed":  "10.65 h",
                        "threshold":  "\u003c= 72 h",
                        "remediation":  "Split oversized changes and archive in smaller batches."
                    },
@@ -30,7 +30,7 @@
                        "name":  "Active change WIP within threshold",
                        "severity":  "fail",
                        "passed":  true,
-                       "observed":  "0",
+                       "observed":  "1",
                        "threshold":  "\u003c= 3",
                        "remediation":  "Pause new starts and close in-flight changes to maintain throughput quality."
                    },
@@ -46,7 +46,7 @@
                        "name":  "Token cost status available",
                        "severity":  "warn",
                        "passed":  true,
-                       "observed":  "available",
+                       "observed":  "unavailable",
                        "threshold":  "recommended: available",
                        "remediation":  "Run npm run metrics:token-cost -- -Source \u003cprovider\u003e -TotalCostUsd \u003camount\u003e to publish token-cost summary."
                    }

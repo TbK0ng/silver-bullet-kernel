@@ -31,6 +31,8 @@ The repository SHALL provide deterministic verify entry points and enforce them 
 - **THEN** loop performs bounded verify attempts with diagnostics after failed attempts
 - **AND** command exits non-zero when attempts are exhausted
 
+## ADDED Requirements
+
 ### Requirement: Tool-Deterministic Refactor Path
 
 The kernel SHALL provide a semantic refactor path for TypeScript symbol rename operations.
@@ -40,4 +42,3 @@ The kernel SHALL provide a semantic refactor path for TypeScript symbol rename o
 - **WHEN** contributor executes semantic rename command with file/line/column and new symbol name
 - **THEN** rename is resolved by TypeScript compiler APIs (not plain text replace)
 - **AND** command fails with explicit error when symbol resolution is invalid
-

@@ -34,10 +34,11 @@ Documentation SHALL include a concrete validation record for the demo app.
 
 Project documentation SHALL include dedicated runbooks for memory governance and observability.
 
-#### Scenario: Collaborator needs to operate phase 4/5 routines
+#### Scenario: Contributor resolves repeated verify failures
 
-- **WHEN** they read project docs
-- **THEN** they can execute memory-safe session recording and metrics collection without external instructions
+- **WHEN** they run verify loop command
+- **THEN** docs describe loop controls, diagnostics artifacts, and escalation steps
+- **AND** docs include deterministic semantic rename runbook for refactor-class changes
 
 ### Requirement: Plan Traceability Maintenance
 
@@ -70,11 +71,11 @@ Project docs SHALL explain the meaning and use of advanced metrics indicators.
 
 Project docs SHALL explain workflow policy and threshold configuration.
 
-#### Scenario: Team needs to tune governance strictness
+#### Scenario: Team tunes active-change task evidence schema
 
 - **WHEN** contributors update policy settings
-- **THEN** docs describe configurable keys, defaults, and tradeoffs
-- **AND** remediation steps are documented for failed checks
+- **THEN** docs describe required task evidence columns and failure remediations
+- **AND** examples show compliant `tasks.md` table structure
 
 ### Requirement: Strict Branch and Worktree Runbook
 

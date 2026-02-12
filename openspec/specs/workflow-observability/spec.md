@@ -7,10 +7,11 @@ Define telemetry and metrics reporting requirements for continuous workflow impr
 
 The workflow SHALL record telemetry for each verify entry point.
 
-#### Scenario: Verify command executes
+#### Scenario: Verify loop command executes
 
-- **WHEN** `verify:fast`, `verify`, or `verify:ci` is executed
-- **THEN** a run record is persisted with mode, duration, status, and step-level outcomes
+- **WHEN** `npm run verify:loop` is executed
+- **THEN** loop attempts and outcomes are persisted as machine-readable local artifacts
+- **AND** each failed attempt records diagnostics command results for postmortem analysis
 
 ### Requirement: Weekly Metrics Reporting
 

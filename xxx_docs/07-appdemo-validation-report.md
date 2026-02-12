@@ -44,11 +44,13 @@ Validate that the workflow kernel can deliver a runnable application artifact wi
   - `openspec status --change harden-fail-closed-owner-worktree-gates` reached `4/4 artifacts complete` before archive.
   - `openspec archive harden-fail-closed-owner-worktree-gates -y` succeeded and merged strict-owner/worktree policy deltas.
   - `openspec status --change close-gap-13-thought-enforcement` reached `4/4 artifacts complete` before archive.
+  - `openspec archive close-gap-13-thought-enforcement -y` succeeded and merged CI-delta/task-schema/deterministic-tooling deltas.
   - `openspec validate --all --strict --no-interactive` passed for canonical specs.
   - `openspec list` returns no active changes after second archive.
   - `openspec list` returns no active changes after third archive.
   - `openspec list` returns no active changes after fourth archive.
   - `openspec list` returns no active changes after fifth archive.
+  - `openspec list` returns no active changes after sixth archive.
   - `xxx_docs/generated/workflow-metrics-weekly.md` generated with 100% success rate in the current 7-day sample.
   - `xxx_docs/generated/workflow-policy-gate.md` generated with `mode=ci` and `outcome=PASS` under strict fail-closed configuration.
   - `xxx_docs/generated/workflow-indicator-gate.md` generated with PASS threshold checks.
