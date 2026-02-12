@@ -1,11 +1,20 @@
 ﻿# Workflow Metrics (Last 7 Days)
 
-- generated_at_utc: 2026-02-12 08:55:06Z
-- total_runs_all_time: 5
-- runs_last_7_days: 5
+- generated_at_utc: 2026-02-12 09:12:25Z
+- total_runs_all_time: 6
+- runs_last_7_days: 6
 - success_rate_last_7_days: 100%
-- active_changes: 0
-- archived_changes: 2
+- failure_rate_last_7_days: 0%
+
+## Plan Indicators
+
+- lead_time_p50_hours: 8.6
+- lead_time_p90_hours: 8.94
+- rework_count_last_7_days: 0
+- parallel_throughput_active_changes: 0
+- parallel_throughput_archived_changes_last_7_days: 3
+- spec_drift_events_last_30_days: 1
+- token_cost_status: unavailable
 
 ## Verify Mode Summary
 
@@ -13,14 +22,14 @@
 | --- | ---: | ---: | ---: |
 | fast | 1 | 100 | 7141 |
 | full | 1 | 100 | 11097 |
-| ci | 3 | 100 | 15389.67 |
+| ci | 4 | 100 | 15267 |
 
 ## Top Failure Steps
 
 - none
 
-## Suggested Actions
+## Notes
 
-- Keep `verify:fast` under 120s median for tight local loops.
-- If `ci` failures increase, inspect `failedStep` trend and add targeted guardrails.
-- Review change throughput weekly (`active_changes` vs `archived_changes`).
+- lead-time uses pre-archive proposal history when available; otherwise falls back to archive metadata + commit timestamps.
+- drift detection counts src commits in last 30 days without openspec spec/change updates.
+- token cost is reported only when .metrics/token-cost.json is present.

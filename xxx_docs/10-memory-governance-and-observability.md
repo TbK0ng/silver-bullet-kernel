@@ -31,16 +31,40 @@ Generated artifacts:
 
 - `xxx_docs/generated/workflow-metrics-weekly.md`
 - `xxx_docs/generated/workflow-metrics-latest.json`
+- `xxx_docs/generated/workflow-doctor.md`
+- `xxx_docs/generated/workflow-doctor.json`
 
 ## Weekly Review Routine
 
 1. Run `npm run verify:ci`.
-2. Run `npm run metrics:collect`.
-3. Review:
-   - success rate
+2. Run `npm run workflow:doctor`.
+3. Run `npm run metrics:collect`.
+4. Review:
+   - lead time p50/p90
+   - success/failure rate
    - per-mode runtime
    - top failed steps
-4. Update guardrails/guides for the top failure trend.
+   - rework count
+   - parallel throughput
+   - spec drift count
+   - token cost status
+5. Update guardrails/guides for the top failure and drift trends.
+
+## Indicator Thresholds
+
+- `last7DaysFailureRate`: keep <= 5%; if > 10%, stop new features and fix gate stability first.
+- `leadTimeHoursP90`: keep <= 48h for routine changes; if > 72h, split scope and reduce change batch size.
+- `reworkCountLast7Days`: keep <= 1; if > 2, add pre-implementation design review and stronger acceptance checks.
+- `specDriftEventsLast30Days`: target 0; any non-zero value requires immediate spec backfill.
+- `parallelThroughput.activeChanges`: keep <= 3 for a two-person team; if higher, enforce WIP limits.
+- `tokenCost.status`: should be `available`; if unavailable for > 2 consecutive weeks, add cost-export integration.
+
+## Tuning Directions
+
+1. If failure rate rises, tighten `verify:fast` checks and move flaky checks from optional to required.
+2. If lead time rises, split changes into smaller OpenSpec units and archive earlier.
+3. If drift events appear, require spec delta creation before touching `src/`.
+4. If throughput stalls, freeze new starts and finish in-flight changes to archive.
 
 ## Session Recovery Proof
 

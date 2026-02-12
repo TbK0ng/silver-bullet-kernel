@@ -6,9 +6,95 @@ $metricsPath = Join-Path $repoRoot ".metrics\\verify-runs.jsonl"
 $docsGeneratedDir = Join-Path $repoRoot "xxx_docs\\generated"
 $reportPath = Join-Path $docsGeneratedDir "workflow-metrics-weekly.md"
 $jsonPath = Join-Path $docsGeneratedDir "workflow-metrics-latest.json"
+$tokenCostPath = Join-Path $repoRoot ".metrics\\token-cost.json"
 
 if (-not (Test-Path $docsGeneratedDir)) {
   New-Item -ItemType Directory -Path $docsGeneratedDir | Out-Null
+}
+
+function Get-Quantile {
+  param(
+    [Parameter(Mandatory = $true)][double[]]$Values,
+    [Parameter(Mandatory = $true)][double]$Percent
+  )
+  if ($Values.Length -eq 0) { return 0 }
+  $sorted = $Values | Sort-Object
+  $rank = [math]::Ceiling(($Percent / 100) * $sorted.Length) - 1
+  if ($rank -lt 0) { $rank = 0 }
+  if ($rank -ge $sorted.Length) { $rank = $sorted.Length - 1 }
+  return [math]::Round([double]$sorted[$rank], 2)
+}
+
+function Get-ArchivedChangeLeadTimes {
+  param([Parameter(Mandatory = $true)][string]$RepoRoot)
+
+  $archiveDir = Join-Path $RepoRoot "openspec\\changes\\archive"
+  if (-not (Test-Path $archiveDir)) { return @() }
+
+  $leadTimes = @()
+  $dirs = Get-ChildItem -Path $archiveDir -Directory
+  foreach ($dir in $dirs) {
+    $proposalPath = Join-Path $dir.FullName "proposal.md"
+    if (-not (Test-Path $proposalPath)) { continue }
+
+    $lastCommit = git -C $RepoRoot log -1 --format=%aI -- "$proposalPath" | Select-Object -First 1
+    if (-not $lastCommit) { continue }
+    $end = [DateTimeOffset]::Parse($lastCommit.Trim())
+
+    $startCandidates = @()
+
+    $slug = $dir.Name -replace "^\d{4}-\d{2}-\d{2}-", ""
+    if ($slug -and $slug -ne $dir.Name) {
+      $preArchiveProposalPath = "openspec/changes/$slug/proposal.md"
+      $preArchiveFirstCommit = git -C $RepoRoot log --diff-filter=A --format=%aI -- "$preArchiveProposalPath" | Select-Object -First 1
+      if ($preArchiveFirstCommit) {
+        $startCandidates += [DateTimeOffset]::Parse($preArchiveFirstCommit.Trim())
+      }
+    }
+
+    $archiveFirstCommit = git -C $RepoRoot log --diff-filter=A --format=%aI -- "$proposalPath" | Select-Object -First 1
+    if ($archiveFirstCommit) {
+      $startCandidates += [DateTimeOffset]::Parse($archiveFirstCommit.Trim())
+    }
+
+    $openSpecMetaPath = Join-Path $dir.FullName ".openspec.yaml"
+    if (Test-Path $openSpecMetaPath) {
+      $createdLine = Get-Content -Path $openSpecMetaPath -Encoding UTF8 | Where-Object { $_ -match "^created:\s*(\d{4}-\d{2}-\d{2})\s*$" } | Select-Object -First 1
+      if ($createdLine) {
+        $createdDate = $createdLine -replace "^created:\s*", ""
+        $startCandidates += [DateTimeOffset]::Parse("$createdDate" + "T00:00:00+00:00")
+      }
+    }
+
+    $start = $end
+    if ($startCandidates.Count -gt 0) {
+      $start = $startCandidates | Sort-Object | Select-Object -First 1
+    }
+
+    $hours = ($end - $start).TotalHours
+    if ($hours -lt 0) { continue }
+    $leadTimes += [math]::Round($hours, 2)
+  }
+
+  return @($leadTimes)
+}
+
+function Get-SpecDriftCountLast30Days {
+  param([Parameter(Mandatory = $true)][string]$RepoRoot)
+
+  $commitIds = @(git -C $RepoRoot log --since="30 days ago" --format=%H -- src)
+  if ($commitIds.Count -eq 0) { return 0 }
+
+  $drift = 0
+  foreach ($id in $commitIds) {
+    $changed = @(git -C $RepoRoot show --name-only --pretty=format: $id)
+    $touchedSrc = @($changed | Where-Object { $_ -like "src/*" }).Count -gt 0
+    $touchedSpecs = @($changed | Where-Object { $_ -like "openspec/specs/*" -or $_ -like "openspec/changes/*" }).Count -gt 0
+    if ($touchedSrc -and -not $touchedSpecs) {
+      $drift += 1
+    }
+  }
+  return $drift
 }
 
 $runs = @()
@@ -20,20 +106,49 @@ if (Test-Path $metricsPath) {
 
 $now = [DateTimeOffset]::UtcNow
 $weekAgo = $now.AddDays(-7)
-$lastWeekRuns = $runs | Where-Object { [DateTimeOffset]::Parse($_.startedAt) -ge $weekAgo }
+$lastWeekRuns = @($runs | Where-Object { [DateTimeOffset]::Parse($_.startedAt) -ge $weekAgo })
 
 $totalRuns = @($runs).Count
 $lastWeekTotal = @($lastWeekRuns).Count
 $lastWeekPassed = @($lastWeekRuns | Where-Object { $_.status -eq "passed" }).Count
 $lastWeekFailed = @($lastWeekRuns | Where-Object { $_.status -eq "failed" }).Count
-
+$failureRate = if ($lastWeekTotal -eq 0) { 0 } else { [math]::Round(($lastWeekFailed / $lastWeekTotal) * 100, 2) }
 $successRate = if ($lastWeekTotal -eq 0) { 0 } else { [math]::Round(($lastWeekPassed / $lastWeekTotal) * 100, 2) }
+
+$failedSteps = @($lastWeekRuns |
+  Where-Object { $_.status -eq "failed" -and $_.failedStep } |
+  Group-Object -Property failedStep |
+  Sort-Object -Property Count -Descending)
+
+$reworkCount = $lastWeekFailed
+$activeChanges = @(Get-ChildItem -Path (Join-Path $repoRoot "openspec\\changes") -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -ne "archive" }).Count
+$archivedChanges = @(Get-ChildItem -Path (Join-Path $repoRoot "openspec\\changes\\archive") -Directory -ErrorAction SilentlyContinue).Count
+$last7ArchivedChanges = @(Get-ChildItem -Path (Join-Path $repoRoot "openspec\\changes\\archive") -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match "^(\d{4})-(\d{2})-(\d{2})-" -and ([DateTimeOffset]::ParseExact($_.Name.Substring(0,10), "yyyy-MM-dd", $null) -ge $weekAgo) }).Count
+
+$leadTimes = @(Get-ArchivedChangeLeadTimes -RepoRoot $repoRoot)
+$leadTimeP50 = Get-Quantile -Values $leadTimes -Percent 50
+$leadTimeP90 = Get-Quantile -Values $leadTimes -Percent 90
+
+$driftEvents = Get-SpecDriftCountLast30Days -RepoRoot $repoRoot
+
+$tokenCostStatus = "unavailable"
+$tokenCostTotal = $null
+if (Test-Path $tokenCostPath) {
+  try {
+    $tokenObj = Get-Content -Path $tokenCostPath -Encoding UTF8 | ConvertFrom-Json
+    $tokenCostStatus = "available"
+    $tokenCostTotal = $tokenObj.totalCostUsd
+  } catch {
+    $tokenCostStatus = "invalid-format"
+    $tokenCostTotal = $null
+  }
+}
 
 $modes = @("fast", "full", "ci")
 $modeRows = @()
 foreach ($mode in $modes) {
-  $modeRuns = $lastWeekRuns | Where-Object { $_.mode -eq $mode }
-  $count = @($modeRuns).Count
+  $modeRuns = @($lastWeekRuns | Where-Object { $_.mode -eq $mode })
+  $count = $modeRuns.Count
   $avgDuration = if ($count -eq 0) { 0 } else { [math]::Round((($modeRuns | Measure-Object -Property durationMs -Average).Average), 2) }
   $passCount = @($modeRuns | Where-Object { $_.status -eq "passed" }).Count
   $passRate = if ($count -eq 0) { 0 } else { [math]::Round(($passCount / $count) * 100, 2) }
@@ -45,15 +160,6 @@ foreach ($mode in $modes) {
   }
 }
 
-$failedSteps = $lastWeekRuns |
-  Where-Object { $_.status -eq "failed" -and $_.failedStep } |
-  Group-Object -Property failedStep |
-  Sort-Object -Property Count -Descending
-$failedSteps = @($failedSteps)
-
-$activeChanges = @(Get-ChildItem -Path (Join-Path $repoRoot "openspec\\changes") -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -ne "archive" }).Count
-$archivedChanges = @(Get-ChildItem -Path (Join-Path $repoRoot "openspec\\changes\\archive") -Directory -ErrorAction SilentlyContinue).Count
-
 $summary = [ordered]@{
   generatedAt = $now.ToString("o")
   totals = [ordered]@{
@@ -62,12 +168,24 @@ $summary = [ordered]@{
     last7DaysPassed = $lastWeekPassed
     last7DaysFailed = $lastWeekFailed
     last7DaysSuccessRate = $successRate
+    last7DaysFailureRate = $failureRate
+  }
+  indicators = [ordered]@{
+    leadTimeHoursP50 = $leadTimeP50
+    leadTimeHoursP90 = $leadTimeP90
+    reworkCountLast7Days = $reworkCount
+    parallelThroughput = [ordered]@{
+      activeChanges = $activeChanges
+      archivedChangesLast7Days = $last7ArchivedChanges
+      archivedChangesTotal = $archivedChanges
+    }
+    specDriftEventsLast30Days = $driftEvents
+    tokenCost = [ordered]@{
+      status = $tokenCostStatus
+      totalCostUsd = $tokenCostTotal
+    }
   }
   modeStats = $modeRows
-  changeStats = [ordered]@{
-    activeChanges = $activeChanges
-    archivedChanges = $archivedChanges
-  }
   topFailureSteps = @($failedSteps | Select-Object -First 5 | ForEach-Object {
       [ordered]@{
         step = $_.Name
@@ -83,8 +201,20 @@ $report += "- generated_at_utc: $($now.ToString("u"))"
 $report += "- total_runs_all_time: $totalRuns"
 $report += "- runs_last_7_days: $lastWeekTotal"
 $report += "- success_rate_last_7_days: $successRate%"
-$report += "- active_changes: $activeChanges"
-$report += "- archived_changes: $archivedChanges"
+$report += "- failure_rate_last_7_days: $failureRate%"
+$report += ""
+$report += "## Plan Indicators"
+$report += ""
+$report += "- lead_time_p50_hours: $leadTimeP50"
+$report += "- lead_time_p90_hours: $leadTimeP90"
+$report += "- rework_count_last_7_days: $reworkCount"
+$report += "- parallel_throughput_active_changes: $activeChanges"
+$report += "- parallel_throughput_archived_changes_last_7_days: $last7ArchivedChanges"
+$report += "- spec_drift_events_last_30_days: $driftEvents"
+$report += "- token_cost_status: $tokenCostStatus"
+if ($null -ne $tokenCostTotal) {
+  $report += "- token_cost_total_usd: $tokenCostTotal"
+}
 $report += ""
 $report += "## Verify Mode Summary"
 $report += ""
@@ -96,7 +226,7 @@ foreach ($row in $modeRows) {
 $report += ""
 $report += "## Top Failure Steps"
 $report += ""
-if (@($failedSteps).Count -eq 0) {
+if ($failedSteps.Count -eq 0) {
   $report += "- none"
 } else {
   foreach ($item in ($failedSteps | Select-Object -First 5)) {
@@ -104,14 +234,14 @@ if (@($failedSteps).Count -eq 0) {
   }
 }
 $report += ""
-$report += "## Suggested Actions"
+$report += "## Notes"
 $report += ""
-$report += '- Keep `verify:fast` under 120s median for tight local loops.'
-$report += '- If `ci` failures increase, inspect `failedStep` trend and add targeted guardrails.'
-$report += '- Review change throughput weekly (`active_changes` vs `archived_changes`).'
+$report += "- lead-time uses pre-archive proposal history when available; otherwise falls back to archive metadata + commit timestamps."
+$report += "- drift detection counts src commits in last 30 days without openspec spec/change updates."
+$report += "- token cost is reported only when `.metrics/token-cost.json` is present."
 
 Set-Content -Path $reportPath -Encoding UTF8 -Value $report
-Set-Content -Path $jsonPath -Encoding UTF8 -Value ($summary | ConvertTo-Json -Depth 8)
+Set-Content -Path $jsonPath -Encoding UTF8 -Value ($summary | ConvertTo-Json -Depth 10)
 
 Write-Host "Wrote report: $reportPath"
 Write-Host "Wrote summary: $jsonPath"

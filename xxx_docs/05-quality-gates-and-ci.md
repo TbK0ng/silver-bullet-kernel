@@ -36,3 +36,11 @@ Using one script for CI and local verification:
   - outputs:
     - `xxx_docs/generated/workflow-metrics-weekly.md`
     - `xxx_docs/generated/workflow-metrics-latest.json`
+
+## Workflow Doctor
+
+- Run: `npm run workflow:doctor`
+- Outputs:
+  - `xxx_docs/generated/workflow-doctor.md`
+  - `xxx_docs/generated/workflow-doctor.json`
+- Use doctor before deep debugging to quickly isolate missing dependencies or broken project structure.

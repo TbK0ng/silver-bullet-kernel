@@ -1,12 +1,28 @@
 ﻿{
-    "generatedAt":  "2026-02-12T08:55:06.2157090+00:00",
+    "generatedAt":  "2026-02-12T09:12:25.8465894+00:00",
     "totals":  {
-                   "allRuns":  5,
-                   "last7DaysRuns":  5,
-                   "last7DaysPassed":  5,
+                   "allRuns":  6,
+                   "last7DaysRuns":  6,
+                   "last7DaysPassed":  6,
                    "last7DaysFailed":  0,
-                   "last7DaysSuccessRate":  100
+                   "last7DaysSuccessRate":  100,
+                   "last7DaysFailureRate":  0
                },
+    "indicators":  {
+                       "leadTimeHoursP50":  8.6,
+                       "leadTimeHoursP90":  8.94,
+                       "reworkCountLast7Days":  0,
+                       "parallelThroughput":  {
+                                                  "activeChanges":  0,
+                                                  "archivedChangesLast7Days":  3,
+                                                  "archivedChangesTotal":  3
+                                              },
+                       "specDriftEventsLast30Days":  1,
+                       "tokenCost":  {
+                                         "status":  "unavailable",
+                                         "totalCostUsd":  null
+                                     }
+                   },
     "modeStats":  [
                       {
                           "mode":  "fast",
@@ -22,15 +38,11 @@
                       },
                       {
                           "mode":  "ci",
-                          "count":  3,
-                          "averageDurationMs":  15389.67,
+                          "count":  4,
+                          "averageDurationMs":  15267,
                           "passRate":  100
                       }
                   ],
-    "changeStats":  {
-                        "activeChanges":  0,
-                        "archivedChanges":  2
-                    },
     "topFailureSteps":  [
 
                         ]

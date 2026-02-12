@@ -46,7 +46,11 @@ This document maps `ai-coding-workflow-silver-bullet-plan.md` requirements to co
 - `scripts/collect-metrics.ps1` generates:
   - `xxx_docs/generated/workflow-metrics-weekly.md`
   - `xxx_docs/generated/workflow-metrics-latest.json`
+- `scripts/workflow-doctor.ps1` generates:
+  - `xxx_docs/generated/workflow-doctor.md`
+  - `xxx_docs/generated/workflow-doctor.json`
 - Validation outcomes documented in `xxx_docs/07-appdemo-validation-report.md`.
 - OpenSpec archive trail:
   - `openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/`
   - `openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/`
+  - `openspec/changes/archive/2026-02-12-add-workflow-doctor-and-advanced-metrics/`

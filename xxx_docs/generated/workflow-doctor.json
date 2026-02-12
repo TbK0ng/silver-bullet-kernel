@@ -1,0 +1,72 @@
+﻿{
+    "generatedAt":  "2026-02-12T09:12:24.9372502+00:00",
+    "overallPassed":  true,
+    "checks":  [
+                   {
+                       "remediation":  "Install Node.js \u003e= 20.19.0",
+                       "details":  "detected=v25.3.0",
+                       "name":  "Node version \u003e= 20.19.0",
+                       "passed":  true
+                   },
+                   {
+                       "remediation":  "Run: npm install -g @fission-ai/openspec@latest",
+                       "details":  "version=1.1.1",
+                       "name":  "OpenSpec CLI available",
+                       "passed":  true
+                   },
+                   {
+                       "remediation":  "Regenerate or restore missing workflow asset.",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\.trellis\\spec\\guides\\constitution.md",
+                       "name":  "Path exists: .trellis/spec/guides/constitution.md",
+                       "passed":  true
+                   },
+                   {
+                       "remediation":  "Regenerate or restore missing workflow asset.",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\.trellis\\spec\\guides\\memory-governance.md",
+                       "name":  "Path exists: .trellis/spec/guides/memory-governance.md",
+                       "passed":  true
+                   },
+                   {
+                       "remediation":  "Regenerate or restore missing workflow asset.",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\.codex\\skills",
+                       "name":  "Path exists: .codex/skills",
+                       "passed":  true
+                   },
+                   {
+                       "remediation":  "Regenerate or restore missing workflow asset.",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\openspec\\specs",
+                       "name":  "Path exists: openspec/specs",
+                       "passed":  true
+                   },
+                   {
+                       "remediation":  "Regenerate or restore missing workflow asset.",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\scripts\\verify-ci.ps1",
+                       "name":  "Path exists: scripts/verify-ci.ps1",
+                       "passed":  true
+                   },
+                   {
+                       "remediation":  "Regenerate or restore missing workflow asset.",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\scripts\\collect-metrics.ps1",
+                       "name":  "Path exists: scripts/collect-metrics.ps1",
+                       "passed":  true
+                   },
+                   {
+                       "remediation":  "Regenerate or restore missing workflow asset.",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\xxx_docs\\00-index.md",
+                       "name":  "Path exists: xxx_docs/00-index.md",
+                       "passed":  true
+                   },
+                   {
+                       "remediation":  "Ensure openspec structure exists and is readable.",
+                       "details":  "active_changes=0",
+                       "name":  "OpenSpec active changes readable",
+                       "passed":  true
+                   },
+                   {
+                       "remediation":  "Run: npm run verify:fast or npm run verify:ci",
+                       "details":  "path=E:\\docc\\silver-bullet-kernel\\.metrics\\\\verify-runs.jsonl",
+                       "name":  "Verify telemetry present",
+                       "passed":  true
+                   }
+               ]
+}

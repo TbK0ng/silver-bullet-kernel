@@ -28,6 +28,7 @@ npm run verify
 - `npm run demo:smoke` run appdemo usability smoke test
 - `npm run map:codebase` generate codebase map into `xxx_docs/generated/`
 - `npm run metrics:collect` generate weekly workflow metrics from verify telemetry
+- `npm run workflow:doctor` run workflow health diagnosis and output report
 
 ## Appdemo API
 
