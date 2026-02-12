@@ -1,16 +1,16 @@
 ﻿# Workflow Metrics (Last 7 Days)
 
-- generated_at_utc: 2026-02-12 12:25:55Z
-- metrics_source_path: E:\docc\trellis-worktrees\sbk-codex-strict-plan13-philosophy\.metrics\verify-runs.jsonl
-- total_runs_all_time: 4
-- runs_last_7_days: 4
-- success_rate_last_7_days: 100%
+- generated_at_utc: 2026-02-12 12:28:14Z
+- metrics_source_path: E:\docc\trellis-worktrees\sbk-codex-strict-plan13-philosophy\.metrics\verify-runs-ci.jsonl
+- total_runs_all_time: 0
+- runs_last_7_days: 0
+- success_rate_last_7_days: 0%
 - failure_rate_last_7_days: 0%
 
 ## Plan Indicators
 
-- lead_time_p50_hours: 9.22
-- lead_time_p90_hours: 11.48
+- lead_time_p50_hours: 10.11
+- lead_time_p90_hours: 12.45
 - rework_count_last_7_days: 0
 - parallel_throughput_active_changes: 0
 - parallel_throughput_archived_changes_last_7_days: 7
@@ -21,8 +21,8 @@
 
 | Mode | Runs | Pass Rate (%) | Avg Duration (ms) |
 | --- | ---: | ---: | ---: |
-| fast | 2 | 100 | 12367 |
-| full | 2 | 100 | 33162 |
+| fast | 0 | 0 | 0 |
+| full | 0 | 0 | 0 |
 | ci | 0 | 0 | 0 |
 
 ## Top Failure Steps
