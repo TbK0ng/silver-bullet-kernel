@@ -31,11 +31,22 @@ This document maps `ai-coding-workflow-silver-bullet-plan.md` requirements to co
 ## Phase 4: Memory and Knowledge Governance
 
 - Session policy documented in `AGENTS.md` (`/trellis:record-session`).
+- Constitution and memory governance policy added:
+  - `.trellis/spec/guides/constitution.md`
+  - `.trellis/spec/guides/memory-governance.md`
+- Session recovery sample committed:
+  - `.trellis/workspace/sample-owner/index.md`
+  - `.trellis/workspace/sample-owner/journal-1.md`
 - Project-owned operational docs maintained under `xxx_docs/`.
 
 ## Phase 5: Observability and Improvement
 
 - `scripts/map-codebase.ps1` generates `xxx_docs/generated/codebase-map.md`.
+- Verify scripts emit telemetry to `.metrics/verify-runs.jsonl`.
+- `scripts/collect-metrics.ps1` generates:
+  - `xxx_docs/generated/workflow-metrics-weekly.md`
+  - `xxx_docs/generated/workflow-metrics-latest.json`
 - Validation outcomes documented in `xxx_docs/07-appdemo-validation-report.md`.
-- Completed OpenSpec change archived for audit trail:
+- OpenSpec archive trail:
   - `openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/`
+  - `openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/`

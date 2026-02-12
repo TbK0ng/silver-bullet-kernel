@@ -1,6 +1,6 @@
 ﻿# Codebase Map
 
-- generated_at: 2026-02-12 16:18:44
+- generated_at: 2026-02-12 16:55:54
 - repo_root: E:\docc\silver-bullet-kernel
 
 ## Top-Level
@@ -10,6 +10,7 @@
 - dir: .codex
 - dir: .github
 - file: .gitignore
+- dir: .metrics
 - dir: .trellis
 - file: AGENTS.md
 - file: CLAUDE.md
@@ -26,10 +27,6 @@
 - dir: xxx_docs
 
 ## Tracked Files
-
-- (none)
-
-## Untracked Files
 
 - .agents/skills/before-backend-dev/SKILL.md
 - .agents/skills/before-frontend-dev/SKILL.md
@@ -153,13 +150,17 @@
 - .trellis/spec/frontend/state-management.md
 - .trellis/spec/frontend/type-safety.md
 - .trellis/spec/guides/code-reuse-thinking-guide.md
+- .trellis/spec/guides/constitution.md
 - .trellis/spec/guides/cross-layer-thinking-guide.md
 - .trellis/spec/guides/index.md
+- .trellis/spec/guides/memory-governance.md
 - .trellis/spec/guides/openspec-workflow.md
 - .trellis/spec/guides/quality-gates.md
 - .trellis/spec/guides/worktree-policy.md
 - .trellis/workflow.md
 - .trellis/workspace/index.md
+- .trellis/workspace/sample-owner/index.md
+- .trellis/workspace/sample-owner/journal-1.md
 - .trellis/worktree.yaml
 - AGENTS.md
 - CLAUDE.md
@@ -172,12 +173,26 @@
 - openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/specs/codex-workflow-kernel/spec.md
 - openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/specs/workflow-docs-system/spec.md
 - openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/tasks.md
+- openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/.openspec.yaml
+- openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/design.md
+- openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/proposal.md
+- openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/specs/codex-workflow-kernel/spec.md
+- openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/specs/memory-governance-policy/spec.md
+- openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/specs/session-recovery-proof/spec.md
+- openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/specs/workflow-docs-system/spec.md
+- openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/specs/workflow-observability/spec.md
+- openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/tasks.md
 - openspec/specs/appdemo-task-api/spec.md
 - openspec/specs/codex-workflow-kernel/spec.md
+- openspec/specs/memory-governance-policy/spec.md
+- openspec/specs/session-recovery-proof/spec.md
 - openspec/specs/workflow-docs-system/spec.md
+- openspec/specs/workflow-observability/spec.md
 - package-lock.json
 - package.json
 - scripts/appdemo-smoke.ps1
+- scripts/collect-metrics.ps1
+- scripts/common/verify-telemetry.ps1
 - scripts/map-codebase.ps1
 - scripts/verify-ci.ps1
 - scripts/verify-fast.ps1
@@ -197,4 +212,11 @@
 - xxx_docs/07-appdemo-validation-report.md
 - xxx_docs/08-troubleshooting.md
 - xxx_docs/09-plan-traceability.md
+- xxx_docs/10-memory-governance-and-observability.md
 - xxx_docs/generated/codebase-map.md
+- xxx_docs/generated/workflow-metrics-latest.json
+- xxx_docs/generated/workflow-metrics-weekly.md
+
+## Untracked Files
+
+- (none)

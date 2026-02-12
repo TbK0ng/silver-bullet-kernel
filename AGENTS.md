@@ -40,3 +40,5 @@ Keep this managed block so 'trellis update' can refresh the instructions.
 - Source of truth for change intent: OpenSpec artifacts.
 - Source of truth for execution policy: Trellis specs and guides.
 - Session memory must be recorded with `/trellis:record-session` at end of work sessions.
+- Never store secrets in memory artifacts; redact before recording.
+- Generate weekly observability report with `npm run metrics:collect`.

@@ -18,6 +18,8 @@
 - Never skip proposal/design for non-trivial changes.
 - Do not claim completion before verify passes.
 - Archive completed OpenSpec changes promptly.
+- Treat `.trellis/spec/guides/constitution.md` as non-negotiable.
+- Review weekly metrics and tune workflow by measured failure trends.
 
 ## Collaboration
 
@@ -29,3 +31,4 @@
 
 - Update `xxx_docs/` during implementation, not after.
 - Include exact commands and file paths for reproducibility.
+- Keep session and memory governance docs current with actual practice.

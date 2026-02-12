@@ -1,7 +1,7 @@
 # appdemo-task-api Specification
 
 ## Purpose
-TBD - created by archiving change bootstrap-codex-workflow-kernel. Update Purpose after archive.
+Define the minimum runnable API used as usability proof for the workflow kernel.
 ## Requirements
 ### Requirement: Demo Service Health Endpoint
 
@@ -48,4 +48,3 @@ The demo service SHALL validate request payloads and task identifiers.
 - **WHEN** a request omits required fields or sends invalid types
 - **THEN** the service returns HTTP 400
 - **AND** response includes validation details
-

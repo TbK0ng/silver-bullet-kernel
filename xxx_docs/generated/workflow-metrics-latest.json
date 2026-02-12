@@ -1,0 +1,37 @@
+﻿{
+    "generatedAt":  "2026-02-12T08:55:06.2157090+00:00",
+    "totals":  {
+                   "allRuns":  5,
+                   "last7DaysRuns":  5,
+                   "last7DaysPassed":  5,
+                   "last7DaysFailed":  0,
+                   "last7DaysSuccessRate":  100
+               },
+    "modeStats":  [
+                      {
+                          "mode":  "fast",
+                          "count":  1,
+                          "averageDurationMs":  7141,
+                          "passRate":  100
+                      },
+                      {
+                          "mode":  "full",
+                          "count":  1,
+                          "averageDurationMs":  11097,
+                          "passRate":  100
+                      },
+                      {
+                          "mode":  "ci",
+                          "count":  3,
+                          "averageDurationMs":  15389.67,
+                          "passRate":  100
+                      }
+                  ],
+    "changeStats":  {
+                        "activeChanges":  0,
+                        "archivedChanges":  2
+                    },
+    "topFailureSteps":  [
+
+                        ]
+}

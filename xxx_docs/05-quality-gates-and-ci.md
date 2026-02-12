@@ -27,3 +27,12 @@ Using one script for CI and local verification:
 - exact command(s) run
 - pass/fail result
 - if failed: root cause and fix path
+
+## Telemetry
+
+- Verify scripts append run telemetry to `.metrics/verify-runs.jsonl` (local only, gitignored).
+- Weekly report generation:
+  - `npm run metrics:collect`
+  - outputs:
+    - `xxx_docs/generated/workflow-metrics-weekly.md`
+    - `xxx_docs/generated/workflow-metrics-latest.json`

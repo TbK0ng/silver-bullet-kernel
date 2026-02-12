@@ -15,6 +15,7 @@ These are project-owned docs for operating this repository as a Codex-first brow
 7. `xxx_docs/07-appdemo-validation-report.md`
 8. `xxx_docs/08-troubleshooting.md`
 9. `xxx_docs/09-plan-traceability.md`
+10. `xxx_docs/10-memory-governance-and-observability.md`
 
 ## Source-of-Truth Split
 

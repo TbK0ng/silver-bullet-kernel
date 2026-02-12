@@ -27,6 +27,8 @@ These guides help you **ask the right questions before coding**.
 | [Quality Gates](./quality-gates.md) | Define objective done criteria and verify evidence | Before claiming task completion |
 | [Worktree Policy](./worktree-policy.md) | Enforce safe parallel development and merge discipline | Multi-person or multi-agent execution |
 | [OpenSpec Workflow (OPSX)](./openspec-workflow.md) | Standardize proposal-design-tasks-spec lifecycle | Every product or refactor change |
+| [Workflow Constitution](./constitution.md) | Define non-negotiable engineering constraints | Before process changes |
+| [Memory Governance](./memory-governance.md) | Keep memory injection and retention auditable | Session start/end and postmortems |
 
 ---
 

@@ -1,0 +1,21 @@
+## ADDED Requirements
+
+### Requirement: Memory Source Governance
+
+The workflow SHALL explicitly define approved memory sources and their responsibilities.
+
+#### Scenario: Agent determines what context to inject
+
+- **WHEN** an agent starts or resumes work
+- **THEN** it references approved sources (`.trellis/workspace/`, `openspec/`, `xxx_docs/`)
+- **AND** it avoids ad-hoc undocumented context stores
+
+### Requirement: Retention and Redaction Policy
+
+The workflow SHALL enforce retention boundaries and sensitive-data redaction.
+
+#### Scenario: Session summary contains secret-like content
+
+- **WHEN** a session record is about to be persisted
+- **THEN** credentials and tokens are redacted
+- **AND** durable records avoid storing secrets

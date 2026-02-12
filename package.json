@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:e2e": "vitest run tests/e2e",
     "map:codebase": "powershell -ExecutionPolicy Bypass -File ./scripts/map-codebase.ps1",
+    "metrics:collect": "powershell -ExecutionPolicy Bypass -File ./scripts/collect-metrics.ps1",
     "demo:smoke": "powershell -ExecutionPolicy Bypass -File ./scripts/appdemo-smoke.ps1",
     "verify:fast": "powershell -ExecutionPolicy Bypass -File ./scripts/verify-fast.ps1",
     "verify": "powershell -ExecutionPolicy Bypass -File ./scripts/verify.ps1",

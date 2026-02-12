@@ -1,7 +1,7 @@
 # codex-workflow-kernel Specification
 
 ## Purpose
-TBD - created by archiving change bootstrap-codex-workflow-kernel. Update Purpose after archive.
+Define the core Codex-first workflow behavior, verification gates, and collaboration invariants for this repository.
 ## Requirements
 ### Requirement: Codex-First Runtime Contract
 
@@ -39,3 +39,21 @@ The repository SHALL define a worktree policy for two-person collaboration.
 - **THEN** each change uses isolated ownership and worktree boundaries
 - **AND** spec merges occur through archive flow, not direct concurrent edits to canonical specs
 
+### Requirement: Constitutional Guardrails
+
+The kernel SHALL define and maintain constitution-level rules governing quality, source-of-truth ownership, and recoverability.
+
+#### Scenario: Process change proposal is introduced
+
+- **WHEN** contributors modify workflow behavior
+- **THEN** changes are checked against constitutional rules before adoption
+
+### Requirement: Metrics-Backed Improvement Loop
+
+The kernel SHALL support data-driven process tuning.
+
+#### Scenario: Weekly process review
+
+- **WHEN** team reviews workflow performance
+- **THEN** they use generated metrics artifacts to identify failures and throughput bottlenecks
+- **AND** they update policy or scripts based on measured evidence
