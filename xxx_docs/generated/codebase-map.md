@@ -1,0 +1,200 @@
+﻿# Codebase Map
+
+- generated_at: 2026-02-12 16:18:44
+- repo_root: E:\docc\silver-bullet-kernel
+
+## Top-Level
+
+- dir: .agents
+- dir: .claude
+- dir: .codex
+- dir: .github
+- file: .gitignore
+- dir: .trellis
+- file: AGENTS.md
+- file: CLAUDE.md
+- file: eslint.config.js
+- dir: openspec
+- file: package.json
+- file: package-lock.json
+- file: README.md
+- dir: scripts
+- dir: src
+- dir: tests
+- file: tsconfig.json
+- file: vitest.config.ts
+- dir: xxx_docs
+
+## Tracked Files
+
+- (none)
+
+## Untracked Files
+
+- .agents/skills/before-backend-dev/SKILL.md
+- .agents/skills/before-frontend-dev/SKILL.md
+- .agents/skills/break-loop/SKILL.md
+- .agents/skills/check-backend/SKILL.md
+- .agents/skills/check-cross-layer/SKILL.md
+- .agents/skills/check-frontend/SKILL.md
+- .agents/skills/create-command/SKILL.md
+- .agents/skills/finish-work/SKILL.md
+- .agents/skills/integrate-skill/SKILL.md
+- .agents/skills/onboard/SKILL.md
+- .agents/skills/record-session/SKILL.md
+- .agents/skills/start/SKILL.md
+- .agents/skills/update-spec/SKILL.md
+- .claude/agents/check.md
+- .claude/agents/debug.md
+- .claude/agents/dispatch.md
+- .claude/agents/implement.md
+- .claude/agents/plan.md
+- .claude/agents/research.md
+- .claude/commands/opsx/apply.md
+- .claude/commands/opsx/archive.md
+- .claude/commands/opsx/bulk-archive.md
+- .claude/commands/opsx/continue.md
+- .claude/commands/opsx/explore.md
+- .claude/commands/opsx/ff.md
+- .claude/commands/opsx/new.md
+- .claude/commands/opsx/onboard.md
+- .claude/commands/opsx/sync.md
+- .claude/commands/opsx/verify.md
+- .claude/commands/trellis/before-backend-dev.md
+- .claude/commands/trellis/before-frontend-dev.md
+- .claude/commands/trellis/break-loop.md
+- .claude/commands/trellis/check-backend.md
+- .claude/commands/trellis/check-cross-layer.md
+- .claude/commands/trellis/check-frontend.md
+- .claude/commands/trellis/create-command.md
+- .claude/commands/trellis/finish-work.md
+- .claude/commands/trellis/integrate-skill.md
+- .claude/commands/trellis/onboard.md
+- .claude/commands/trellis/parallel.md
+- .claude/commands/trellis/record-session.md
+- .claude/commands/trellis/start.md
+- .claude/commands/trellis/update-spec.md
+- .claude/hooks/inject-subagent-context.py
+- .claude/hooks/ralph-loop.py
+- .claude/hooks/session-start.py
+- .claude/settings.json
+- .claude/skills/openspec-apply-change/SKILL.md
+- .claude/skills/openspec-archive-change/SKILL.md
+- .claude/skills/openspec-bulk-archive-change/SKILL.md
+- .claude/skills/openspec-continue-change/SKILL.md
+- .claude/skills/openspec-explore/SKILL.md
+- .claude/skills/openspec-ff-change/SKILL.md
+- .claude/skills/openspec-new-change/SKILL.md
+- .claude/skills/openspec-onboard/SKILL.md
+- .claude/skills/openspec-sync-specs/SKILL.md
+- .claude/skills/openspec-verify-change/SKILL.md
+- .codex/skills/before-backend-dev/SKILL.md
+- .codex/skills/before-frontend-dev/SKILL.md
+- .codex/skills/break-loop/SKILL.md
+- .codex/skills/check-backend/SKILL.md
+- .codex/skills/check-cross-layer/SKILL.md
+- .codex/skills/check-frontend/SKILL.md
+- .codex/skills/create-command/SKILL.md
+- .codex/skills/finish-work/SKILL.md
+- .codex/skills/integrate-skill/SKILL.md
+- .codex/skills/onboard/SKILL.md
+- .codex/skills/openspec-apply-change/SKILL.md
+- .codex/skills/openspec-archive-change/SKILL.md
+- .codex/skills/openspec-bulk-archive-change/SKILL.md
+- .codex/skills/openspec-continue-change/SKILL.md
+- .codex/skills/openspec-explore/SKILL.md
+- .codex/skills/openspec-ff-change/SKILL.md
+- .codex/skills/openspec-new-change/SKILL.md
+- .codex/skills/openspec-onboard/SKILL.md
+- .codex/skills/openspec-sync-specs/SKILL.md
+- .codex/skills/openspec-verify-change/SKILL.md
+- .codex/skills/record-session/SKILL.md
+- .codex/skills/start/SKILL.md
+- .codex/skills/update-spec/SKILL.md
+- .github/workflows/ci.yml
+- .gitignore
+- .trellis/.gitignore
+- .trellis/.template-hashes.json
+- .trellis/.version
+- .trellis/scripts/__init__.py
+- .trellis/scripts/add_session.py
+- .trellis/scripts/common/__init__.py
+- .trellis/scripts/common/cli_adapter.py
+- .trellis/scripts/common/developer.py
+- .trellis/scripts/common/git_context.py
+- .trellis/scripts/common/paths.py
+- .trellis/scripts/common/phase.py
+- .trellis/scripts/common/registry.py
+- .trellis/scripts/common/task_queue.py
+- .trellis/scripts/common/task_utils.py
+- .trellis/scripts/common/worktree.py
+- .trellis/scripts/create_bootstrap.py
+- .trellis/scripts/get_context.py
+- .trellis/scripts/get_developer.py
+- .trellis/scripts/init_developer.py
+- .trellis/scripts/multi_agent/__init__.py
+- .trellis/scripts/multi_agent/cleanup.py
+- .trellis/scripts/multi_agent/create_pr.py
+- .trellis/scripts/multi_agent/plan.py
+- .trellis/scripts/multi_agent/start.py
+- .trellis/scripts/multi_agent/status.py
+- .trellis/scripts/task.py
+- .trellis/spec/backend/database-guidelines.md
+- .trellis/spec/backend/directory-structure.md
+- .trellis/spec/backend/error-handling.md
+- .trellis/spec/backend/index.md
+- .trellis/spec/backend/logging-guidelines.md
+- .trellis/spec/backend/quality-guidelines.md
+- .trellis/spec/frontend/component-guidelines.md
+- .trellis/spec/frontend/directory-structure.md
+- .trellis/spec/frontend/hook-guidelines.md
+- .trellis/spec/frontend/index.md
+- .trellis/spec/frontend/quality-guidelines.md
+- .trellis/spec/frontend/state-management.md
+- .trellis/spec/frontend/type-safety.md
+- .trellis/spec/guides/code-reuse-thinking-guide.md
+- .trellis/spec/guides/cross-layer-thinking-guide.md
+- .trellis/spec/guides/index.md
+- .trellis/spec/guides/openspec-workflow.md
+- .trellis/spec/guides/quality-gates.md
+- .trellis/spec/guides/worktree-policy.md
+- .trellis/workflow.md
+- .trellis/workspace/index.md
+- .trellis/worktree.yaml
+- AGENTS.md
+- CLAUDE.md
+- README.md
+- eslint.config.js
+- openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/.openspec.yaml
+- openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/design.md
+- openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/proposal.md
+- openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/specs/appdemo-task-api/spec.md
+- openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/specs/codex-workflow-kernel/spec.md
+- openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/specs/workflow-docs-system/spec.md
+- openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/tasks.md
+- openspec/specs/appdemo-task-api/spec.md
+- openspec/specs/codex-workflow-kernel/spec.md
+- openspec/specs/workflow-docs-system/spec.md
+- package-lock.json
+- package.json
+- scripts/appdemo-smoke.ps1
+- scripts/map-codebase.ps1
+- scripts/verify-ci.ps1
+- scripts/verify-fast.ps1
+- scripts/verify.ps1
+- src/app.ts
+- src/server.ts
+- tests/e2e/app.e2e.test.ts
+- tsconfig.json
+- vitest.config.ts
+- xxx_docs/00-index.md
+- xxx_docs/01-setup-and-bootstrap.md
+- xxx_docs/02-brownfield-onboarding.md
+- xxx_docs/03-codex-daily-sop.md
+- xxx_docs/04-two-person-collaboration.md
+- xxx_docs/05-quality-gates-and-ci.md
+- xxx_docs/06-best-practices.md
+- xxx_docs/07-appdemo-validation-report.md
+- xxx_docs/08-troubleshooting.md
+- xxx_docs/09-plan-traceability.md
+- xxx_docs/generated/codebase-map.md
