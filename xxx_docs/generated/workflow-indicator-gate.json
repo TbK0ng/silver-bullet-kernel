@@ -1,5 +1,5 @@
 ﻿{
-    "generatedAt":  "2026-02-12T11:26:53.2266091+00:00",
+    "generatedAt":  "2026-02-12T11:31:03.8484786+00:00",
     "outcome":  "PASS",
     "checks":  [
                    {
@@ -14,7 +14,7 @@
                        "name":  "Lead time P90 within threshold",
                        "severity":  "warn",
                        "passed":  true,
-                       "observed":  "10.65 h",
+                       "observed":  "11.48 h",
                        "threshold":  "\u003c= 72 h",
                        "remediation":  "Split oversized changes and archive in smaller batches."
                    },
@@ -30,7 +30,7 @@
                        "name":  "Active change WIP within threshold",
                        "severity":  "fail",
                        "passed":  true,
-                       "observed":  "1",
+                       "observed":  "0",
                        "threshold":  "\u003c= 3",
                        "remediation":  "Pause new starts and close in-flight changes to maintain throughput quality."
                    },

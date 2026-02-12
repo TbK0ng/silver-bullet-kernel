@@ -1,5 +1,5 @@
 ﻿{
-    "generatedAt":  "2026-02-12T11:26:51.2479846+00:00",
+    "generatedAt":  "2026-02-12T11:31:00.6492651+00:00",
     "totals":  {
                    "allRuns":  0,
                    "last7DaysRuns":  0,
@@ -10,12 +10,12 @@
                },
     "indicators":  {
                        "leadTimeHoursP50":  9.22,
-                       "leadTimeHoursP90":  10.65,
+                       "leadTimeHoursP90":  11.48,
                        "reworkCountLast7Days":  0,
                        "parallelThroughput":  {
-                                                  "activeChanges":  1,
-                                                  "archivedChangesLast7Days":  5,
-                                                  "archivedChangesTotal":  5
+                                                  "activeChanges":  0,
+                                                  "archivedChangesLast7Days":  6,
+                                                  "archivedChangesTotal":  6
                                               },
                        "specDriftEventsLast30Days":  1,
                        "tokenCost":  {
