@@ -66,11 +66,49 @@ Fix:
 Cause:
 
 - `WORKFLOW_BASE_REF` missing or remote base branch not fetched.
+- `WORKFLOW_BASE_REF` resolves to current `HEAD` (degenerate delta context).
 
 Fix:
 
-- ensure CI step sets `WORKFLOW_BASE_REF` (for PR: `origin/<base_ref>`, for push: `origin/main`)
+- ensure CI step sets `WORKFLOW_BASE_REF` (for PR: `origin/<base_ref>`, for push: `${{ github.event.before }}`)
 - ensure checkout fetches full history (`fetch-depth: 0`)
+
+## Policy Gate Fails: Tasks Evidence Schema
+
+Cause:
+
+- active change `tasks.md` does not include required evidence columns.
+
+Fix:
+
+- use table header with required columns:
+  - `| ID | Status | Files | Action | Verify | Done |`
+- re-run `npm run workflow:policy`
+
+## Repeated Local Verify Failures
+
+Cause:
+
+- failure recurs without structured diagnostics loop.
+
+Fix:
+
+- run bounded verify/fix loop:
+  - `npm run verify:loop -- -Profile fast -MaxAttempts 2`
+- inspect `.metrics/verify-fix-loop.jsonl` for failed attempts and diagnostics outcomes.
+
+## Unsafe Text Replace Rename
+
+Cause:
+
+- symbol rename done by plain text replacement, causing semantic drift.
+
+Fix:
+
+- run semantic rename dry-run first:
+  - `npm run refactor:rename -- --file <path> --line <n> --column <n> --newName <name> --dryRun`
+- then apply rename and verify:
+  - `npm run verify:fast`
 
 ## Indicator Gate Fails on Drift or Rework
 

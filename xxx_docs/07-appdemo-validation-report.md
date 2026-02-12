@@ -17,6 +17,8 @@ Validate that the workflow kernel can deliver a runnable application artifact wi
 - `npm run test:e2e`
 - `npm run demo:smoke`
 - `npm run verify`
+- `npm run verify:loop -- -Profile fast -MaxAttempts 2`
+- `npm run refactor:rename -- --file src/app.ts --line 4 --column 7 --newName createTaskPayload --dryRun`
 
 ## Result
 
@@ -24,6 +26,8 @@ Validate that the workflow kernel can deliver a runnable application artifact wi
 - Evidence:
   - `npm run verify:fast` passed.
   - `npm run verify` passed.
+  - `npm run verify:loop -- -Profile fast -MaxAttempts 2` passed and wrote `.metrics/verify-fix-loop.jsonl`.
+  - `npm run refactor:rename ... --dryRun` passed and reported deterministic symbol rename scope.
   - `npm run workflow:policy` passed (policy gate enforcing change/session governance).
   - `npm run metrics:collect` passed and generated weekly metrics artifacts.
   - `npm run workflow:gate` passed (indicator threshold gate).
@@ -39,6 +43,7 @@ Validate that the workflow kernel can deliver a runnable application artifact wi
   - `openspec archive enforce-workflow-policy-gates -y` succeeded and merged policy-gate deltas.
   - `openspec status --change harden-fail-closed-owner-worktree-gates` reached `4/4 artifacts complete` before archive.
   - `openspec archive harden-fail-closed-owner-worktree-gates -y` succeeded and merged strict-owner/worktree policy deltas.
+  - `openspec status --change close-gap-13-thought-enforcement` reached `4/4 artifacts complete` before archive.
   - `openspec validate --all --strict --no-interactive` passed for canonical specs.
   - `openspec list` returns no active changes after second archive.
   - `openspec list` returns no active changes after third archive.

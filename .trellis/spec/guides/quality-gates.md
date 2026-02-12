@@ -8,6 +8,7 @@ This repository treats completion claims as invalid until objective verification
 
 - Local fast gate: `npm run verify:fast`
 - Local full gate: `npm run verify`
+- Local bounded fix loop: `npm run verify:loop -- -Profile fast -MaxAttempts 2`
 - CI gate: `npm run verify:ci`
 - Policy gate: `npm run workflow:policy`
 - Indicator gate: `npm run workflow:gate`
@@ -28,10 +29,12 @@ Any code task is complete only when all criteria pass:
 
 Every OpenSpec task must include:
 
-- `files`: exact files changed
-- `action`: what changed and why
-- `verify`: command(s) run
-- `done`: observable outcome
+- `Files`: exact files changed
+- `Action`: what changed and why
+- `Verify`: command(s) run
+- `Done`: observable outcome
+
+`tasks.md` table headers are enforced by policy gate and must include these columns.
 
 ## Failure Handling
 
@@ -48,8 +51,10 @@ Do not archive a change with unresolved verify failures.
 
 - Implementation edits must be traceable to `openspec/changes/<name>/` artifacts.
 - Active change artifacts must include proposal/design/tasks/spec delta before verify succeeds.
+- Active change `tasks.md` must include evidence columns: `Files`, `Action`, `Verify`, `Done`.
 - Branch must match `sbk-<owner>-<change>` and `<change>` must map to active change.
 - Local implementation must run in linked worktree (`.git/worktrees/...`).
+- CI branch delta base ref must not resolve to current `HEAD`.
 - CI branch delta must include:
   - OpenSpec change artifacts for implementation edits.
   - Session evidence updates under owner path `.trellis/workspace/<owner>/`.

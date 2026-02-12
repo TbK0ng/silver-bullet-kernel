@@ -38,5 +38,5 @@ jobs:
         if: github.event_name != 'pull_request'
         shell: pwsh
         env:
-          WORKFLOW_BASE_REF: origin/main
+          WORKFLOW_BASE_REF: ${{ github.event.before }}
         run: ./scripts/verify-ci.ps1

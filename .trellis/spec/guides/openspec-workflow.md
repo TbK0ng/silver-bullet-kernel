@@ -28,7 +28,7 @@ Each active change must contain:
 
 - `proposal.md`: why and scope
 - `design.md`: decisions and trade-offs
-- `tasks.md`: executable checklist with verify evidence
+- `tasks.md`: executable checklist with verify evidence table columns `Files`, `Action`, `Verify`, `Done`
 - `specs/<capability>/spec.md`: requirement deltas
 
 ## Brownfield Rule
@@ -48,5 +48,7 @@ For existing repositories:
 ## Enforced Gate Integration
 
 - `npm run workflow:policy` must pass before and during implementation.
+- `npm run verify:loop -- -Profile fast -MaxAttempts 2` is the preferred bounded verify/fix loop for repeated local failures.
 - `npm run verify:ci` enforces policy + indicator gates for merge readiness.
 - For implementation branches, include session evidence updates under `.trellis/workspace/`.
+- CI push pipelines must pass event-correct base ref (`github.event.before`) to preserve branch-delta governance fidelity.

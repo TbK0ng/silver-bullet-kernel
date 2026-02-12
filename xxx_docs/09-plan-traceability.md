@@ -21,6 +21,7 @@ This document maps `ai-coding-workflow-silver-bullet-plan.md` requirements to co
 
 - Verify scripts enforce lint/typecheck/test/build and OpenSpec strict validation.
 - Verify scripts enforce workflow policy gate for artifact/session discipline.
+- Active change task evidence schema (`Files/Action/Verify/Done`) enforced in policy gate.
 - CI gate in `.github/workflows/ci.yml` uses `scripts/verify-ci.ps1`.
 
 ## Phase 3: Parallel and Conflict Governance
@@ -45,6 +46,8 @@ This document maps `ai-coding-workflow-silver-bullet-plan.md` requirements to co
 
 - `scripts/map-codebase.ps1` generates `xxx_docs/generated/codebase-map.md`.
 - Verify scripts emit telemetry to `.metrics/verify-runs.jsonl`.
+- `scripts/verify-loop.ps1` emits verify/fix loop evidence to `.metrics/verify-fix-loop.jsonl`.
+- `scripts/semantic-rename.ts` provides TypeScript semantic refactor command for deterministic rename operations.
 - `scripts/collect-metrics.ps1` generates:
   - `xxx_docs/generated/workflow-metrics-weekly.md`
   - `xxx_docs/generated/workflow-metrics-latest.json`
@@ -65,3 +68,4 @@ This document maps `ai-coding-workflow-silver-bullet-plan.md` requirements to co
   - `openspec/changes/archive/2026-02-12-add-workflow-doctor-and-advanced-metrics/`
   - `openspec/changes/archive/2026-02-12-enforce-workflow-policy-gates/`
   - `openspec/changes/archive/2026-02-12-harden-fail-closed-owner-worktree-gates/`
+  - `openspec/changes/archive/2026-02-12-close-gap-13-thought-enforcement/`

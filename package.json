@@ -21,6 +21,8 @@
     "workflow:policy": "powershell -ExecutionPolicy Bypass -File ./scripts/workflow-policy-gate.ps1 -Mode local",
     "workflow:gate": "powershell -ExecutionPolicy Bypass -File ./scripts/workflow-indicator-gate.ps1",
     "workflow:doctor": "powershell -ExecutionPolicy Bypass -File ./scripts/workflow-doctor.ps1",
+    "verify:loop": "powershell -ExecutionPolicy Bypass -File ./scripts/verify-loop.ps1",
+    "refactor:rename": "tsx ./scripts/semantic-rename.ts",
     "demo:smoke": "powershell -ExecutionPolicy Bypass -File ./scripts/appdemo-smoke.ps1",
     "verify:fast": "powershell -ExecutionPolicy Bypass -File ./scripts/verify-fast.ps1",
     "verify": "powershell -ExecutionPolicy Bypass -File ./scripts/verify.ps1",

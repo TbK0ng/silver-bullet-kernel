@@ -13,6 +13,12 @@
     "requireOwnerScopedSessionEvidence": true,
     "ownerWorkspaceRoot": ".trellis/workspace/",
     "ciRequireResolvableBaseRef": true,
+    "requiredTaskEvidenceColumns": [
+      "Files",
+      "Action",
+      "Verify",
+      "Done"
+    ],
     "implementationPathPrefixes": [
       "src/",
       "tests/",

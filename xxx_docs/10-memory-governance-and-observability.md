@@ -23,6 +23,7 @@ Operational rules:
 Telemetry source:
 
 - `.metrics/verify-runs.jsonl` (local, gitignored)
+- `.metrics/verify-fix-loop.jsonl` (bounded verify/fix loop evidence)
 
 Generation command:
 
@@ -45,7 +46,8 @@ Generated artifacts:
 2. Run `npm run workflow:doctor`.
 3. Run `npm run metrics:collect`.
 4. Run `npm run workflow:gate`.
-5. Review:
+5. If repeated local failures occur, run `npm run verify:loop -- -Profile fast -MaxAttempts 2`.
+6. Review:
    - lead time p50/p90
    - success/failure rate
    - per-mode runtime
@@ -54,7 +56,7 @@ Generated artifacts:
    - parallel throughput
    - spec drift count
    - token cost status
-6. Update guardrails/guides for the top failure and drift trends.
+7. Update guardrails/guides for the top failure and drift trends.
 
 ## Indicator Thresholds
 

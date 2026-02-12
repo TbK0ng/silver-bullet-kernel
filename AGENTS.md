@@ -36,6 +36,7 @@ Keep this managed block so 'trellis update' can refresh the instructions.
 
 - Fast local gate: `npm run verify:fast`
 - Full local gate: `npm run verify`
+- Bounded verify/fix loop: `npm run verify:loop -- -Profile fast -MaxAttempts 2`
 - CI gate: `npm run verify:ci`
 - Policy gate: `npm run workflow:policy`
 - Indicator gate: `npm run workflow:gate`
@@ -49,3 +50,5 @@ Keep this managed block so 'trellis update' can refresh the instructions.
 - Session evidence path must match branch owner workspace (`.trellis/workspace/<owner>/`).
 - Never store secrets in memory artifacts; redact before recording.
 - Generate weekly observability report with `npm run metrics:collect`.
+- Use semantic rename command for symbol-level rename refactors:
+  - `npm run refactor:rename -- --file <path> --line <n> --column <n> --newName <name> --dryRun`

@@ -27,7 +27,7 @@ workspace/
 
 | Developer | Last Active | Sessions | Active File |
 |-----------|-------------|----------|-------------|
-| codex | 2026-02-12 | 1 | `.trellis/workspace/codex/journal-1.md` |
+| codex | 2026-02-12 | 2 | `.trellis/workspace/codex/journal-2.md` |
 
 ---
 

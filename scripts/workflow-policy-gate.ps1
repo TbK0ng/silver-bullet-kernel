@@ -84,9 +84,11 @@ function Get-WorkingTreeFiles {
 function Get-BranchDeltaInfo {
   param(
     [Parameter(Mandatory = $true)][string]$RepoRoot,
-    [Parameter(Mandatory = $false)][string]$BaseRefArg
+    [Parameter(Mandatory = $false)][string]$BaseRefArg,
+    [Parameter(Mandatory = $false)][string]$GateMode = "local"
   )
 
+  $headSha = (git -C $RepoRoot rev-parse HEAD | Select-Object -First 1).Trim()
   $resolvedBaseRef = $BaseRefArg
   if ([string]::IsNullOrWhiteSpace($resolvedBaseRef)) {
     $resolvedBaseRef = $env:WORKFLOW_BASE_REF
@@ -106,6 +108,33 @@ function Get-BranchDeltaInfo {
       available = $false
       reason = "No base ref available (set WORKFLOW_BASE_REF or ensure origin base branch is fetched)."
       baseRef = ""
+      baseSha = ""
+      headSha = $headSha
+      mergeBase = ""
+      files = @()
+    }
+  }
+
+  $baseSha = (git -C $RepoRoot rev-parse --verify --quiet $resolvedBaseRef | Select-Object -First 1).Trim()
+  if ([string]::IsNullOrWhiteSpace($baseSha)) {
+    return [ordered]@{
+      available = $false
+      reason = "Unable to resolve base ref '$resolvedBaseRef'."
+      baseRef = $resolvedBaseRef
+      baseSha = ""
+      headSha = $headSha
+      mergeBase = ""
+      files = @()
+    }
+  }
+
+  if ($GateMode -eq "ci" -and $baseSha.Equals($headSha, [System.StringComparison]::OrdinalIgnoreCase)) {
+    return [ordered]@{
+      available = $false
+      reason = "Base ref '$resolvedBaseRef' resolves to current HEAD; branch delta is degenerate."
+      baseRef = $resolvedBaseRef
+      baseSha = $baseSha
+      headSha = $headSha
       mergeBase = ""
       files = @()
     }
@@ -117,6 +146,8 @@ function Get-BranchDeltaInfo {
       available = $false
       reason = "Unable to resolve merge-base for '$resolvedBaseRef'."
       baseRef = $resolvedBaseRef
+      baseSha = $baseSha
+      headSha = $headSha
       mergeBase = ""
       files = @()
     }
@@ -130,6 +161,8 @@ function Get-BranchDeltaInfo {
     available = $true
     reason = ""
     baseRef = $resolvedBaseRef
+    baseSha = $baseSha
+    headSha = $headSha
     mergeBase = $mergeBase.Trim()
     files = @($files | Select-Object -Unique)
   }
@@ -159,6 +192,54 @@ function Get-ImplementationFiles {
     }
   }
   return @($result | Select-Object -Unique)
+}
+
+function Test-TasksEvidenceSchema {
+  param(
+    [Parameter(Mandatory = $true)][string]$TasksPath,
+    [Parameter(Mandatory = $true)][AllowEmptyCollection()][string[]]$RequiredColumns
+  )
+
+  if (-not (Test-Path $TasksPath)) {
+    return [ordered]@{
+      passed = $false
+      reason = "tasks.md missing"
+      matchedHeader = ""
+    }
+  }
+
+  $lines = Get-Content -Path $TasksPath -Encoding UTF8
+  foreach ($line in $lines) {
+    $trimmed = $line.Trim()
+    if (-not $trimmed.StartsWith("|")) { continue }
+    if ($trimmed -match "^\|\s*[-: ]+\|") { continue }
+
+    $columns = @($trimmed.Trim('|').Split('|') | ForEach-Object { $_.Trim() })
+    if ($columns.Count -eq 0) { continue }
+
+    $allMatched = $true
+    foreach ($required in $RequiredColumns) {
+      $found = @($columns | Where-Object { $_.Equals($required, [System.StringComparison]::OrdinalIgnoreCase) }).Count -gt 0
+      if (-not $found) {
+        $allMatched = $false
+        break
+      }
+    }
+
+    if ($allMatched) {
+      return [ordered]@{
+        passed = $true
+        reason = ""
+        matchedHeader = ($columns -join ", ")
+      }
+    }
+  }
+
+  return [ordered]@{
+    passed = $false
+    reason = "No table header contains required columns."
+    matchedHeader = ""
+  }
 }
 
 function Get-CurrentBranchName {
@@ -282,6 +363,10 @@ $implementationFilesExact = @($config.workflowGate.implementationPathFiles)
 $ignorePrefixes = @($config.workflowGate.ignorePathPrefixes)
 $branchPattern = [string]$config.workflowGate.branchPattern
 $ownerWorkspaceRoot = [string]$config.workflowGate.ownerWorkspaceRoot
+$requiredTaskEvidenceColumns = @($config.workflowGate.requiredTaskEvidenceColumns)
+if ($requiredTaskEvidenceColumns.Count -eq 0) {
+  $requiredTaskEvidenceColumns = @("Files", "Action", "Verify", "Done")
+}
 if ([string]::IsNullOrWhiteSpace($ownerWorkspaceRoot)) {
   $ownerWorkspaceRoot = ".trellis/workspace/"
 }
@@ -345,6 +430,14 @@ if ([bool]$config.workflowGate.requireCompleteActiveChangeArtifacts) {
       -Passed $complete `
       -Details ("proposal=$(Test-Path $proposal); design=$(Test-Path $design); tasks=$(Test-Path $tasks); delta_specs=$($deltaSpecs.Count)") `
       -Remediation "Ensure proposal.md, design.md, tasks.md, and at least one spec delta file exist under the active change."
+
+    $taskSchema = Test-TasksEvidenceSchema -TasksPath $tasks -RequiredColumns $requiredTaskEvidenceColumns
+    Add-Check -Checks $checks `
+      -Name "Active change '$($change.Name)' tasks evidence schema is complete" `
+      -Severity "fail" `
+      -Passed ([bool]$taskSchema.passed) `
+      -Details ("required=" + ($requiredTaskEvidenceColumns -join ", ") + "; matched_header=$($taskSchema.matchedHeader); reason=$($taskSchema.reason)") `
+      -Remediation "Use a tasks table header that includes: $($requiredTaskEvidenceColumns -join ', ')."
   }
 }
 
@@ -358,7 +451,7 @@ Add-Check -Checks $checks `
   -Details ("canonical_spec_files=$($workingCanonicalSpecs.Count); has_archive_artifacts=$workingHasArchiveArtifacts; files=" + (Join-PathsForDetails -Paths $workingCanonicalSpecs)) `
   -Remediation "Avoid direct canonical spec edits during active implementation; use change deltas and `openspec archive` to merge."
 
-$branchDelta = Get-BranchDeltaInfo -RepoRoot $repoRoot -BaseRefArg $BaseRef
+$branchDelta = Get-BranchDeltaInfo -RepoRoot $repoRoot -BaseRefArg $BaseRef -GateMode $Mode
 $branchImplementationFiles = @()
 if ([bool]$branchDelta.available) {
   $branchImplementationFiles = @(Get-ImplementationFiles `
@@ -442,7 +535,7 @@ Add-Check -Checks $checks `
   -Name "Branch delta available for governance checks" `
   -Severity $branchDeltaAvailabilitySeverity `
   -Passed ([bool]$branchDelta.available) `
-  -Details ("available=$($branchDelta.available); base_ref=$($branchDelta.baseRef); merge_base=$($branchDelta.mergeBase); reason=$($branchDelta.reason)") `
+  -Details ("available=$($branchDelta.available); base_ref=$($branchDelta.baseRef); base_sha=$($branchDelta.baseSha); head_sha=$($branchDelta.headSha); merge_base=$($branchDelta.mergeBase); reason=$($branchDelta.reason)") `
   -Remediation "Set WORKFLOW_BASE_REF and ensure base branch history is fetched in CI."
 
 if ([bool]$branchDelta.available -and [bool]$config.workflowGate.requireChangeArtifactsInBranchDelta) {

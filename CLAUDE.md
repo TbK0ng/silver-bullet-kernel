@@ -14,6 +14,7 @@ This repository follows the same policy as `AGENTS.md`.
 
 - `npm run verify:fast`
 - `npm run verify`
+- `npm run verify:loop -- -Profile fast -MaxAttempts 2`
 - `npm run verify:ci`
 - `npm run workflow:policy`
 - `npm run workflow:gate`

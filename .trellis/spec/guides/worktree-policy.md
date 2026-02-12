@@ -29,6 +29,7 @@ Examples:
 - Implementation edits are blocked unless branch naming passes policy gate.
 - Local implementation from main worktree is blocked; use linked worktree only.
 - CI branch-delta checks are fail-closed when base ref is unavailable.
+- CI branch-delta checks also fail when base ref resolves to current `HEAD` (degenerate delta).
 
 ## Branching and Merge
 

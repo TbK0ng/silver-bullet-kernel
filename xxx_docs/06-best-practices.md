@@ -12,12 +12,17 @@
 - Keep tasks small and verifiable.
 - Prefer deterministic validation and explicit error handling.
 - Add tests for both success and error paths.
+- For symbol rename refactors, use semantic rename command (not text replace):
+  - `npm run refactor:rename -- --file <path> --line <n> --column <n> --newName <name> --dryRun`
 
 ## Process
 
 - Never skip proposal/design for non-trivial changes.
 - Keep active change artifacts complete (proposal/design/tasks/spec delta) before verify.
+- Keep active change `tasks.md` evidence table columns complete: `Files`, `Action`, `Verify`, `Done`.
 - Do not claim completion before verify passes.
+- For repeated local failures, use bounded loop and capture diagnostics evidence:
+  - `npm run verify:loop -- -Profile fast -MaxAttempts 2`
 - Archive completed OpenSpec changes promptly.
 - Treat `.trellis/spec/guides/constitution.md` as non-negotiable.
 - Review weekly metrics and tune workflow by measured failure trends.

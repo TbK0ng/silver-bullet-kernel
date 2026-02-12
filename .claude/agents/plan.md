@@ -249,7 +249,7 @@ EOF
 
 ```bash
 # Set branch name
-python3 ./.trellis/scripts/task.py set-branch "$PLAN_TASK_DIR" "feature/${PLAN_TASK_NAME}"
+python3 ./.trellis/scripts/task.py set-branch "$PLAN_TASK_DIR" "sbk-<owner>-${PLAN_TASK_NAME}"
 
 # Set scope (from research agent suggestion)
 python3 ./.trellis/scripts/task.py set-scope "$PLAN_TASK_DIR" "<scope>"

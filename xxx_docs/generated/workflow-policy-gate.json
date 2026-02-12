@@ -1,104 +1,127 @@
 ﻿{
-    "generatedAt":  "2026-02-12T10:37:57.5431123+00:00",
-    "mode":  "ci",
-    "outcome":  "PASS",
-    "currentBranch":  "sbk-codex-harden-fail-closed-owner-worktree-gates",
+    "generatedAt":  "2026-02-12T11:21:39.8006325+00:00",
+    "mode":  "local",
+    "outcome":  "WARN",
+    "currentBranch":  "sbk-codex-close-gap-13-thought-enforcement",
     "branchIdentity":  {
                            "valid":  true,
-                           "branch":  "sbk-codex-harden-fail-closed-owner-worktree-gates",
+                           "branch":  "sbk-codex-close-gap-13-thought-enforcement",
                            "owner":  "codex",
-                           "change":  "harden-fail-closed-owner-worktree-gates",
+                           "change":  "close-gap-13-thought-enforcement",
                            "reason":  ""
                        },
     "gitDirInfo":  {
-                       "gitDirRaw":  "E:/docc/silver-bullet-kernel/.git/worktrees/sbk-codex-harden-fail-closed-owner-worktree-gates",
-                       "gitDirFull":  "E:/docc/silver-bullet-kernel/.git/worktrees/sbk-codex-harden-fail-closed-owner-worktree-gates",
+                       "gitDirRaw":  "E:/docc/silver-bullet-kernel/.git/worktrees/sbk-codex-close-gap-13-thought-enforcement",
+                       "gitDirFull":  "E:/docc/silver-bullet-kernel/.git/worktrees/sbk-codex-close-gap-13-thought-enforcement",
                        "isLinkedWorktree":  true
                    },
     "branchDelta":  {
-                        "available":  true,
-                        "reason":  "",
-                        "baseRef":  "main",
-                        "mergeBase":  "f5d5dd5664e22743e2e000cf4a6da20ce0beee8b",
+                        "available":  false,
+                        "reason":  "No base ref available (set WORKFLOW_BASE_REF or ensure origin base branch is fetched).",
+                        "baseRef":  "",
+                        "baseSha":  "",
+                        "headSha":  "2838935d9425d9e94bf9640a3b2179a0d7c15c98",
+                        "mergeBase":  "",
                         "files":  [
 
                                   ]
                     },
     "activeChanges":  [
-
+                          "close-gap-13-thought-enforcement"
                       ],
     "workingImplementationFiles":  [
+                                       ".claude/agents/plan.md",
+                                       ".claude/commands/trellis/parallel.md",
                                        ".github/workflows/ci.yml",
-                                       ".trellis/spec/guides/memory-governance.md",
+                                       ".trellis/spec/guides/openspec-workflow.md",
                                        ".trellis/spec/guides/quality-gates.md",
                                        ".trellis/spec/guides/worktree-policy.md",
+                                       ".trellis/workspace/codex/index.md",
                                        ".trellis/workspace/index.md",
                                        "AGENTS.md",
                                        "CLAUDE.md",
                                        "README.md",
-                                       "openspec/specs/codex-workflow-kernel/spec.md",
-                                       "openspec/specs/memory-governance-policy/spec.md",
-                                       "openspec/specs/workflow-docs-system/spec.md",
                                        "package-lock.json",
+                                       "package.json",
                                        "scripts/workflow-policy-gate.ps1",
-                                       ".trellis/workspace/codex/"
+                                       "tsconfig.json",
+                                       ".codex/skills/semantic-rename/",
+                                       ".trellis/workspace/codex/journal-2.md",
+                                       "scripts/semantic-rename.ts",
+                                       "scripts/verify-loop.ps1",
+                                       "tests/e2e/semantic-rename.e2e.test.ts",
+                                       "tests/e2e/workflow-policy-gate.e2e.test.ts"
                                    ],
     "checks":  [
                    {
                        "name":  "Implementation edits require active change or archive artifacts",
                        "severity":  "fail",
                        "passed":  true,
-                       "details":  "implementation_files=14; active_changes=0; has_archive_artifacts=True; files=.github/workflows/ci.yml, .trellis/spec/guides/memory-governance.md, .trellis/spec/guides/quality-gates.md, .trellis/spec/guides/worktree-policy.md, .trellis/workspace/index.md, AGENTS.md, CLAUDE.md, README.md (+6 more)",
+                       "details":  "implementation_files=21; active_changes=1; has_archive_artifacts=False; files=.claude/agents/plan.md, .claude/commands/trellis/parallel.md, .github/workflows/ci.yml, .trellis/spec/guides/openspec-workflow.md, .trellis/spec/guides/quality-gates.md, .trellis/spec/guides/worktree-policy.md, .trellis/workspace/codex/index.md, .trellis/workspace/index.md (+13 more)",
                        "remediation":  "Create an OpenSpec change (openspec new change \u003cname\u003e) and complete artifacts before implementation, or archive completed change properly."
+                   },
+                   {
+                       "name":  "Active change \u0027close-gap-13-thought-enforcement\u0027 has complete artifacts",
+                       "severity":  "fail",
+                       "passed":  true,
+                       "details":  "proposal=True; design=True; tasks=True; delta_specs=3",
+                       "remediation":  "Ensure proposal.md, design.md, tasks.md, and at least one spec delta file exist under the active change."
+                   },
+                   {
+                       "name":  "Active change \u0027close-gap-13-thought-enforcement\u0027 tasks evidence schema is complete",
+                       "severity":  "fail",
+                       "passed":  true,
+                       "details":  "required=Files, Action, Verify, Done; matched_header=ID, Status, Files, Action, Verify, Done; reason=",
+                       "remediation":  "Use a tasks table header that includes: Files, Action, Verify, Done."
                    },
                    {
                        "name":  "Canonical specs updated only via archive flow",
                        "severity":  "fail",
                        "passed":  true,
-                       "details":  "canonical_spec_files=3; has_archive_artifacts=True; files=openspec/specs/codex-workflow-kernel/spec.md, openspec/specs/memory-governance-policy/spec.md, openspec/specs/workflow-docs-system/spec.md",
+                       "details":  "canonical_spec_files=0; has_archive_artifacts=False; files=none",
                        "remediation":  "Avoid direct canonical spec edits during active implementation; use change deltas and openspec archive to merge."
                    },
                    {
                        "name":  "Implementation branch matches owner/change pattern",
                        "severity":  "fail",
                        "passed":  true,
-                       "details":  "branch=sbk-codex-harden-fail-closed-owner-worktree-gates; valid=True; owner=codex; change=harden-fail-closed-owner-worktree-gates; reason=",
+                       "details":  "branch=sbk-codex-close-gap-13-thought-enforcement; valid=True; owner=codex; change=close-gap-13-thought-enforcement; reason=",
                        "remediation":  "Use branch format from workflow policy config (for example: sbk-codex-\u003cchange\u003e)."
                    },
                    {
                        "name":  "Implementation scope maps to exactly one active change",
                        "severity":  "fail",
                        "passed":  true,
-                       "details":  "active_changes=0; has_archive_context=False",
+                       "details":  "active_changes=1; has_archive_context=False",
                        "remediation":  "Keep one active OpenSpec change per implementation branch."
                    },
                    {
                        "name":  "Branch change id matches active change",
                        "severity":  "fail",
                        "passed":  true,
-                       "details":  "branch_change=harden-fail-closed-owner-worktree-gates; active_change=",
+                       "details":  "branch_change=close-gap-13-thought-enforcement; active_change=close-gap-13-thought-enforcement",
                        "remediation":  "Rename branch or active change so branch \u003cchange\u003e segment matches active OpenSpec change id."
                    },
                    {
+                       "name":  "Local implementation runs from linked worktree",
+                       "severity":  "fail",
+                       "passed":  true,
+                       "details":  "git_dir_raw=E:/docc/silver-bullet-kernel/.git/worktrees/sbk-codex-close-gap-13-thought-enforcement; git_dir_full=E:/docc/silver-bullet-kernel/.git/worktrees/sbk-codex-close-gap-13-thought-enforcement; is_linked=True",
+                       "remediation":  "Run implementation in linked worktree (git worktree add) using one branch per change."
+                   },
+                   {
+                       "name":  "Local implementation includes owner-scoped session evidence",
+                       "severity":  "fail",
+                       "passed":  true,
+                       "details":  "owner_prefix=.trellis/workspace/codex/; has_owner_session_evidence=True",
+                       "remediation":  "Update session evidence under .trellis/workspace/codex/ before verify."
+                   },
+                   {
                        "name":  "Branch delta available for governance checks",
-                       "severity":  "fail",
-                       "passed":  true,
-                       "details":  "available=True; base_ref=main; merge_base=f5d5dd5664e22743e2e000cf4a6da20ce0beee8b; reason=",
+                       "severity":  "warn",
+                       "passed":  false,
+                       "details":  "available=False; base_ref=; base_sha=; head_sha=2838935d9425d9e94bf9640a3b2179a0d7c15c98; merge_base=; reason=No base ref available (set WORKFLOW_BASE_REF or ensure origin base branch is fetched).",
                        "remediation":  "Set WORKFLOW_BASE_REF and ensure base branch history is fetched in CI."
-                   },
-                   {
-                       "name":  "Branch implementation delta includes OpenSpec change artifacts",
-                       "severity":  "fail",
-                       "passed":  true,
-                       "details":  "implementation_files=0; has_change_artifacts=False; files=none",
-                       "remediation":  "Ensure branch includes openspec/changes/\u003cname\u003e/ artifacts for implementation changes."
-                   },
-                   {
-                       "name":  "Branch implementation delta includes session evidence",
-                       "severity":  "fail",
-                       "passed":  true,
-                       "details":  "implementation_files=0; expected_owner_prefix=.trellis/workspace/codex/; has_session_evidence=False",
-                       "remediation":  "Record session evidence under owner workspace path before merge."
                    }
                ]
 }

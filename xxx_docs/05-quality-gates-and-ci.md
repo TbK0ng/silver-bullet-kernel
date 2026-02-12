@@ -4,6 +4,7 @@
 
 - Fast local: `npm run verify:fast`
 - Full local: `npm run verify`
+- Bounded fix loop: `npm run verify:loop -- -Profile fast -MaxAttempts 2`
 - CI strict: `npm run verify:ci`
 - Policy gate: `npm run workflow:policy`
 - Indicator gate: `npm run workflow:gate`
@@ -27,9 +28,12 @@ Using one script for CI and local verification:
 
 ## Required Evidence in Change Tasks
 
-- exact command(s) run
-- pass/fail result
-- if failed: root cause and fix path
+- `Files`: exact changed files
+- `Action`: implementation intent
+- `Verify`: exact command(s) run
+- `Done`: objective outcome
+
+Policy gate now fails if active change `tasks.md` does not include these columns.
 
 ## Telemetry
 
@@ -64,6 +68,7 @@ Using one script for CI and local verification:
   - implementation-path mapping requirements
   - branch naming and change-owner mapping
   - linked worktree requirement for local implementation
+  - required task evidence columns (`requiredTaskEvidenceColumns`)
   - session-evidence enforcement
   - CI fail-closed base-ref behavior
   - indicator thresholds and token-cost requirement mode
@@ -72,4 +77,5 @@ Using one script for CI and local verification:
 
 - CI must provide resolvable base ref (`WORKFLOW_BASE_REF`).
 - If base ref is missing/unresolvable, workflow policy gate fails CI (not warning).
+- CI push uses `github.event.before` as base ref. If base resolves to `HEAD`, policy gate fails.
 - Local `workflow:policy` may report warning for branch-delta availability when base ref is intentionally not provided.
