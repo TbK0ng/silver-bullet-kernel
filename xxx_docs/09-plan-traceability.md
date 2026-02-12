@@ -20,6 +20,7 @@ This document maps `ai-coding-workflow-silver-bullet-plan.md` requirements to co
 ## Phase 2: Hard Acceptance Gates
 
 - Verify scripts enforce lint/typecheck/test/build and OpenSpec strict validation.
+- Verify scripts enforce workflow policy gate for artifact/session discipline.
 - CI gate in `.github/workflows/ci.yml` uses `scripts/verify-ci.ps1`.
 
 ## Phase 3: Parallel and Conflict Governance
@@ -49,8 +50,16 @@ This document maps `ai-coding-workflow-silver-bullet-plan.md` requirements to co
 - `scripts/workflow-doctor.ps1` generates:
   - `xxx_docs/generated/workflow-doctor.md`
   - `xxx_docs/generated/workflow-doctor.json`
+- `scripts/workflow-policy-gate.ps1` generates:
+  - `xxx_docs/generated/workflow-policy-gate.md`
+  - `xxx_docs/generated/workflow-policy-gate.json`
+- `scripts/workflow-indicator-gate.ps1` generates:
+  - `xxx_docs/generated/workflow-indicator-gate.md`
+  - `xxx_docs/generated/workflow-indicator-gate.json`
+- `workflow-policy.json` defines gate rules and thresholds as policy-as-code.
 - Validation outcomes documented in `xxx_docs/07-appdemo-validation-report.md`.
 - OpenSpec archive trail:
   - `openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/`
   - `openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/`
   - `openspec/changes/archive/2026-02-12-add-workflow-doctor-and-advanced-metrics/`
+  - `openspec/changes/archive/2026-02-12-enforce-workflow-policy-gates/`

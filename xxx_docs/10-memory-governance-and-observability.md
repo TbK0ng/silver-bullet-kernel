@@ -33,13 +33,18 @@ Generated artifacts:
 - `xxx_docs/generated/workflow-metrics-latest.json`
 - `xxx_docs/generated/workflow-doctor.md`
 - `xxx_docs/generated/workflow-doctor.json`
+- `xxx_docs/generated/workflow-policy-gate.md`
+- `xxx_docs/generated/workflow-policy-gate.json`
+- `xxx_docs/generated/workflow-indicator-gate.md`
+- `xxx_docs/generated/workflow-indicator-gate.json`
 
 ## Weekly Review Routine
 
 1. Run `npm run verify:ci`.
 2. Run `npm run workflow:doctor`.
 3. Run `npm run metrics:collect`.
-4. Review:
+4. Run `npm run workflow:gate`.
+5. Review:
    - lead time p50/p90
    - success/failure rate
    - per-mode runtime
@@ -48,7 +53,7 @@ Generated artifacts:
    - parallel throughput
    - spec drift count
    - token cost status
-5. Update guardrails/guides for the top failure and drift trends.
+6. Update guardrails/guides for the top failure and drift trends.
 
 ## Indicator Thresholds
 
@@ -58,6 +63,14 @@ Generated artifacts:
 - `specDriftEventsLast30Days`: target 0; any non-zero value requires immediate spec backfill.
 - `parallelThroughput.activeChanges`: keep <= 3 for a two-person team; if higher, enforce WIP limits.
 - `tokenCost.status`: should be `available`; if unavailable for > 2 consecutive weeks, add cost-export integration.
+
+## Token Cost Integration
+
+- Publish token-cost summary when provider usage is available:
+  - `npm run metrics:token-cost -- -Source <provider> -TotalCostUsd <amount> -TotalInputTokens <n> -TotalOutputTokens <n>`
+- After publishing, rerun:
+  - `npm run metrics:collect`
+  - `npm run workflow:gate`
 
 ## Tuning Directions
 
@@ -72,3 +85,4 @@ Committed sample:
 
 - `.trellis/workspace/sample-owner/index.md`
 - `.trellis/workspace/sample-owner/journal-1.md`
+- `.trellis/workspace/sample-owner/journal-2.md`

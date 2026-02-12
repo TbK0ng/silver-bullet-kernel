@@ -46,3 +46,23 @@ Observability SHALL include reproducible estimation logic for lead time and spec
 - **WHEN** they inspect generated metrics artifacts
 - **THEN** they can see lead-time quantiles and drift event counts with explicit method notes
 
+### Requirement: Indicator Threshold Gate
+
+Workflow observability SHALL enforce threshold-based governance checks from generated metrics.
+
+#### Scenario: Team runs indicator gate
+
+- **WHEN** `npm run workflow:gate` executes
+- **THEN** metrics snapshot is evaluated against configured thresholds
+- **AND** failing thresholds return actionable non-zero results
+
+### Requirement: Configurable Governance Thresholds
+
+Threshold behavior SHALL be managed as repository configuration.
+
+#### Scenario: Team tunes process targets
+
+- **WHEN** contributors update workflow-policy config
+- **THEN** threshold values and severities are reviewable in version control
+- **AND** subsequent gate runs use updated config values
+

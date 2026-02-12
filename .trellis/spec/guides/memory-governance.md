@@ -35,3 +35,8 @@ At end of meaningful work session:
 2. If a new stable rule is discovered, update:
    - `.trellis/spec/guides/*` (execution policy), or
    - `xxx_docs/*` (operational guidance).
+
+## CI Evidence Rule
+
+- For implementation changes, branch delta must include session evidence under `.trellis/workspace/`.
+- Keep entries concise and factual: change id, decisions, failures, and verify evidence.

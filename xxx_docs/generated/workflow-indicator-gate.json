@@ -1,0 +1,54 @@
+﻿{
+    "generatedAt":  "2026-02-12T10:04:46.5701085+00:00",
+    "outcome":  "PASS",
+    "checks":  [
+                   {
+                       "name":  "Verify failure rate within threshold",
+                       "severity":  "fail",
+                       "passed":  true,
+                       "observed":  "0%",
+                       "threshold":  "\u003c= 5%",
+                       "remediation":  "Investigate top failed steps and stabilize verify gates before adding new scope."
+                   },
+                   {
+                       "name":  "Lead time P90 within threshold",
+                       "severity":  "warn",
+                       "passed":  true,
+                       "observed":  "9.22 h",
+                       "threshold":  "\u003c= 72 h",
+                       "remediation":  "Split oversized changes and archive in smaller batches."
+                   },
+                   {
+                       "name":  "Rework count within threshold",
+                       "severity":  "fail",
+                       "passed":  true,
+                       "observed":  "0",
+                       "threshold":  "\u003c= 2",
+                       "remediation":  "Strengthen proposal/design clarity and pre-implementation acceptance checks."
+                   },
+                   {
+                       "name":  "Active change WIP within threshold",
+                       "severity":  "fail",
+                       "passed":  true,
+                       "observed":  "0",
+                       "threshold":  "\u003c= 3",
+                       "remediation":  "Pause new starts and close in-flight changes to maintain throughput quality."
+                   },
+                   {
+                       "name":  "Spec drift events within threshold",
+                       "severity":  "fail",
+                       "passed":  true,
+                       "observed":  "1",
+                       "threshold":  "\u003c= 1",
+                       "remediation":  "Backfill missing specs/changes for drifted commits and enforce change-first workflow."
+                   },
+                   {
+                       "name":  "Token cost status available",
+                       "severity":  "warn",
+                       "passed":  true,
+                       "observed":  "available",
+                       "threshold":  "recommended: available",
+                       "remediation":  "Run npm run metrics:token-cost -- -Source \u003cprovider\u003e -TotalCostUsd \u003camount\u003e to publish token-cost summary."
+                   }
+               ]
+}

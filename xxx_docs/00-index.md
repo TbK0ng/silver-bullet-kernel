@@ -17,6 +17,8 @@ These are project-owned docs for operating this repository as a Codex-first brow
 9. `xxx_docs/09-plan-traceability.md`
 10. `xxx_docs/10-memory-governance-and-observability.md`
 11. `xxx_docs/generated/workflow-doctor.md`
+12. `xxx_docs/generated/workflow-policy-gate.md`
+13. `xxx_docs/generated/workflow-indicator-gate.md`
 
 ## Source-of-Truth Split
 

@@ -1,45 +1,45 @@
 ﻿{
-    "generatedAt":  "2026-02-12T09:12:25.8465894+00:00",
+    "generatedAt":  "2026-02-12T10:04:43.7869440+00:00",
     "totals":  {
-                   "allRuns":  6,
-                   "last7DaysRuns":  6,
-                   "last7DaysPassed":  6,
+                   "allRuns":  13,
+                   "last7DaysRuns":  13,
+                   "last7DaysPassed":  13,
                    "last7DaysFailed":  0,
                    "last7DaysSuccessRate":  100,
                    "last7DaysFailureRate":  0
                },
     "indicators":  {
-                       "leadTimeHoursP50":  8.6,
-                       "leadTimeHoursP90":  8.94,
+                       "leadTimeHoursP50":  8.94,
+                       "leadTimeHoursP90":  9.22,
                        "reworkCountLast7Days":  0,
                        "parallelThroughput":  {
                                                   "activeChanges":  0,
-                                                  "archivedChangesLast7Days":  3,
-                                                  "archivedChangesTotal":  3
+                                                  "archivedChangesLast7Days":  4,
+                                                  "archivedChangesTotal":  4
                                               },
                        "specDriftEventsLast30Days":  1,
                        "tokenCost":  {
-                                         "status":  "unavailable",
-                                         "totalCostUsd":  null
+                                         "status":  "available",
+                                         "totalCostUsd":  0
                                      }
                    },
     "modeStats":  [
                       {
                           "mode":  "fast",
-                          "count":  1,
-                          "averageDurationMs":  7141,
+                          "count":  3,
+                          "averageDurationMs":  9523.67,
                           "passRate":  100
                       },
                       {
                           "mode":  "full",
-                          "count":  1,
-                          "averageDurationMs":  11097,
+                          "count":  3,
+                          "averageDurationMs":  15174.33,
                           "passRate":  100
                       },
                       {
                           "mode":  "ci",
-                          "count":  4,
-                          "averageDurationMs":  15267,
+                          "count":  7,
+                          "averageDurationMs":  16909.57,
                           "passRate":  100
                       }
                   ],

@@ -17,6 +17,10 @@
    - `npm run map:codebase`
 4. Run full local verification:
    - `npm run verify`
+5. Run governance gates:
+   - `npm run workflow:policy`
+   - `npm run metrics:collect`
+   - `npm run workflow:gate`
 
 ## Runtime Initialization (Already Wired)
 

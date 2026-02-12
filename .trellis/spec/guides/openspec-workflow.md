@@ -44,3 +44,9 @@ For existing repositories:
 - Use Trellis for context injection, worktree orchestration, and session recording.
 - Use OpenSpec for planning artifacts and change lifecycle.
 - Keep only one source of truth for each concern: Trellis for execution policy, OpenSpec for change artifacts.
+
+## Enforced Gate Integration
+
+- `npm run workflow:policy` must pass before and during implementation.
+- `npm run verify:ci` enforces policy + indicator gates for merge readiness.
+- For implementation branches, include session evidence updates under `.trellis/workspace/`.

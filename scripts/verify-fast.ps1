@@ -26,6 +26,7 @@ function Invoke-Step {
 }
 
 try {
+  Invoke-Step -Name "workflow policy gate (local)" -Command "powershell -ExecutionPolicy Bypass -File ./scripts/workflow-policy-gate.ps1 -Mode local"
   Invoke-Step -Name "lint" -Command "npm run lint"
   Invoke-Step -Name "typecheck" -Command "npm run typecheck"
   Complete-VerifyRun -Run $run -Status "passed"

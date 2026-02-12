@@ -1,0 +1,39 @@
+{
+  "workflowGate": {
+    "requireActiveChangeForImplementationEdits": true,
+    "requireCompleteActiveChangeArtifacts": true,
+    "requireChangeArtifactsInBranchDelta": true,
+    "requireSessionRecordInBranchDelta": true,
+    "implementationPathPrefixes": [
+      "src/",
+      "tests/",
+      "scripts/",
+      ".trellis/",
+      ".codex/",
+      ".claude/",
+      ".github/workflows/",
+      "openspec/specs/"
+    ],
+    "implementationPathFiles": [
+      "AGENTS.md",
+      "CLAUDE.md",
+      "README.md",
+      "package.json",
+      "package-lock.json",
+      "tsconfig.json",
+      "eslint.config.js"
+    ],
+    "ignorePathPrefixes": [
+      "xxx_docs/generated/",
+      ".metrics/"
+    ]
+  },
+  "indicatorGate": {
+    "maxFailureRateLast7Days": 5,
+    "maxLeadTimeHoursP90": 72,
+    "maxReworkCountLast7Days": 2,
+    "maxActiveChanges": 3,
+    "maxSpecDriftEventsLast30Days": 1,
+    "requireTokenCostAvailable": false
+  }
+}

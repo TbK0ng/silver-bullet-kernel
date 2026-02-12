@@ -22,3 +22,14 @@ The workflow SHALL enforce retention boundaries and sensitive-data redaction.
 - **WHEN** a session record is about to be persisted
 - **THEN** credentials and tokens are redacted
 - **AND** durable records avoid storing secrets
+
+### Requirement: Session Evidence for Implemented Changes
+
+Memory governance SHALL require session evidence artifacts for implementation changes.
+
+#### Scenario: CI validates implementation branch delta
+
+- **WHEN** implementation files are changed in branch delta
+- **THEN** policy gate requires corresponding session evidence updates under `.trellis/workspace/`
+- **AND** CI fails when session evidence is missing
+

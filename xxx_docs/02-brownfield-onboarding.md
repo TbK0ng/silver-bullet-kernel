@@ -19,6 +19,8 @@ Before changing code in an existing repository, establish factual baseline and r
   - `openspec new change <name>`
   - `openspec status --change <name>`
   - create proposal/design/specs/tasks artifacts before coding
+- Run policy gate before implementation:
+  - `npm run workflow:policy`
 
 ## Baseline Verify
 
@@ -26,5 +28,6 @@ Run and record outputs before coding:
 
 - `npm run verify:fast`
 - `npm run verify`
+- `npm run workflow:gate`
 
 If baseline is already failing, fix baseline first or explicitly isolate pre-existing failures in the change proposal.

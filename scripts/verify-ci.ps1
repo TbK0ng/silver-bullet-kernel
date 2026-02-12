@@ -26,12 +26,15 @@ function Invoke-Step {
 }
 
 try {
+  Invoke-Step -Name "workflow policy gate (ci)" -Command "powershell -ExecutionPolicy Bypass -File ./scripts/workflow-policy-gate.ps1 -Mode ci"
   Invoke-Step -Name "lint" -Command "npm run lint"
   Invoke-Step -Name "typecheck" -Command "npm run typecheck"
   Invoke-Step -Name "unit and integration tests" -Command "npm run test"
   Invoke-Step -Name "e2e tests" -Command "npm run test:e2e"
   Invoke-Step -Name "build" -Command "npm run build"
   Invoke-Step -Name "OpenSpec strict validation" -Command "openspec validate --all --strict --no-interactive"
+  Invoke-Step -Name "collect metrics snapshot" -Command "npm run metrics:collect"
+  Invoke-Step -Name "workflow indicator gate" -Command "powershell -ExecutionPolicy Bypass -File ./scripts/workflow-indicator-gate.ps1"
   Complete-VerifyRun -Run $run -Status "passed"
   Write-Host "[verify-ci] completed"
 } catch {

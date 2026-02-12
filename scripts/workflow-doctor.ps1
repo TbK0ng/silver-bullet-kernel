@@ -61,6 +61,9 @@ $requiredPaths = @(
   "openspec/specs",
   "scripts/verify-ci.ps1",
   "scripts/collect-metrics.ps1",
+  "scripts/workflow-policy-gate.ps1",
+  "scripts/workflow-indicator-gate.ps1",
+  "workflow-policy.json",
   "xxx_docs/00-index.md"
 )
 
@@ -93,6 +96,34 @@ Add-Check -Checks $checks `
   -Passed $metricsExists `
   -Details "path=$metricsFile" `
   -Remediation "Run: npm run verify:fast or npm run verify:ci"
+
+$policyGatePassed = $true
+$policyGateDetails = "passed"
+try {
+  & (Join-Path $repoRoot "scripts\\workflow-policy-gate.ps1") -Mode local -NoReport -Quiet
+} catch {
+  $policyGatePassed = $false
+  $policyGateDetails = $_.Exception.Message
+}
+Add-Check -Checks $checks `
+  -Name "Workflow policy gate healthy" `
+  -Passed $policyGatePassed `
+  -Details $policyGateDetails `
+  -Remediation "Run: npm run workflow:policy and fix reported policy violations."
+
+$indicatorGatePassed = $true
+$indicatorGateDetails = "passed"
+try {
+  & (Join-Path $repoRoot "scripts\\workflow-indicator-gate.ps1") -NoReport -Quiet
+} catch {
+  $indicatorGatePassed = $false
+  $indicatorGateDetails = $_.Exception.Message
+}
+Add-Check -Checks $checks `
+  -Name "Workflow indicator gate healthy" `
+  -Passed $indicatorGatePassed `
+  -Details $indicatorGateDetails `
+  -Remediation "Run: npm run metrics:collect then npm run workflow:gate and remediate threshold failures."
 
 $overallPassed = (@($checks | Where-Object { -not $_.passed }).Count -eq 0)
 $timestamp = [DateTimeOffset]::UtcNow.ToString("o")

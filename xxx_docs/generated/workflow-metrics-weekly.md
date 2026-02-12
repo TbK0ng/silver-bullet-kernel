@@ -1,28 +1,29 @@
 ﻿# Workflow Metrics (Last 7 Days)
 
-- generated_at_utc: 2026-02-12 09:12:25Z
-- total_runs_all_time: 6
-- runs_last_7_days: 6
+- generated_at_utc: 2026-02-12 10:04:43Z
+- total_runs_all_time: 13
+- runs_last_7_days: 13
 - success_rate_last_7_days: 100%
 - failure_rate_last_7_days: 0%
 
 ## Plan Indicators
 
-- lead_time_p50_hours: 8.6
-- lead_time_p90_hours: 8.94
+- lead_time_p50_hours: 8.94
+- lead_time_p90_hours: 9.22
 - rework_count_last_7_days: 0
 - parallel_throughput_active_changes: 0
-- parallel_throughput_archived_changes_last_7_days: 3
+- parallel_throughput_archived_changes_last_7_days: 4
 - spec_drift_events_last_30_days: 1
-- token_cost_status: unavailable
+- token_cost_status: available
+- token_cost_total_usd: 0
 
 ## Verify Mode Summary
 
 | Mode | Runs | Pass Rate (%) | Avg Duration (ms) |
 | --- | ---: | ---: | ---: |
-| fast | 1 | 100 | 7141 |
-| full | 1 | 100 | 11097 |
-| ci | 4 | 100 | 15267 |
+| fast | 3 | 100 | 9523.67 |
+| full | 3 | 100 | 15174.33 |
+| ci | 7 | 100 | 16909.57 |
 
 ## Top Failure Steps
 

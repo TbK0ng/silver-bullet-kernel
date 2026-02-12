@@ -18,6 +18,7 @@ Swap roles by change, not within same change.
 - Small changes: squash merge
 - Larger changes: preserve atomic commits
 - Never merge failing verify gates
+- Never merge branch deltas missing session evidence updates under `.trellis/workspace/`
 
 ## Conflict Avoidance
 

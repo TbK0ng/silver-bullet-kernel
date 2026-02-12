@@ -16,16 +16,19 @@
 ## Process
 
 - Never skip proposal/design for non-trivial changes.
+- Keep active change artifacts complete (proposal/design/tasks/spec delta) before verify.
 - Do not claim completion before verify passes.
 - Archive completed OpenSpec changes promptly.
 - Treat `.trellis/spec/guides/constitution.md` as non-negotiable.
 - Review weekly metrics and tune workflow by measured failure trends.
+- Treat `workflow-policy.json` as reviewed policy-as-code, not local preference.
 
 ## Collaboration
 
 - Use worktree isolation for parallel work.
 - Keep branch lifetime short.
 - Capture session learnings with `/trellis:record-session`.
+- Include `.trellis/workspace/` evidence updates for implementation branches.
 
 ## Documentation
 

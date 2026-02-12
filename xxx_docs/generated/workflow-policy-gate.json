@@ -1,0 +1,63 @@
+﻿{
+    "generatedAt":  "2026-02-12T10:05:23.3689949+00:00",
+    "mode":  "local",
+    "outcome":  "WARN",
+    "branchDelta":  {
+                        "available":  false,
+                        "reason":  "No base ref available (set WORKFLOW_BASE_REF or fetch origin/main).",
+                        "baseRef":  "",
+                        "mergeBase":  "",
+                        "files":  [
+
+                                  ]
+                    },
+    "activeChanges":  [
+
+                      ],
+    "workingImplementationFiles":  [
+                                       ".trellis/spec/guides/memory-governance.md",
+                                       ".trellis/spec/guides/openspec-workflow.md",
+                                       ".trellis/spec/guides/quality-gates.md",
+                                       ".trellis/workspace/sample-owner/index.md",
+                                       "AGENTS.md",
+                                       "CLAUDE.md",
+                                       "README.md",
+                                       "openspec/specs/codex-workflow-kernel/spec.md",
+                                       "openspec/specs/memory-governance-policy/spec.md",
+                                       "openspec/specs/workflow-docs-system/spec.md",
+                                       "openspec/specs/workflow-doctor/spec.md",
+                                       "openspec/specs/workflow-observability/spec.md",
+                                       "package.json",
+                                       "scripts/verify-ci.ps1",
+                                       "scripts/verify-fast.ps1",
+                                       "scripts/verify.ps1",
+                                       "scripts/workflow-doctor.ps1",
+                                       ".trellis/workspace/sample-owner/journal-2.md",
+                                       "scripts/update-token-cost.ps1",
+                                       "scripts/workflow-indicator-gate.ps1",
+                                       "scripts/workflow-policy-gate.ps1"
+                                   ],
+    "checks":  [
+                   {
+                       "name":  "Implementation edits require active change or archive artifacts",
+                       "severity":  "fail",
+                       "passed":  true,
+                       "details":  "implementation_files=21; active_changes=0; has_archive_artifacts=True; files=.trellis/spec/guides/memory-governance.md, .trellis/spec/guides/openspec-workflow.md, .trellis/spec/guides/quality-gates.md, .trellis/workspace/sample-owner/index.md, AGENTS.md, CLAUDE.md, README.md, openspec/specs/codex-workflow-kernel/spec.md (+13 more)",
+                       "remediation":  "Create an OpenSpec change (openspec new change \u003cname\u003e) and complete artifacts before implementation, or archive completed change properly."
+                   },
+                   {
+                       "name":  "Canonical specs updated only via archive flow",
+                       "severity":  "fail",
+                       "passed":  true,
+                       "details":  "canonical_spec_files=5; has_archive_artifacts=True; files=openspec/specs/codex-workflow-kernel/spec.md, openspec/specs/memory-governance-policy/spec.md, openspec/specs/workflow-docs-system/spec.md, openspec/specs/workflow-doctor/spec.md, openspec/specs/workflow-observability/spec.md",
+                       "remediation":  "Avoid direct canonical spec edits during active implementation; use change deltas and openspec archive to merge."
+                   },
+                   {
+                       "name":  "Branch delta available for governance checks",
+                       "severity":  "warn",
+                       "passed":  false,
+                       "details":  "available=False; base_ref=; merge_base=; reason=No base ref available (set WORKFLOW_BASE_REF or fetch origin/main).",
+                       "remediation":  "Fetch base branch and/or set WORKFLOW_BASE_REF to enable branch-delta governance checks."
+                   }
+               ]
+}
