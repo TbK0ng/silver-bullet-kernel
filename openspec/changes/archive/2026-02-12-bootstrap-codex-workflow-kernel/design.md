@@ -12,7 +12,7 @@ The project must prioritize Codex usage while remaining compatible with Claude C
   - OpenSpec: change artifacts and requirements
 - Enforce deterministic completion using verify scripts and CI.
 - Provide an app-level demo that can be tested end-to-end.
-- Produce full operational docs in `xxx_docs/`.
+- Produce full operational docs in `docs/`.
 
 **Non-Goals:**
 
@@ -26,7 +26,7 @@ The project must prioritize Codex usage while remaining compatible with Claude C
 - Keep both Trellis and OpenSpec skills in `.codex/skills` to avoid capability loss after dual initialization.
 - Use PowerShell verify scripts because the working environment is Windows-first.
 - Use a minimal Express + TypeScript demo API for clear and fast usability proof.
-- Keep docs in `xxx_docs/` as project-owned operational knowledge outside upstream Trellis docs.
+- Keep docs in `docs/` as project-owned operational knowledge outside upstream Trellis docs.
 
 ## Risks / Trade-offs
 

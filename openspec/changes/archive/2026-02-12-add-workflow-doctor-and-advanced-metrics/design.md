@@ -21,7 +21,7 @@ For a workflow project, usability depends on operational clarity: contributors n
 
 - Implement doctor as PowerShell script for environment consistency.
 - Keep metrics source local (`.metrics/verify-runs.jsonl` + git/OpenSpec metadata).
-- Emit doctor/metrics reports under `xxx_docs/generated/`.
+- Emit doctor/metrics reports under `docs/generated/`.
 - Treat unavailable token-cost data as explicit `status: unavailable`.
 
 ## Risks / Trade-offs

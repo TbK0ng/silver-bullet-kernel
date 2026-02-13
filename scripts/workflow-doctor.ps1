@@ -71,7 +71,7 @@ $requiredPaths = @(
   "scripts/workflow-policy-gate.ps1",
   "scripts/workflow-indicator-gate.ps1",
   "workflow-policy.json",
-  "xxx_docs/README.md"
+  "docs/README.md"
 )
 
 foreach ($p in $requiredPaths) {

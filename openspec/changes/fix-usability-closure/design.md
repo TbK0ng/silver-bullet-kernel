@@ -24,7 +24,7 @@ or command drift.
 
 ### 4) Doctor diagnostics must follow current docs topology
 
-- Replace legacy `xxx_docs/00-index.md` health check target with `xxx_docs/README.md`.
+- Replace legacy `docs/00-index.md` health check target with `docs/README.md`.
 - Keep doctor behavior and output format unchanged.
 
 ### 5) CI governance should validate branch policy in PR flow
@@ -34,10 +34,10 @@ or command drift.
 
 ### 6) Generated workflow diagnostics must stay in ephemeral metrics storage
 
-- Move workflow doctor/policy/indicator report outputs from `xxx_docs/generated/` to `.metrics/`.
+- Move workflow doctor/policy/indicator report outputs from `docs/generated/` to `.metrics/`.
 - Move metrics collector outputs (`workflow-metrics-weekly.md`, `workflow-metrics-latest.json`) to `.metrics/`.
-- Move codebase map output from `xxx_docs/generated/codebase-map.md` to `.metrics/codebase-map.md`.
-- Keep `xxx_docs/` as durable guidance docs, not runtime artifact sink.
+- Move codebase map output from `docs/generated/codebase-map.md` to `.metrics/codebase-map.md`.
+- Keep `docs/` as durable guidance docs, not runtime artifact sink.
 - Keep policy ignore semantics aligned with `.metrics/`-scoped ephemeral artifacts.
 
 ## Verification Strategy
@@ -47,4 +47,4 @@ or command drift.
 - Run policy and indicator gates.
 - Run OpenSpec strict validation.
 - Confirm docs and command mapping consistency.
-- Confirm generated report files are emitted under `.metrics/` and `xxx_docs/generated/*` is removed from tracked files.
+- Confirm generated report files are emitted under `.metrics/` and `docs/generated/*` is removed from tracked files.

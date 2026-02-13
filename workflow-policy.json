@@ -74,7 +74,7 @@
     "durableArtifactPathPrefixes": [
       ".trellis/workspace/",
       "openspec/",
-      "xxx_docs/"
+      "docs/"
     ],
     "secretScanIgnorePathPrefixes": [
       "openspec/changes/archive/"

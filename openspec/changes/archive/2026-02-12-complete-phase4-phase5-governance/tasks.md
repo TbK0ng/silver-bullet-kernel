@@ -18,5 +18,5 @@
 
 | ID | Status | Files | Action | Verify | Done |
 | --- | --- | --- | --- | --- | --- |
-| 3.1 | [x] | `README.md`, `xxx_docs/05-quality-gates-and-ci.md`, `xxx_docs/06-best-practices.md`, `xxx_docs/09-plan-traceability.md` | Add governance and observability operation instructions. | Manual review and command checks. | Docs reflect current scripts, policy, and plan completion. |
-| 3.2 | [x] | `xxx_docs/10-memory-governance-and-observability.md`, `xxx_docs/07-appdemo-validation-report.md`, `xxx_docs/00-index.md` | Add dedicated phase 4/5 runbook and update validation evidence. | `npm run demo:smoke`, `npm run verify:ci`, `npm run metrics:collect` | Runbook exists and validation evidence updated. |
+| 3.1 | [x] | `README.md`, `docs/05-quality-gates-and-ci.md`, `docs/06-best-practices.md`, `docs/09-plan-traceability.md` | Add governance and observability operation instructions. | Manual review and command checks. | Docs reflect current scripts, policy, and plan completion. |
+| 3.2 | [x] | `docs/10-memory-governance-and-observability.md`, `docs/07-appdemo-validation-report.md`, `docs/00-index.md` | Add dedicated phase 4/5 runbook and update validation evidence. | `npm run demo:smoke`, `npm run verify:ci`, `npm run metrics:collect` | Runbook exists and validation evidence updated. |

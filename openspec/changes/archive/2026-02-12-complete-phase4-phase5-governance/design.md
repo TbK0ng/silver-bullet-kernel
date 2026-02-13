@@ -21,7 +21,7 @@ The workflow kernel currently proves planning and execution, but governance and 
 ## Decisions
 
 - Store raw verify telemetry in local `.metrics/verify-runs.jsonl` (gitignored).
-- Store weekly report in `xxx_docs/generated/` for shareable visibility.
+- Store weekly report in `docs/generated/` for shareable visibility.
 - Treat constitution and memory governance as Trellis guides to remain runtime-agnostic.
 - Commit a sample workspace journal for format and recovery proof.
 

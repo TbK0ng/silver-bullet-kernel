@@ -27,7 +27,7 @@ tooling.
 
 - Add `securityGate` config section in `workflow-policy.json`.
 - Validate branch/working implementation deltas against denylisted path patterns.
-- Scan changed durable artifacts (`.trellis/workspace`, `openspec`, `xxx_docs`)
+- Scan changed durable artifacts (`.trellis/workspace`, `openspec`, `docs`)
   with configurable secret regex patterns.
 
 Rationale:

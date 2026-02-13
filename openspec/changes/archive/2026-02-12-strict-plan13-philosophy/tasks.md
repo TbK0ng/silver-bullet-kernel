@@ -41,4 +41,4 @@
 | ID | Status | Files | Action | Verify | Done |
 | --- | --- | --- | --- | --- | --- |
 | 5.1 | [x] | `tests/e2e/workflow-policy-gate.e2e.test.ts`, `tests/e2e/memory-context.e2e.test.ts` | Add e2e coverage for strict task parsing, security scan, and memory context stages. | `npm run test:e2e` | New strict checks are regression-protected by tests. |
-| 5.2 | [x] | `.trellis/spec/guides/*.md`, `xxx_docs/*.md`, `.codex/skills/memory-context/SKILL.md` | Update runbooks and Codex skill guides for security/memory/orchestrator strict rules. | `npm run verify:fast` | Docs and skill path are consistent with executable behavior. |
+| 5.2 | [x] | `.trellis/spec/guides/*.md`, `docs/*.md`, `.codex/skills/memory-context/SKILL.md` | Update runbooks and Codex skill guides for security/memory/orchestrator strict rules. | `npm run verify:fast` | Docs and skill path are consistent with executable behavior. |

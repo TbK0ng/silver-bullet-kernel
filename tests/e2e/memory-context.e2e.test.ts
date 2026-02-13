@@ -43,7 +43,7 @@ describe("memory context progressive disclosure", () => {
     writeFile(path.join(repoDir, ".trellis", "spec", "guides", "memory-governance.md"), "# Memory Governance");
     writeFile(path.join(repoDir, ".trellis", "spec", "guides", "quality-gates.md"), "# Quality Gates");
     writeFile(path.join(repoDir, ".trellis", "workflow.md"), "# Workflow");
-    writeFile(path.join(repoDir, "xxx_docs", "README.md"), "# Docs Home");
+    writeFile(path.join(repoDir, "docs", "README.md"), "# Docs Home");
     writeFile(path.join(repoDir, "README.md"), "# Repo Readme");
     writeFile(path.join(repoDir, "AGENTS.md"), "# Agents");
     writeFile(path.join(repoDir, ".trellis", "workspace", "codex", "index.md"), "# Codex Index");
@@ -134,7 +134,7 @@ describe("memory context progressive disclosure", () => {
     writeFile(path.join(repoDir, ".trellis", "spec", "guides", "memory-governance.md"), "# Memory Governance");
     writeFile(path.join(repoDir, ".trellis", "spec", "guides", "quality-gates.md"), "# Quality Gates");
     writeFile(path.join(repoDir, ".trellis", "workflow.md"), "# Workflow");
-    writeFile(path.join(repoDir, "xxx_docs", "README.md"), "# Docs Home");
+    writeFile(path.join(repoDir, "docs", "README.md"), "# Docs Home");
     writeFile(path.join(repoDir, "README.md"), "# Repo Readme");
     writeFile(path.join(repoDir, "AGENTS.md"), "# Agents");
 

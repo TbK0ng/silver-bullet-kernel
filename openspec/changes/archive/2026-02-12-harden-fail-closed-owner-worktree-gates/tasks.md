@@ -17,5 +17,5 @@
 
 | ID | Status | Files | Action | Verify | Done |
 | --- | --- | --- | --- | --- | --- |
-| 3.1 | [x] | `.trellis/spec/guides/worktree-policy.md`, `.trellis/spec/guides/memory-governance.md`, `xxx_docs/04-two-person-collaboration.md`, `xxx_docs/05-quality-gates-and-ci.md`, `xxx_docs/08-troubleshooting.md` | Document strict branch/worktree requirements and remediation steps. | Manual review + gate output | Operators can resolve strict policy failures without ambiguity. |
+| 3.1 | [x] | `.trellis/spec/guides/worktree-policy.md`, `.trellis/spec/guides/memory-governance.md`, `docs/04-two-person-collaboration.md`, `docs/05-quality-gates-and-ci.md`, `docs/08-troubleshooting.md` | Document strict branch/worktree requirements and remediation steps. | Manual review + gate output | Operators can resolve strict policy failures without ambiguity. |
 | 3.2 | [x] | `openspec/changes/harden-fail-closed-owner-worktree-gates/specs/**` | Add spec deltas for fail-closed CI and owner/worktree enforcement. | `openspec validate --all --strict --no-interactive` | Spec deltas validate and mirror implementation behavior. |

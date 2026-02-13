@@ -2,11 +2,11 @@
 
 ### Requirement: Project-Owned Workflow Documentation
 
-The repository SHALL maintain operational documentation under `xxx_docs/` independent of upstream framework docs.
+The repository SHALL maintain operational documentation under `docs/` independent of upstream framework docs.
 
 #### Scenario: New collaborator onboards from docs
 
-- **WHEN** a collaborator reads `xxx_docs/`
+- **WHEN** a collaborator reads `docs/`
 - **THEN** they can set up the toolchain, run verify gates, and follow collaboration SOP without external assumptions
 
 ### Requirement: Brownfield Best Practices

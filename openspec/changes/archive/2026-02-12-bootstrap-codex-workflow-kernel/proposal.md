@@ -7,7 +7,7 @@ The workflow currently exists only as research notes and lacks an executable Cod
 - Bootstrap a production-style repository using Trellis (execution policy) and OpenSpec (change artifacts).
 - Implement verification entry points (`verify:fast`, `verify`, `verify:ci`) and CI enforcement.
 - Add an `appdemo` service with tests as usability proof.
-- Create project-owned docs under `xxx_docs/` for onboarding, operations, best practices, and troubleshooting.
+- Create project-owned docs under `docs/` for onboarding, operations, best practices, and troubleshooting.
 - Define collaboration and worktree policy for two collaborators.
 
 ## Capabilities
@@ -16,7 +16,7 @@ The workflow currently exists only as research notes and lacks an executable Cod
 
 - `codex-workflow-kernel`: Codex-first engineering workflow integrating Trellis and OpenSpec with enforceable quality gates.
 - `appdemo-task-api`: A testable demo API used to prove workflow completeness and correctness.
-- `workflow-docs-system`: Project-level documentation system in `xxx_docs/` covering setup, SOP, and best practices.
+- `workflow-docs-system`: Project-level documentation system in `docs/` covering setup, SOP, and best practices.
 
 ### Modified Capabilities
 

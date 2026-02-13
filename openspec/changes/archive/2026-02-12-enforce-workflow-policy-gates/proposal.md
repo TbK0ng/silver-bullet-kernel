@@ -47,7 +47,7 @@ To realize the silver-bullet philosophy in `ai-coding-workflow-silver-bullet-pla
   - `README.md`
   - `.trellis/spec/guides/quality-gates.md`
   - `.trellis/spec/guides/memory-governance.md`
-  - `xxx_docs/*`
+  - `docs/*`
 - Affected specs:
   - `codex-workflow-kernel`
   - `workflow-observability`

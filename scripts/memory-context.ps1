@@ -143,7 +143,7 @@ $coreSources = @(
   ".trellis/spec/guides/memory-governance.md",
   ".trellis/spec/guides/quality-gates.md",
   "workflow-policy.json",
-  "xxx_docs/README.md",
+  "docs/README.md",
   "README.md",
   "AGENTS.md",
   ".trellis/workflow.md"

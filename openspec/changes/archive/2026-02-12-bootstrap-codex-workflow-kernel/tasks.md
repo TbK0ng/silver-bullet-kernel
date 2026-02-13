@@ -17,5 +17,5 @@
 
 | ID | Status | Files | Action | Verify | Done |
 | --- | --- | --- | --- | --- | --- |
-| 3.1 | [x] | `xxx_docs/*.md` | Write setup, SOP, brownfield onboarding, troubleshooting, and best-practice docs. | Manual doc review against implementation files. | `xxx_docs` includes complete runbook and collaboration best practices. |
+| 3.1 | [x] | `docs/*.md` | Write setup, SOP, brownfield onboarding, troubleshooting, and best-practice docs. | Manual doc review against implementation files. | `docs` includes complete runbook and collaboration best practices. |
 | 3.2 | [x] | `README.md` | Document runnable developer entry points and demo commands. | Follow README steps in clean shell. | README commands map to actual scripts and current project layout. |

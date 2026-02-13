@@ -8,7 +8,7 @@ Keep memory useful, auditable, and safe for a coding workflow project.
 
 - Trellis workspace journals under `.trellis/workspace/`
 - OpenSpec artifacts under `openspec/`
-- Project runbooks under `xxx_docs/`
+- Project runbooks under `docs/`
 
 ## Injection Rules
 
@@ -38,7 +38,7 @@ At end of meaningful work session:
 1. Record session with `/trellis:record-session` or equivalent journal update.
 2. If a new stable rule is discovered, update:
    - `.trellis/spec/guides/*` (execution policy), or
-   - `xxx_docs/*` (operational guidance).
+   - `docs/*` (operational guidance).
 3. For owner-scoped session evidence files, include disclosure metadata markers:
    - `Memory Sources`
    - `Disclosure Level`

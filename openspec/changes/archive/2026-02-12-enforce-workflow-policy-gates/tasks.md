@@ -23,5 +23,5 @@
 
 | ID | Status | Files | Action | Verify | Done |
 | --- | --- | --- | --- | --- | --- |
-| 4.1 | [x] | `README.md`, `.trellis/spec/guides/*.md`, `xxx_docs/*.md` | Document hard-gate SOP, threshold tuning, and remediation flow. | Manual review + command outputs | Docs describe real enforced behavior. |
+| 4.1 | [x] | `README.md`, `.trellis/spec/guides/*.md`, `docs/*.md` | Document hard-gate SOP, threshold tuning, and remediation flow. | Manual review + command outputs | Docs describe real enforced behavior. |
 | 4.2 | [x] | `openspec/changes/enforce-workflow-policy-gates/specs/**` | Add capability deltas for policy/indicator/session-evidence enforcement. | `openspec validate --all --strict --no-interactive` | Specs validate and match implementation. |

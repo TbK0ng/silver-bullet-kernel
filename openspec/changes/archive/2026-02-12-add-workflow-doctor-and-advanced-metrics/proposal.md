@@ -12,7 +12,7 @@ The kernel already has baseline metrics, but it lacks a one-command operational 
   - parallel throughput
   - spec drift event count
   - token cost availability status
-- Add generated doctor report to `xxx_docs/generated/`.
+- Add generated doctor report to `docs/generated/`.
 - Update runbooks with doctor/advanced-metrics operations.
 
 ## Capabilities
@@ -30,5 +30,5 @@ The kernel already has baseline metrics, but it lacks a one-command operational 
 ## Impact
 
 - Affected code: `scripts/collect-metrics.ps1`, `scripts/workflow-doctor.ps1`, `package.json`
-- Affected docs: `xxx_docs/*`
+- Affected docs: `docs/*`
 - Affected specs: observability and docs capabilities

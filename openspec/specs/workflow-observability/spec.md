@@ -20,7 +20,7 @@ The workflow SHALL provide a command that generates weekly operational metrics f
 #### Scenario: Team runs metrics collection
 
 - **WHEN** `npm run metrics:collect` executes
-- **THEN** it generates a markdown summary and JSON snapshot under `xxx_docs/generated/`
+- **THEN** it generates a markdown summary and JSON snapshot under `docs/generated/`
 - **AND** report includes success rate, per-mode durations, and failure-step trends
 
 ### Requirement: Full Plan Indicator Coverage

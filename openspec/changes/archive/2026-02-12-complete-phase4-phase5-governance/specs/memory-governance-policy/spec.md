@@ -7,7 +7,7 @@ The workflow SHALL explicitly define approved memory sources and their responsib
 #### Scenario: Agent determines what context to inject
 
 - **WHEN** an agent starts or resumes work
-- **THEN** it references approved sources (`.trellis/workspace/`, `openspec/`, `xxx_docs/`)
+- **THEN** it references approved sources (`.trellis/workspace/`, `openspec/`, `docs/`)
 - **AND** it avoids ad-hoc undocumented context stores
 
 ### Requirement: Retention and Redaction Policy

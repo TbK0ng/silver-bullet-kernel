@@ -11,7 +11,7 @@ The project SHALL provide a one-command workflow health diagnosis.
 
 - **WHEN** `npm run workflow:doctor` is executed
 - **THEN** it checks runtime prerequisites and workflow structure integrity
-- **AND** outputs both markdown and JSON reports under `xxx_docs/generated/`
+- **AND** outputs both markdown and JSON reports under `docs/generated/`
 
 ### Requirement: Actionable Check Results
 

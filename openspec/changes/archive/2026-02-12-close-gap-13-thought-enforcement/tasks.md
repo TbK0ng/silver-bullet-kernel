@@ -24,5 +24,5 @@
 
 | ID | Status | Files | Action | Verify | Done |
 | --- | --- | --- | --- | --- | --- |
-| 4.1 | [x] | `.trellis/spec/guides/quality-gates.md`, `.trellis/spec/guides/openspec-workflow.md`, `xxx_docs/05-quality-gates-and-ci.md`, `xxx_docs/06-best-practices.md`, `xxx_docs/08-troubleshooting.md` | Document strict task schema, verify loop usage, and semantic rename workflow. | Manual review + `npm run verify:fast` | Operators can execute and remediate new hard checks without ambiguity. |
+| 4.1 | [x] | `.trellis/spec/guides/quality-gates.md`, `.trellis/spec/guides/openspec-workflow.md`, `docs/05-quality-gates-and-ci.md`, `docs/06-best-practices.md`, `docs/08-troubleshooting.md` | Document strict task schema, verify loop usage, and semantic rename workflow. | Manual review + `npm run verify:fast` | Operators can execute and remediate new hard checks without ambiguity. |
 | 4.2 | [x] | `openspec/changes/close-gap-13-thought-enforcement/specs/**` | Add deltas for CI delta integrity, task evidence schema enforcement, verify loop, and semantic refactor capability. | `openspec validate --all --strict --no-interactive` | Spec deltas validate and align with implementation behavior. |

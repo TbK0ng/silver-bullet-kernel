@@ -11,7 +11,7 @@ export default tseslint.config(
       ".claude/**",
       ".codex/**",
       "openspec/**",
-      "xxx_docs/**",
+      "docs/**",
       ".agents/**",
     ],
   },

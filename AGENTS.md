@@ -56,7 +56,7 @@ Keep this managed block so 'trellis update' can refresh the instructions.
 - Never store secrets in memory artifacts; redact before recording.
 - Security policy gate blocks:
   - denylisted sensitive path edits
-  - secret-like patterns in durable artifacts (`.trellis/workspace/`, `openspec/`, `xxx_docs/`)
+  - secret-like patterns in durable artifacts (`.trellis/workspace/`, `openspec/`, `docs/`)
 - Generate weekly observability report with `npm run metrics:collect`.
 - Active change `tasks.md` must use `Task Evidence` heading with non-empty evidence rows.
 - Use semantic rename command for symbol-level rename refactors:

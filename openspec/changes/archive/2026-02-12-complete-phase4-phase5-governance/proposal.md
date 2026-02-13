@@ -27,4 +27,4 @@ The repository has a working kernel and demo, but plan phases 4 and 5 are not fu
 
 - Affected code: `scripts/verify*.ps1`, `scripts/collect-metrics.ps1`, `package.json`
 - Affected policy: `.trellis/spec/guides/*`, `AGENTS.md`
-- Affected docs: `xxx_docs/*`, `openspec/specs/*`
+- Affected docs: `docs/*`, `openspec/specs/*`

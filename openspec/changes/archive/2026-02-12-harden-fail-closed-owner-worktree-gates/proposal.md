@@ -38,10 +38,10 @@ To satisfy strict execution philosophy, governance must fail-closed in CI and en
 - Affected docs:
   - `.trellis/spec/guides/worktree-policy.md`
   - `.trellis/spec/guides/memory-governance.md`
-  - `xxx_docs/04-two-person-collaboration.md`
-  - `xxx_docs/05-quality-gates-and-ci.md`
-  - `xxx_docs/08-troubleshooting.md`
-  - `xxx_docs/09-plan-traceability.md`
+  - `docs/04-two-person-collaboration.md`
+  - `docs/05-quality-gates-and-ci.md`
+  - `docs/08-troubleshooting.md`
+  - `docs/09-plan-traceability.md`
 - Affected specs:
   - `codex-workflow-kernel`
   - `memory-governance-policy`
