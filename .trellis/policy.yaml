@@ -1,0 +1,227 @@
+# Trellis Workflow Policy Configuration
+# Version: 1.0
+#
+# This file defines workflow policies as code.
+# Changes to this file should be reviewed and committed.
+
+version: "1.0"
+
+# =============================================================================
+# Sensitive Paths - Denylist and Warnlist
+# =============================================================================
+sensitive_paths:
+  # Paths that will cause verify to FAIL if touched
+  deny:
+    - ".env"
+    - ".env.*"
+    - "*.key"
+    - "*.pem"
+    - "secrets/"
+    - "credentials/"
+    - ".credentials"
+    - "id_rsa"
+    - "id_ed25519"
+    - "*.p12"
+    - "*.pfx"
+
+  # Paths that will cause verify to WARN if touched
+  warn:
+    - "config/*.local.*"
+    - ".env.local"
+    - ".env.*.local"
+    - "*.secret"
+    - "private/"
+
+# =============================================================================
+# Secret Patterns - for detect-secrets integration
+# =============================================================================
+secret_scan:
+  # Enable detect-secrets integration
+  enabled: true
+
+  # Baseline file path (created by: detect-secrets scan > .secrets.baseline)
+  baseline_file: ".secrets.baseline"
+
+  # Additional custom patterns (used as fallback if detect-secrets not available)
+  custom_patterns:
+    - name: "API Key Assignment"
+      pattern: "(?i)(api[_-]?key|apikey)\\s*[=:]\\s*['\"][a-zA-Z0-9_\\-]{20,}['\"]"
+      severity: "high"
+    - name: "Password Assignment"
+      pattern: "(?i)password\\s*[=:]\\s*['\"][^'\"]{8,}['\"]"
+      severity: "high"
+    - name: "Token Assignment"
+      pattern: "(?i)(auth[_-]?token|bearer|secret[_-]?token)\\s*[=:]\\s*['\"][a-zA-Z0-9_\\-]{20,}['\"]"
+      severity: "high"
+    - name: "Private Key Header"
+      pattern: "-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----"
+      severity: "critical"
+    - name: "AWS Access Key"
+      pattern: "(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[0-9A-Z]{16}"
+      severity: "critical"
+    - name: "GitHub Token"
+      pattern: "ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|ghu_[a-zA-Z0-9]{36}|ghs_[a-zA-Z0-9]{36}|ghr_[a-zA-Z0-9]{36}"
+      severity: "critical"
+
+  # Paths to exclude from secret scanning
+  exclude_paths:
+    - ".git/"
+    - "node_modules/"
+    - ".trellis/metrics/"
+    - "*.lock"
+    - "package-lock.json"
+    - "yarn.lock"
+
+# =============================================================================
+# Governance Thresholds - for workflow:gate
+# =============================================================================
+thresholds:
+  # Verify failure rate (0.0 - 1.0)
+  verify_failure_rate:
+    warn: 0.2      # Warn if > 20% failure rate
+    fail: 0.5      # Fail if > 50% failure rate
+    description: "Percentage of verify runs that failed"
+
+  # Rework count per task
+  rework_count:
+    warn: 3        # Warn if > 3 rework cycles
+    fail: 5        # Fail if > 5 rework cycles
+    description: "Number of times a task went back to implement phase"
+
+  # Lead time P90 in hours
+  lead_time_p90_hours:
+    warn: 24       # Warn if P90 > 24 hours
+    fail: 72       # Fail if P90 > 72 hours
+    description: "90th percentile time from task start to PR merge"
+
+  # Spec drift events per week
+  spec_drift_weekly:
+    warn: 3        # Warn if > 3 drift events
+    fail: 10       # Fail if > 10 drift events
+    description: "Code changes without corresponding spec updates"
+
+  # Parallel throughput (concurrent tasks)
+  parallel_throughput_min:
+    warn: 1        # Warn if < 1 (no parallelization)
+    fail: -1       # Never fail (parallelization is optional)
+    description: "Minimum number of concurrent tasks"
+
+# =============================================================================
+# Memory Sources - Approved context sources
+# =============================================================================
+memory_sources:
+  approved:
+    - path: ".trellis/workspace/"
+      type: "session_evidence"
+      description: "Developer session journals and progress"
+    - path: "openspec/specs/"
+      type: "long_term_spec"
+      description: "Project specifications (source of truth)"
+    - path: "openspec/changes/"
+      type: "change_package"
+      description: "Active and archived change packages"
+    - path: ".trellis/spec/"
+      type: "dev_guidelines"
+      description: "Development guidelines and conventions"
+    - path: ".trellis/gotchas/"
+      type: "lessons_learned"
+      description: "Known issues and pitfalls"
+
+  # Patterns to redact when displaying context
+  redact_patterns:
+    - "(?i)password\\s*[=:]\\s*['\"][^'\"]+['\"]"
+    - "(?i)token\\s*[=:]\\s*['\"][^'\"]+['\"]"
+    - "(?i)secret\\s*[=:]\\s*['\"][^'\"]+['\"]"
+    - "(?i)api[_-]?key\\s*[=:]\\s*['\"][^'\"]+['\"]"
+
+  # Retention policy
+  retention:
+    daily_metrics_days: 90      # Keep daily metrics for 90 days
+    weekly_reports_weeks: 52     # Keep weekly reports for 1 year
+    archived_tasks_months: 24    # Keep archived tasks for 2 years
+
+# =============================================================================
+# Session Evidence Requirements - for CI validation
+# =============================================================================
+session_evidence:
+  # Require session evidence for implementation changes
+  required_for_implement: true
+
+  # Minimum required fields in session evidence
+  required_fields:
+    - "title"
+    - "date"
+    - "summary"
+    - "files_changed"
+
+  # Owner scoping requirement
+  owner_scoped: true
+
+  # Disclosure metadata requirement
+  require_disclosure_metadata: true
+
+# =============================================================================
+# Doctor Checks - Health check configuration
+# =============================================================================
+doctor:
+  checks:
+    - id: "git_repo"
+      name: "Git Repository"
+      description: "Check if inside a git repository"
+      critical: true
+
+    - id: "developer_identity"
+      name: "Developer Identity"
+      description: "Check if developer identity is set"
+      critical: true
+
+    - id: "trellis_structure"
+      name: "Trellis Directory Structure"
+      description: "Check required .trellis directories exist"
+      critical: true
+
+    - id: "openspec_structure"
+      name: "OpenSpec Directory Structure"
+      description: "Check openspec directories exist"
+      critical: false
+
+    - id: "policy_file"
+      name: "Policy Configuration"
+      description: "Check policy.yaml exists and is valid"
+      critical: false
+
+    - id: "secret_baseline"
+      name: "Secret Scan Baseline"
+      description: "Check detect-secrets baseline exists"
+      critical: false
+
+    - id: "python_version"
+      name: "Python Version"
+      description: "Check Python version >= 3.10"
+      critical: true
+
+    - id: "hooks_configured"
+      name: "Hooks Configuration"
+      description: "Check Claude Code hooks are configured"
+      critical: false
+
+# =============================================================================
+# Metrics Collection - Configuration
+# =============================================================================
+metrics:
+  # Collection interval (for hook-based collection)
+  collection:
+    on_session_start: true
+    on_session_end: true
+    on_verify_loop: true
+    on_task_complete: true
+
+  # Report generation
+  reports:
+    weekly_enabled: true
+    output_dir: ".trellis/metrics/weekly"
+    include_sections:
+      - "summary"
+      - "indicators"
+      - "trends"
+      - "recommendations"

@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 Session Start Hook - Inject structured context
+
+Also records session-start metric event for observability.
 """
 
 # IMPORTANT: Suppress all warnings FIRST
@@ -14,6 +16,61 @@ import subprocess
 import sys
 from io import StringIO
 from pathlib import Path
+
+
+# =============================================================================
+# Metrics Recording
+# =============================================================================
+
+def record_session_start_metric(repo_root: Path) -> None:
+    """Record session start metric event.
+
+    This is a best-effort operation - failures are silently ignored.
+    """
+    try:
+        metrics_script = repo_root / ".trellis" / "scripts" / "collect_metrics.py"
+        if not metrics_script.exists():
+            return
+
+        # Get current task if any
+        current_task_file = repo_root / ".trellis" / ".current-task"
+        task_name = None
+        if current_task_file.exists():
+            try:
+                task_name = current_task_file.read_text(encoding="utf-8").strip()
+            except Exception:
+                pass
+
+        # Get developer identity
+        developer_file = repo_root / ".trellis" / ".developer"
+        developer = None
+        if developer_file.exists():
+            try:
+                developer = developer_file.read_text(encoding="utf-8").strip()
+            except Exception:
+                pass
+
+        # Run metrics collection using uv
+        cmd = [
+            "uv",
+            "run",
+            str(metrics_script),
+            "session-start",
+        ]
+        if task_name:
+            cmd.extend(["--task", task_name])
+        if developer:
+            cmd.extend(["--developer", developer])
+
+        subprocess.run(
+            cmd,
+            capture_output=True,
+            timeout=5,
+            cwd=repo_root,
+        )
+    except Exception:
+        # Silently ignore metric recording failures
+        pass
 
 # IMPORTANT: Force stdout to use UTF-8 on Windows
 # This fixes UnicodeEncodeError when outputting non-ASCII characters
@@ -72,6 +129,9 @@ def main():
     project_dir = Path(os.environ.get("CLAUDE_PROJECT_DIR", ".")).resolve()
     trellis_dir = project_dir / ".trellis"
     claude_dir = project_dir / ".claude"
+
+    # Record session start metric (best-effort)
+    record_session_start_metric(project_dir)
 
     output = StringIO()
 

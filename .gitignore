@@ -1,16 +1,87 @@
+# =============================================================================
+# Silver-Bullet-Kernel .gitignore
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Python
+# -----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+.uv/
+
+# Keep uv.lock for reproducibility
+
+# -----------------------------------------------------------------------------
+# Node.js
+# -----------------------------------------------------------------------------
 node_modules/
 dist/
 coverage/
-.metrics/
-.DS_Store
 *.log
 
-# Trellis local identity and external worktrees
-.trellis/.developer
-trellis-worktrees/
+# -----------------------------------------------------------------------------
+# IDE
+# -----------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# Local env
+# -----------------------------------------------------------------------------
+# OS
+# -----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# -----------------------------------------------------------------------------
+# Secrets (NEVER COMMIT)
+# -----------------------------------------------------------------------------
 .env
-.env.local
 .env.*
 !.env.example
+*.key
+*.pem
+secrets/
+
+# Secret scan baseline (contains hashed secrets - optional)
+# .secrets.baseline
+
+# -----------------------------------------------------------------------------
+# Trellis Workflow
+# -----------------------------------------------------------------------------
+# Developer identity (local only)
+.trellis/.developer/
+
+# Session journals (local only)
+.trellis/workspace/*/
+!.trellis/workspace/index.md
+
+# Metrics data (local only)
+.trellis/metrics/daily/*.jsonl
+.trellis/metrics/daily/*.json
+.trellis/metrics/weekly/*.md
+!.trellis/metrics/daily/.gitkeep
+!.trellis/metrics/weekly/.gitkeep
+
+# Ralph Loop state
+.ralph-state.json
+
+# External worktrees
+trellis-worktrees/
+*-worktree/
+
+# -----------------------------------------------------------------------------
+# Legacy / Deprecated
+# -----------------------------------------------------------------------------
+# Old metrics directory (migrated to .trellis/metrics/)
+.metrics/
+
+# -----------------------------------------------------------------------------
+# Temporary
+# -----------------------------------------------------------------------------
+*.tmp
+*.bak
+*.orig

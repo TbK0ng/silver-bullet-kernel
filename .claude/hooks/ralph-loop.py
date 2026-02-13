@@ -13,6 +13,8 @@ Mechanism:
 - Blocks stopping until verification passes or all markers found
 - Has max iterations as safety limit
 
+Also records verify-loop metric events for observability.
+
 State file: .trellis/.ralph-state.json
 - Tracks current iteration count per session
 - Resets when task changes
@@ -28,6 +30,47 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+
+
+# =============================================================================
+# Metrics Recording
+# =============================================================================
+
+def record_verify_loop_metric(repo_root: Path, success: bool, attempts: int, task_dir: str | None) -> None:
+    """Record verify loop metric event.
+
+    This is a best-effort operation - failures are silently ignored.
+    """
+    try:
+        metrics_script = repo_root / ".trellis" / "scripts" / "collect_metrics.py"
+        if not metrics_script.exists():
+            return
+
+        # Extract task name if available
+        task_name = None
+        if task_dir:
+            task_name = task_dir.split("/")[-1] if "/" in task_dir else task_dir
+
+        cmd = [
+            "uv",
+            "run",
+            str(metrics_script),
+            "verify-loop",
+            "--attempts", str(attempts),
+            "--success" if success else "--fail",
+        ]
+        if task_name:
+            cmd.extend(["--task", task_name])
+
+        subprocess.run(
+            cmd,
+            capture_output=True,
+            timeout=5,
+            cwd=repo_root,
+        )
+    except Exception:
+        # Silently ignore metric recording failures
+        pass
 
 # IMPORTANT: Force stdout to use UTF-8 on Windows
 # This fixes UnicodeEncodeError when outputting non-ASCII characters
@@ -315,6 +358,8 @@ def main():
         # Allow stop, reset state for next run
         state["iteration"] = 0
         save_state(repo_root, state)
+        # Record max iterations reached (treated as failure)
+        record_verify_loop_metric(repo_root, success=False, attempts=MAX_ITERATIONS, task_dir=task_dir)
         output = {
             "decision": "allow",
             "reason": f"Max iterations ({MAX_ITERATIONS}) reached. Stopping to prevent infinite loop.",
@@ -333,6 +378,8 @@ def main():
             # All verify commands passed, allow stop
             state["iteration"] = 0
             save_state(repo_root, state)
+            # Record successful verify loop metric
+            record_verify_loop_metric(repo_root, success=True, attempts=current_iteration, task_dir=task_dir)
             output = {
                 "decision": "allow",
                 "reason": "All verify commands passed. Check phase complete.",
@@ -341,6 +388,7 @@ def main():
             sys.exit(0)
         else:
             # Verification failed, block stop
+            # Note: Don't record metric on failure - will retry
             output = {
                 "decision": "block",
                 "reason": f"Iteration {current_iteration}/{MAX_ITERATIONS}. Verification failed:\n{message}\n\nPlease fix the issues and try again.",
@@ -356,6 +404,8 @@ def main():
             # All checks complete, allow stop
             state["iteration"] = 0
             save_state(repo_root, state)
+            # Record successful verify loop metric
+            record_verify_loop_metric(repo_root, success=True, attempts=current_iteration, task_dir=task_dir)
             output = {
                 "decision": "allow",
                 "reason": "All completion markers found. Check phase complete.",
@@ -364,6 +414,7 @@ def main():
             sys.exit(0)
         else:
             # Missing markers, block stop and continue
+            # Note: Don't record metric on failure - will retry
             output = {
                 "decision": "block",
                 "reason": f"""Iteration {current_iteration}/{MAX_ITERATIONS}. Missing completion markers: {", ".join(missing)}.

@@ -1,0 +1,2 @@
+# This file ensures the directory is tracked by git.
+# Daily metrics files (metrics-YYYY-MM-DD.json) are stored here.

@@ -1,0 +1,14 @@
+[project]
+name = "silver-bullet-kernel"
+version = "0.1.0"
+description = "Codex-first AI coding workflow kernel built on Trellis + OpenSpec"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[dependency-groups]
+dev = [
+    "detect-secrets>=1.4.0",
+]
