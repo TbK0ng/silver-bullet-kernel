@@ -1,6 +1,8 @@
 # Silver Bullet Kernel
 
-Codex-first workflow kernel for brownfield development, built on:
+AI 辅助编程工作流框架，基于 Trellis + OpenSpec 构建：
+
+> 专为已有代码库（非从零开始）设计的 AI 编程工作流解决方案
 
 - Trellis for execution policy, context injection, and worktree orchestration
 - OpenSpec for artifact-driven change management
@@ -55,4 +57,7 @@ npm run verify
 
 ## Documentation
 
-Project-owned documentation is in `xxx_docs/`.
+- [使用指南](xxx_docs/README.md) - 快速上手
+- [配置指南](xxx_docs/01-配置指南.md) - 配置详解
+- [命令参考](xxx_docs/02-命令参考.md) - 所有命令
+- [常见问题](xxx_docs/03-常见问题.md) - 故障排除
