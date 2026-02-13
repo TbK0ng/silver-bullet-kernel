@@ -16,7 +16,7 @@ function Show-Usage {
   Write-Host "  capabilities [--platform <name>] [--target-repo-root <path>]"
   Write-Host "  explore [--change <id>]"
   Write-Host "  improve-ut [--skip-validation]"
-  Write-Host "  migrate-specs [--change <id>] [--apply]"
+  Write-Host "  migrate-specs [--change <id>] [--apply] [--unsafe-overwrite]"
   Write-Host "  parallel [plan|start|status|cleanup] [args]"
   Write-Host "  verify:fast | verify | verify:ci | verify:loop"
   Write-Host "  policy | docs-sync | skill-parity | doctor | doctor:json"
@@ -336,6 +336,7 @@ switch ($command) {
       "--change" = "-Change"
       "--apply" = "-Apply"
       "--no-validate" = "-NoValidate"
+      "--unsafe-overwrite" = "-UnsafeOverwrite"
     }
     Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "openspec-migrate-specs.ps1") -ScriptArgs $scriptArgs
     break
