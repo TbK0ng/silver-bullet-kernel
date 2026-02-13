@@ -110,3 +110,53 @@ S001, S002, S003, S004, S005
 - `npm run test:e2e`
 - `npm run workflow:gate`
 - `npm run workflow:doctor`
+
+## Session 5: Generated Artifacts Migration to Metrics
+
+**Date**: 2026-02-13  
+**Task**: fix-usability-closure
+
+### Summary
+
+Migrated runtime-generated workflow and codebase-report artifacts from
+`xxx_docs/generated/` to `.metrics/` and removed tracked generated files.
+
+### Memory Sources
+
+- `openspec/changes/fix-usability-closure/proposal.md`
+- `openspec/changes/fix-usability-closure/design.md`
+- `openspec/changes/fix-usability-closure/tasks.md`
+- `scripts/collect-metrics.ps1`
+- `scripts/workflow-policy-gate.ps1`
+- `scripts/workflow-indicator-gate.ps1`
+- `scripts/workflow-doctor.ps1`
+
+### Disclosure Level
+
+index-then-detail
+
+### Source IDs
+
+S001, S002, S003, S004, S005, S006, S007
+
+### Main Changes
+
+- Redirected workflow doctor/policy/indicator report outputs to `.metrics/`.
+- Redirected metrics summary output and codebase map output to `.metrics/`.
+- Updated e2e assertions and user docs to new report paths.
+- Removed tracked `xxx_docs/generated/*` runtime artifacts from repository files.
+- Fixed `workflow:doctor:json` to use kernel doctor output instead of legacy `.trellis` doctor.
+
+### Verification
+
+- `npm run lint`
+- `npm run typecheck`
+- `npm run test`
+- `npm run test:e2e`
+- `npm run metrics:collect`
+- `npm run workflow:gate`
+- `npm run workflow:doctor`
+- `npm run workflow:doctor:json`
+- `npm run verify:fast`
+- `npm run verify`
+- `WORKFLOW_BASE_REF=HEAD~2 npm run verify:ci`

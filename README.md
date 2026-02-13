@@ -31,7 +31,7 @@ npm run verify
 - `npm run demo:smoke` run appdemo usability smoke test
 - `npm run refactor:rename -- --file <path> --line <n> --column <n> --newName <name> [--dryRun]` semantic rename
 - `npm run memory:context -- -Stage index` progressive-disclosure memory source index
-- `npm run map:codebase` generate codebase map into `xxx_docs/generated/`
+- `npm run map:codebase` generate codebase map into `.metrics/`
 - `npm run metrics:collect` generate weekly workflow metrics from verify telemetry
 - `npm run metrics:token-cost -- -Source <provider> -TotalCostUsd <amount>` publish token-cost summary
 - `npm run workflow:policy` enforce workflow policy gate

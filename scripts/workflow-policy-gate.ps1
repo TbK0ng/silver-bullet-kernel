@@ -10,9 +10,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$docsGeneratedDir = Join-Path $repoRoot "xxx_docs\\generated"
-$reportMd = Join-Path $docsGeneratedDir "workflow-policy-gate.md"
-$reportJson = Join-Path $docsGeneratedDir "workflow-policy-gate.json"
+$metricsOutputDir = Join-Path $repoRoot ".metrics"
+$reportMd = Join-Path $metricsOutputDir "workflow-policy-gate.md"
+$reportJson = Join-Path $metricsOutputDir "workflow-policy-gate.json"
 
 function Add-Check {
   param(
@@ -1048,8 +1048,8 @@ $summary = [ordered]@{
 }
 
 if (-not $NoReport) {
-  if (-not (Test-Path $docsGeneratedDir)) {
-    New-Item -ItemType Directory -Path $docsGeneratedDir | Out-Null
+  if (-not (Test-Path $metricsOutputDir)) {
+    New-Item -ItemType Directory -Path $metricsOutputDir | Out-Null
   }
 
   $lines = @()

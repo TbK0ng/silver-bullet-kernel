@@ -6,9 +6,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$docsGeneratedDir = Join-Path $repoRoot "xxx_docs\\generated"
-$reportPath = Join-Path $docsGeneratedDir "workflow-metrics-weekly.md"
-$jsonPath = Join-Path $docsGeneratedDir "workflow-metrics-latest.json"
+$metricsOutputDir = Join-Path $repoRoot ".metrics"
+$reportPath = Join-Path $metricsOutputDir "workflow-metrics-weekly.md"
+$jsonPath = Join-Path $metricsOutputDir "workflow-metrics-latest.json"
 $tokenCostPath = Join-Path $repoRoot ".metrics\\token-cost.json"
 
 function Resolve-MetricsPath {
@@ -52,8 +52,8 @@ function Resolve-MetricsPath {
 
 $metricsPath = Resolve-MetricsPath -RepoRoot $repoRoot -OverridePath $MetricsPath
 
-if (-not (Test-Path $docsGeneratedDir)) {
-  New-Item -ItemType Directory -Path $docsGeneratedDir | Out-Null
+if (-not (Test-Path $metricsOutputDir)) {
+  New-Item -ItemType Directory -Path $metricsOutputDir | Out-Null
 }
 
 function Get-Quantile {

@@ -32,6 +32,14 @@ or command drift.
 - Keep strict `verify-ci` on pull requests.
 - Avoid running branch-pattern-constrained `verify-ci` on `push` to `main`.
 
+### 6) Generated workflow diagnostics must stay in ephemeral metrics storage
+
+- Move workflow doctor/policy/indicator report outputs from `xxx_docs/generated/` to `.metrics/`.
+- Move metrics collector outputs (`workflow-metrics-weekly.md`, `workflow-metrics-latest.json`) to `.metrics/`.
+- Move codebase map output from `xxx_docs/generated/codebase-map.md` to `.metrics/codebase-map.md`.
+- Keep `xxx_docs/` as durable guidance docs, not runtime artifact sink.
+- Keep policy ignore semantics aligned with `.metrics/`-scoped ephemeral artifacts.
+
 ## Verification Strategy
 
 - Run lint/typecheck/unit+e2e/build.
@@ -39,3 +47,4 @@ or command drift.
 - Run policy and indicator gates.
 - Run OpenSpec strict validation.
 - Confirm docs and command mapping consistency.
+- Confirm generated report files are emitted under `.metrics/` and `xxx_docs/generated/*` is removed from tracked files.

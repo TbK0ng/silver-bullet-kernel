@@ -56,7 +56,6 @@
       "eslint.config.js"
     ],
     "ignorePathPrefixes": [
-      "xxx_docs/generated/",
       ".metrics/"
     ]
   },

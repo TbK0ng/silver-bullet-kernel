@@ -9,10 +9,10 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $configPath = Join-Path $repoRoot "workflow-policy.json"
-$metricsJsonPath = Join-Path $repoRoot "xxx_docs\\generated\\workflow-metrics-latest.json"
-$docsGeneratedDir = Join-Path $repoRoot "xxx_docs\\generated"
-$reportMd = Join-Path $docsGeneratedDir "workflow-indicator-gate.md"
-$reportJson = Join-Path $docsGeneratedDir "workflow-indicator-gate.json"
+$metricsOutputDir = Join-Path $repoRoot ".metrics"
+$metricsJsonPath = Join-Path $metricsOutputDir "workflow-metrics-latest.json"
+$reportMd = Join-Path $metricsOutputDir "workflow-indicator-gate.md"
+$reportJson = Join-Path $metricsOutputDir "workflow-indicator-gate.json"
 
 function Add-Check {
   param(
@@ -136,8 +136,8 @@ $summary = [ordered]@{
 }
 
 if (-not $NoReport) {
-  if (-not (Test-Path $docsGeneratedDir)) {
-    New-Item -ItemType Directory -Path $docsGeneratedDir | Out-Null
+  if (-not (Test-Path $metricsOutputDir)) {
+    New-Item -ItemType Directory -Path $metricsOutputDir | Out-Null
   }
 
   $lines = @()

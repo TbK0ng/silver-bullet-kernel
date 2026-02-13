@@ -1,7 +1,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$outputDir = Join-Path $PSScriptRoot "..\\xxx_docs\\generated"
+$outputDir = Join-Path $PSScriptRoot "..\\.metrics"
 $outputPath = Join-Path $outputDir "codebase-map.md"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 

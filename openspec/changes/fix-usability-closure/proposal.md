@@ -10,6 +10,8 @@ Recent verification exposed usability and governance inconsistencies that break 
 - `workflow:gate` script mapping diverges from docs and policy intent (indicator gate).
 - `verify:loop` diagnostics reference outdated doctor path assumptions.
 - CI trigger strategy conflicts with strict branch governance on `push` to `main`.
+- operational reports are currently written under `xxx_docs/generated/` and kept in VCS,
+  which pollutes repository history with test artifacts that should be ephemeral.
 
 ## What Changes
 
@@ -20,6 +22,9 @@ Recent verification exposed usability and governance inconsistencies that break 
 5. Adjust CI workflow trigger behavior to avoid policy conflict on post-merge `main`.
 6. Add regression tests for memory-context behavior in non-`sbk-*` branch context.
 7. Update docs/runbook references to keep command semantics consistent.
+8. Relocate generated workflow/codebase reports from `xxx_docs/generated/` to `.metrics/`.
+9. Remove tracked generated report files from repository history moving forward.
+10. Update report-path tests and docs to reflect `.metrics/` as the runtime artifact sink.
 
 ## Impact
 
@@ -27,3 +32,4 @@ Recent verification exposed usability and governance inconsistencies that break 
 - Restores progressive-disclosure memory retrieval usability.
 - Removes command semantic drift across docs, scripts, and policy.
 - Preserves strict CI governance where it is intended (PR branch validation).
+- Keeps test/report artifacts cleanly disposable without touching durable docs content.

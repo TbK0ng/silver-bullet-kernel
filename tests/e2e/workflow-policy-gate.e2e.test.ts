@@ -23,7 +23,7 @@ function writeFile(targetPath: string, content: string) {
 }
 
 function readJsonReport(repoDir: string) {
-  const reportPath = path.join(repoDir, "xxx_docs", "generated", "workflow-policy-gate.json");
+  const reportPath = path.join(repoDir, ".metrics", "workflow-policy-gate.json");
   expect(fs.existsSync(reportPath)).toBe(true);
   const reportRaw = fs.readFileSync(reportPath, "utf8").replace(/^\uFEFF/, "");
   return JSON.parse(reportRaw);
