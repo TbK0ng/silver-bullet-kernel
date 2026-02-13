@@ -13,6 +13,7 @@ function Show-Usage {
   Write-Host ""
   Write-Host "Commands:"
   Write-Host "  init --owner <name> [--project-type backend|frontend|fullstack]"
+  Write-Host "  greenfield [--adapter node-ts|python|go|java|rust] [--project-name <name>] [--project-type backend|frontend|fullstack] [--no-language-stubs] [--force]"
   Write-Host "  capabilities [--platform <name>] [--target-repo-root <path>]"
   Write-Host "  explore [--change <id>]"
   Write-Host "  improve-ut [--skip-validation]"
@@ -339,6 +340,17 @@ switch ($command) {
       "--unsafe-overwrite" = "-UnsafeOverwrite"
     }
     Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "openspec-migrate-specs.ps1") -ScriptArgs $scriptArgs
+    break
+  }
+  "greenfield" {
+    $scriptArgs = Convert-SbkScriptArgs -RawArgs $rest -TokenMap @{
+      "--adapter" = "-Adapter"
+      "--project-name" = "-ProjectName"
+      "--project-type" = "-ProjectType"
+      "--no-language-stubs" = "-NoLanguageStubs"
+      "--force" = "-Force"
+    }
+    Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "greenfield-bootstrap.ps1") -ScriptArgs $scriptArgs
     break
   }
   "parallel" {
