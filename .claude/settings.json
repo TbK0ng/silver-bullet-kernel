@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/session-start.py",
+            "command": "uv run .claude/hooks/session-start.py",
             "timeout": 10
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/inject-subagent-context.py",
+            "command": "uv run .claude/hooks/inject-subagent-context.py",
             "timeout": 30
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/ralph-loop.py",
+            "command": "uv run .claude/hooks/ralph-loop.py",
             "timeout": 10
           }
         ]
