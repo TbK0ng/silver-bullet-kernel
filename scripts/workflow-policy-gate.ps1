@@ -1,6 +1,9 @@
 param(
   [ValidateSet("local", "ci")][string]$Mode = "local",
   [string]$BaseRef = "",
+  [string]$TargetConfigPath = "",
+  [string]$Adapter = "",
+  [string]$Profile = "",
   [switch]$NoReport,
   [switch]$FailOnWarning,
   [switch]$Quiet
@@ -10,6 +13,14 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+. (Join-Path $PSScriptRoot "common\\sbk-runtime.ps1")
+
+$runtime = Get-SbkRuntimeContext `
+  -SbkRoot $repoRoot `
+  -TargetConfigPath $TargetConfigPath `
+  -AdapterOverride $Adapter `
+  -ProfileOverride $Profile
+
 $metricsOutputDir = Join-Path $repoRoot ".metrics"
 $reportMd = Join-Path $metricsOutputDir "workflow-policy-gate.md"
 $reportJson = Join-Path $metricsOutputDir "workflow-policy-gate.json"
@@ -64,7 +75,7 @@ function Get-WorkingTreeFiles {
     [Parameter(Mandatory = $true)][string]$RepoRoot
   )
 
-  $lines = @(git -C $RepoRoot status --porcelain=v1)
+  $lines = @(git -c core.quotepath=false -C $RepoRoot status --porcelain=v1)
   $files = @()
   foreach ($line in $lines) {
     if ([string]::IsNullOrWhiteSpace($line)) { continue }
@@ -154,7 +165,7 @@ function Get-BranchDeltaInfo {
     }
   }
 
-  $files = @(git -C $RepoRoot diff --name-only "$mergeBase..HEAD" |
+  $files = @(git -c core.quotepath=false -C $RepoRoot diff --name-only "$mergeBase..HEAD" |
       Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
       ForEach-Object { Normalize-RepoPath -Path $_ })
 
@@ -665,8 +676,20 @@ if (-not (Test-Path $configPath)) {
 }
 $config = Get-Content -Path $configPath -Encoding UTF8 | ConvertFrom-Json
 
-$implementationPrefixes = @($config.workflowGate.implementationPathPrefixes)
-$implementationFilesExact = @($config.workflowGate.implementationPathFiles)
+foreach ($override in $runtime.workflowGateOverrides.GetEnumerator()) {
+  $config.workflowGate | Add-Member -NotePropertyName $override.Key -NotePropertyValue $override.Value -Force
+}
+
+$implementationPrefixes = if ($runtime.implementationPathPrefixes.Count -gt 0) {
+  @($runtime.implementationPathPrefixes)
+} else {
+  @($config.workflowGate.implementationPathPrefixes)
+}
+$implementationFilesExact = if ($runtime.implementationPathFiles.Count -gt 0) {
+  @($runtime.implementationPathFiles)
+} else {
+  @($config.workflowGate.implementationPathFiles)
+}
 $ignorePrefixes = @($config.workflowGate.ignorePathPrefixes)
 $branchPattern = [string]$config.workflowGate.branchPattern
 $ownerWorkspaceRoot = [string]$config.workflowGate.ownerWorkspaceRoot
@@ -1030,6 +1053,11 @@ $summary = [ordered]@{
   generatedAt = [DateTimeOffset]::UtcNow.ToString("o")
   mode = $Mode
   outcome = $outcome
+  runtime = [ordered]@{
+    configPath = $runtime.runtimeConfigPath
+    adapter = $runtime.adapter
+    profile = $runtime.profile
+  }
   currentBranch = $currentBranch
   branchIdentity = $branchIdentity
   gitDirInfo = $gitDirInfo
@@ -1058,6 +1086,8 @@ if (-not $NoReport) {
   $lines += "- generated_at_utc: $([DateTimeOffset]::UtcNow.ToString("u"))"
   $lines += "- mode: $Mode"
   $lines += "- outcome: $outcome"
+  $lines += "- adapter: $($runtime.adapter)"
+  $lines += "- profile: $($runtime.profile)"
   $lines += "- active_changes: $(if ($activeChangeNames.Count -eq 0) { "none" } else { $activeChangeNames -join ", " })"
   $lines += ""
   $lines += "## Checks"

@@ -1,0 +1,33 @@
+﻿{
+  "name": "go",
+  "priority": 70,
+  "detect": {
+    "anyOfFiles": [
+      "go.mod"
+    ]
+  },
+  "implementation": {
+    "pathPrefixes": [
+      "cmd/",
+      "internal/",
+      "pkg/",
+      "tests/",
+      "scripts/"
+    ],
+    "pathFiles": [
+      "go.mod",
+      "go.sum"
+    ]
+  },
+  "verify": {
+    "fast": [
+      "go test ./..."
+    ],
+    "full": [
+      "go test ./..."
+    ],
+    "ci": [
+      "go test ./..."
+    ]
+  }
+}

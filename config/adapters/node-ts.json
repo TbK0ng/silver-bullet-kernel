@@ -1,0 +1,52 @@
+﻿{
+  "name": "node-ts",
+  "priority": 50,
+  "detect": {
+    "anyOfFiles": [
+      "package.json"
+    ]
+  },
+  "implementation": {
+    "pathPrefixes": [
+      "src/",
+      "tests/",
+      "scripts/",
+      "config/adapters/",
+      ".trellis/",
+      ".codex/",
+      ".claude/",
+      ".github/workflows/",
+      "openspec/specs/"
+    ],
+    "pathFiles": [
+      "AGENTS.md",
+      "CLAUDE.md",
+      "README.md",
+      "package.json",
+      "package-lock.json",
+      "tsconfig.json",
+      "eslint.config.js",
+      "workflow-policy.json",
+      "sbk.config.json"
+    ]
+  },
+  "verify": {
+    "fast": [
+      "npm run lint",
+      "npm run typecheck"
+    ],
+    "full": [
+      "npm run lint",
+      "npm run typecheck",
+      "npm run test",
+      "npm run build"
+    ],
+    "ci": [
+      "npm run lint",
+      "npm run typecheck",
+      "npm run test",
+      "npm run test:e2e",
+      "npm run build"
+    ]
+  }
+}

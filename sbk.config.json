@@ -1,0 +1,47 @@
+﻿{
+  "version": 1,
+  "adapter": "node-ts",
+  "profile": "strict",
+  "targetRepoRoot": ".",
+  "adaptersDir": "config/adapters",
+  "profiles": {
+    "strict": {
+      "workflowGateOverrides": {}
+    },
+    "balanced": {
+      "workflowGateOverrides": {
+        "requireOwnerScopedSessionEvidence": false,
+        "requireSessionDisclosureMetadata": false
+      }
+    },
+    "lite": {
+      "workflowGateOverrides": {
+        "requireBranchPatternForImplementationEdits": false,
+        "requireBranchChangeMatchesActiveChange": false,
+        "requireLinkedWorktreeForLocalImplementation": false,
+        "requireOwnerScopedSessionEvidence": false,
+        "requireSessionDisclosureMetadata": false,
+        "requireSessionRecordInBranchDelta": false
+      }
+    }
+  },
+  "docsSync": {
+    "enabled": true,
+    "triggerPathPrefixes": [
+      "scripts/",
+      "config/adapters/"
+    ],
+    "triggerPathFiles": [
+      "workflow-policy.json",
+      "sbk.config.json",
+      "package.json",
+      "AGENTS.md",
+      "CLAUDE.md"
+    ],
+    "requiredDocs": [
+      "docs/02-功能手册-命令原理与产物.md",
+      "docs/05-命令与产物速查表.md",
+      "docs/06-多项目类型接入与配置指南.md"
+    ]
+  }
+}

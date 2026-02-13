@@ -5,13 +5,14 @@ Define one-command workflow health diagnostics for runtime, structure, and proce
 ## Requirements
 ### Requirement: Workflow Health Diagnosis
 
-The project SHALL provide a one-command workflow health diagnosis.
+The workflow doctor SHALL produce machine-readable and human-readable diagnostics.
 
-#### Scenario: Contributor runs doctor command
+#### Scenario: Run workflow doctor
 
-- **WHEN** `npm run workflow:doctor` is executed
-- **THEN** it checks runtime prerequisites and workflow structure integrity
-- **AND** outputs both markdown and JSON reports under `docs/generated/`
+- **WHEN** contributor executes `npm run workflow:doctor`
+- **THEN** doctor validates required runtime/tooling/workflow checks
+- **AND** outputs both markdown and JSON reports under `.metrics/`
+- **AND** exits non-zero when any required check is unhealthy
 
 ### Requirement: Actionable Check Results
 

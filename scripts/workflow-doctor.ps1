@@ -69,7 +69,12 @@ $requiredPaths = @(
   "scripts/collect-metrics.ps1",
   "scripts/memory-context.ps1",
   "scripts/workflow-policy-gate.ps1",
+  "scripts/workflow-docs-sync-gate.ps1",
   "scripts/workflow-indicator-gate.ps1",
+  "scripts/sbk.ps1",
+  "scripts/common/sbk-runtime.ps1",
+  "sbk.config.json",
+  "config/adapters/node-ts.json",
   "workflow-policy.json",
   "docs/README.md"
 )
@@ -131,6 +136,20 @@ Add-Check -Checks $checks `
   -Passed $indicatorGatePassed `
   -Details $indicatorGateDetails `
   -Remediation "Run: npm run metrics:collect then npm run workflow:gate and remediate threshold failures."
+
+$docsSyncGatePassed = $true
+$docsSyncGateDetails = "passed"
+try {
+  & (Join-Path $repoRoot "scripts\\workflow-docs-sync-gate.ps1") -Mode local -NoReport -Quiet
+} catch {
+  $docsSyncGatePassed = $false
+  $docsSyncGateDetails = $_.Exception.Message
+}
+Add-Check -Checks $checks `
+  -Name "Workflow docs sync gate healthy" `
+  -Passed $docsSyncGatePassed `
+  -Details $docsSyncGateDetails `
+  -Remediation "Update docs mapped by sbk docs sync policy, then run: npm run workflow:docs-sync."
 
 $overallPassed = (@($checks | Where-Object { -not $_.passed }).Count -eq 0)
 $timestamp = [DateTimeOffset]::UtcNow.ToString("o")

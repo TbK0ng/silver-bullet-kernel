@@ -31,15 +31,25 @@ function readJsonReport(repoDir: string) {
 
 function bootstrapPolicyRepo(repoDir: string) {
   const policyScriptSource = path.join(process.cwd(), "scripts", "workflow-policy-gate.ps1");
+  const runtimeHelperSource = path.join(process.cwd(), "scripts", "common", "sbk-runtime.ps1");
   const policyConfigSource = path.join(process.cwd(), "workflow-policy.json");
+  const runtimeConfigSource = path.join(process.cwd(), "sbk.config.json");
 
   writeFile(
     path.join(repoDir, "scripts", "workflow-policy-gate.ps1"),
     fs.readFileSync(policyScriptSource, "utf8"),
   );
   writeFile(
+    path.join(repoDir, "scripts", "common", "sbk-runtime.ps1"),
+    fs.readFileSync(runtimeHelperSource, "utf8"),
+  );
+  writeFile(
     path.join(repoDir, "workflow-policy.json"),
     fs.readFileSync(policyConfigSource, "utf8"),
+  );
+  writeFile(
+    path.join(repoDir, "sbk.config.json"),
+    fs.readFileSync(runtimeConfigSource, "utf8"),
   );
   writeFile(
     path.join(repoDir, ".claude", "agents", "dispatch.md"),
@@ -284,5 +294,73 @@ describe("workflow policy gate task evidence schema", () => {
     );
     expect(securityCheck).toBeTruthy();
     expect(securityCheck.passed).toBe(false);
+  });
+
+  it("uses adapter implementation path overrides from sbk runtime config", () => {
+    const repoDir = fs.mkdtempSync(path.join(os.tmpdir(), "sbk-policy-adapter-"));
+    tempDirs.push(repoDir);
+
+    bootstrapPolicyRepo(repoDir);
+    writeValidActiveChange(repoDir);
+
+    writeFile(
+      path.join(repoDir, "sbk.config.json"),
+      JSON.stringify(
+        {
+          version: 1,
+          adapter: "rust",
+          profile: "strict",
+          targetRepoRoot: ".",
+          adaptersDir: "config/adapters",
+        },
+        null,
+        2,
+      ),
+    );
+    writeFile(
+      path.join(repoDir, "config", "adapters", "rust.json"),
+      JSON.stringify(
+        {
+          name: "rust",
+          detect: { anyOfFiles: ["Cargo.toml"] },
+          implementation: {
+            pathPrefixes: ["rustsrc/"],
+            pathFiles: ["Cargo.toml"],
+          },
+          verify: { fast: [], full: [], ci: [] },
+        },
+        null,
+        2,
+      ),
+    );
+    writeFile(path.join(repoDir, "Cargo.toml"), "[package]\nname='x'\nversion='0.1.0'\n");
+    writeFile(path.join(repoDir, "rustsrc", "main.rs"), "fn main() {}\n");
+
+    initGitRepo(repoDir);
+    writeFile(path.join(repoDir, "rustsrc", "main.rs"), "fn main() { println!(\"x\"); }\n");
+
+    const pwsh = process.platform === "win32" ? "powershell.exe" : "pwsh";
+    const gate = run(
+      pwsh,
+      [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "./scripts/workflow-policy-gate.ps1",
+        "-Mode",
+        "local",
+        "-Adapter",
+        "rust",
+      ],
+      repoDir,
+    );
+    expect(gate.status).not.toBe(0);
+
+    const report = readJsonReport(repoDir);
+    const mappingCheck = report.checks.find((c: { name: string }) =>
+      c.name.includes("Implementation edits require active change"),
+    );
+    expect(mappingCheck).toBeTruthy();
+    expect(String(mappingCheck.details)).toContain("implementation_files=1");
   });
 });

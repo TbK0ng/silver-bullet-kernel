@@ -1,0 +1,40 @@
+﻿{
+  "name": "rust",
+  "priority": 80,
+  "detect": {
+    "anyOfFiles": [
+      "Cargo.toml"
+    ]
+  },
+  "implementation": {
+    "pathPrefixes": [
+      "src/",
+      "tests/",
+      "benches/",
+      "examples/",
+      "scripts/"
+    ],
+    "pathFiles": [
+      "Cargo.toml",
+      "Cargo.lock",
+      "rust-toolchain.toml"
+    ]
+  },
+  "verify": {
+    "fast": [
+      "cargo fmt --check",
+      "cargo clippy --all-targets -- -D warnings",
+      "cargo test -q"
+    ],
+    "full": [
+      "cargo fmt --check",
+      "cargo clippy --all-targets --all-features -- -D warnings",
+      "cargo test --all-features"
+    ],
+    "ci": [
+      "cargo fmt --check",
+      "cargo clippy --all-targets --all-features -- -D warnings",
+      "cargo test --all-features"
+    ]
+  }
+}

@@ -15,13 +15,14 @@ The workflow SHALL record telemetry for each verify entry point.
 
 ### Requirement: Weekly Metrics Reporting
 
-The workflow SHALL provide a command that generates weekly operational metrics from telemetry.
+The workflow observability system SHALL produce weekly metrics summaries from verify telemetry.
 
-#### Scenario: Team runs metrics collection
+#### Scenario: Generate weekly metrics report
 
-- **WHEN** `npm run metrics:collect` executes
-- **THEN** it generates a markdown summary and JSON snapshot under `docs/generated/`
-- **AND** report includes success rate, per-mode durations, and failure-step trends
+- **WHEN** `npm run metrics:collect` executes successfully
+- **THEN** it generates a markdown summary and JSON snapshot under `.metrics/`
+- **AND** outputs include lead-time percentiles, rework count, parallel throughput, and spec-drift indicators
+- **AND** token-cost status is included from `.metrics/token-cost.json` when present
 
 ### Requirement: Full Plan Indicator Coverage
 

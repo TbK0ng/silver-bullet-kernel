@@ -160,3 +160,47 @@ S001, S002, S003, S004, S005, S006, S007
 - `npm run verify:fast`
 - `npm run verify`
 - `WORKFLOW_BASE_REF=HEAD~2 npm run verify:ci`
+
+## Session 6: Universal SBK Sidecar and Adapter Runtime
+
+**Date**: 2026-02-14  
+**Task**: sbk-universal-sidecar
+
+### Summary
+
+Implemented a universal `sbk` command entrypoint with adapter-driven verify/policy
+runtime, added docs-sync governance gate, and synchronized multi-project onboarding docs.
+
+### Memory Sources
+
+- `openspec/changes/sbk-universal-sidecar/proposal.md`
+- `openspec/changes/sbk-universal-sidecar/design.md`
+- `openspec/changes/sbk-universal-sidecar/tasks.md`
+- `scripts/common/sbk-runtime.ps1`
+- `scripts/workflow-docs-sync-gate.ps1`
+- `docs/06-多项目类型接入与配置指南.md`
+
+### Disclosure Level
+
+index-then-detail
+
+### Source IDs
+
+S101, S102, S103, S104, S105, S106
+
+### Main Changes
+
+- Added `sbk` dispatcher command (`scripts/sbk.ps1`) and npm entry `npm run sbk -- <subcommand>`.
+- Added runtime config (`sbk.config.json`) and adapter manifests for Node/TS, Python, Go, Java, Rust.
+- Added shared runtime resolver (`scripts/common/sbk-runtime.ps1`) for adapter/profile/command matrix resolution.
+- Refactored verify entrypoints to use adapter matrix and docs-sync gate.
+- Added `workflow-docs-sync-gate.ps1` and wired health checks into workflow doctor.
+- Added e2e coverage for docs-sync pass/fail and adapter implementation override behavior.
+- Updated docs index, command handbook, quick reference, and new cross-ecosystem onboarding guide.
+
+### Verification
+
+- `openspec validate --all --strict --no-interactive`
+- `npm run lint`
+- `npm run test:e2e -- tests/e2e/workflow-policy-gate.e2e.test.ts tests/e2e/workflow-docs-sync-gate.e2e.test.ts`
+- `powershell -ExecutionPolicy Bypass -File ./scripts/workflow-docs-sync-gate.ps1 -Mode local -NoReport -Quiet`

@@ -1,6 +1,6 @@
 ## MODIFIED Requirements
 
-### Requirement: Workflow Doctor Health Report
+### Requirement: Workflow Health Diagnosis
 
 The workflow doctor SHALL produce machine-readable and human-readable diagnostics.
 

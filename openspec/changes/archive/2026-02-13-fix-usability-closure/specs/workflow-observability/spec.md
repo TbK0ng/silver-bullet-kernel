@@ -1,6 +1,6 @@
 ## MODIFIED Requirements
 
-### Requirement: Weekly Metrics Report Generation
+### Requirement: Weekly Metrics Reporting
 
 The workflow observability system SHALL produce weekly metrics summaries from verify telemetry.
 

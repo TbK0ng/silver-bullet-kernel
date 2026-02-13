@@ -1,0 +1,41 @@
+﻿{
+  "name": "python",
+  "priority": 60,
+  "detect": {
+    "anyOfFiles": [
+      "pyproject.toml",
+      "requirements.txt",
+      "setup.py"
+    ]
+  },
+  "implementation": {
+    "pathPrefixes": [
+      "src/",
+      "app/",
+      "tests/",
+      "scripts/"
+    ],
+    "pathFiles": [
+      "pyproject.toml",
+      "requirements.txt",
+      "setup.py",
+      "setup.cfg"
+    ]
+  },
+  "verify": {
+    "fast": [
+      "ruff check .",
+      "python -m pytest -q"
+    ],
+    "full": [
+      "ruff check .",
+      "mypy .",
+      "python -m pytest"
+    ],
+    "ci": [
+      "ruff check .",
+      "mypy .",
+      "python -m pytest --maxfail=1"
+    ]
+  }
+}

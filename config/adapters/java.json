@@ -1,0 +1,37 @@
+﻿{
+  "name": "java",
+  "priority": 65,
+  "detect": {
+    "anyOfFiles": [
+      "pom.xml",
+      "build.gradle",
+      "build.gradle.kts"
+    ]
+  },
+  "implementation": {
+    "pathPrefixes": [
+      "src/",
+      "test/",
+      "tests/",
+      "scripts/"
+    ],
+    "pathFiles": [
+      "pom.xml",
+      "build.gradle",
+      "build.gradle.kts",
+      "settings.gradle",
+      "settings.gradle.kts"
+    ]
+  },
+  "verify": {
+    "fast": [
+      "mvn -q -DskipTests compile"
+    ],
+    "full": [
+      "mvn -q test"
+    ],
+    "ci": [
+      "mvn -q verify"
+    ]
+  }
+}
