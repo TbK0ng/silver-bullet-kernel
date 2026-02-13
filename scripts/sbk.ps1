@@ -14,6 +14,8 @@ function Show-Usage {
   Write-Host "Commands:"
   Write-Host "  init --owner <name> [--project-type backend|frontend|fullstack]"
   Write-Host "  greenfield [--adapter node-ts|python|go|java|rust] [--project-name <name>] [--project-type backend|frontend|fullstack] [--no-language-stubs] [--force]"
+  Write-Host "  install [--target-repo-root <path>] [--preset minimal|full] [--overwrite] [--skip-package-scripts]"
+  Write-Host "  upgrade [--target-repo-root <path>] [--preset minimal|full] [--skip-package-scripts]"
   Write-Host "  capabilities [--platform <name>] [--target-repo-root <path>]"
   Write-Host "  explore [--change <id>]"
   Write-Host "  improve-ut [--skip-validation]"
@@ -351,6 +353,28 @@ switch ($command) {
       "--force" = "-Force"
     }
     Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "greenfield-bootstrap.ps1") -ScriptArgs $scriptArgs
+    break
+  }
+  "install" {
+    $scriptArgs = Convert-SbkScriptArgs -RawArgs $rest -TokenMap @{
+      "--target-repo-root" = "-TargetRepoRoot"
+      "--preset" = "-Preset"
+      "--overwrite" = "-Overwrite"
+      "--skip-package-scripts" = "-SkipPackageScriptInjection"
+    }
+    Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "sbk-install.ps1") -ScriptArgs $scriptArgs
+    break
+  }
+  "upgrade" {
+    $scriptArgs = Convert-SbkScriptArgs -RawArgs $rest -TokenMap @{
+      "--target-repo-root" = "-TargetRepoRoot"
+      "--preset" = "-Preset"
+      "--skip-package-scripts" = "-SkipPackageScriptInjection"
+    }
+    if (-not ($scriptArgs -contains "-Overwrite")) {
+      $scriptArgs += "-Overwrite"
+    }
+    Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "sbk-install.ps1") -ScriptArgs $scriptArgs
     break
   }
   "parallel" {
