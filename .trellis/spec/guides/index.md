@@ -1,4 +1,4 @@
-# Thinking Guides
+﻿# Thinking Guides
 
 > **Purpose**: Expand your thinking to catch things you might not have considered.
 
@@ -24,6 +24,7 @@ These guides help you **ask the right questions before coding**.
 | [Code Reuse Thinking Guide](./code-reuse-thinking-guide.md) | Identify patterns and reduce duplication | When you notice repeated patterns |
 | [Cross-Layer Thinking Guide](./cross-layer-thinking-guide.md) | Think through data flow across layers | Features spanning multiple layers |
 | [Cross-Platform Thinking Guide](./cross-platform-thinking-guide.md) | Catch platform-specific assumptions | Scripts, paths, commands |
+| [Unit Test Guidelines](../unit-test/index.md) | Define UT conventions, mock strategy, and integration test boundaries | Before adding or revising automated tests |
 | [Quality Gates](./quality-gates.md) | Define objective done criteria and verify evidence | Before claiming task completion |
 | [Worktree Policy](./worktree-policy.md) | Enforce safe parallel development and merge discipline | Multi-person or multi-agent execution |
 | [OpenSpec Workflow (OPSX)](./openspec-workflow.md) | Standardize proposal-design-tasks-spec lifecycle | Every product or refactor change |
@@ -62,6 +63,15 @@ These guides help you **ask the right questions before coding**.
 
 → Read [Cross-Platform Thinking Guide](./cross-platform-thinking-guide.md)
 
+### When to Improve Tests
+
+- [ ] Changed runtime script or adapter behavior
+- [ ] Added or updated workflow policy/verify logic
+- [ ] Fixed a bug that needs regression coverage
+- [ ] Refactored multi-agent orchestration paths
+
+Read [Unit Test Guidelines](../unit-test/index.md)
+
 ---
 
 ## Pre-Modification Rule (CRITICAL)
@@ -92,3 +102,4 @@ Found a new "didn't think of that" moment? Add it to the relevant guide.
 ---
 
 **Core Principle**: 30 minutes of thinking saves 3 hours of debugging.
+

@@ -204,3 +204,47 @@ S101, S102, S103, S104, S105, S106
 - `npm run lint`
 - `npm run test:e2e -- tests/e2e/workflow-policy-gate.e2e.test.ts tests/e2e/workflow-docs-sync-gate.e2e.test.ts`
 - `powershell -ExecutionPolicy Bypass -File ./scripts/workflow-docs-sync-gate.ps1 -Mode local -NoReport -Quiet`
+
+## Session 7: Claude/Codex Parity Hardening
+
+**Date**: 2026-02-14  
+**Task**: sbk-universal-sidecar
+
+### Summary
+
+Hardened parity between Claude and Codex by adding explicit platform capability
+matrix, skill/command parity gate, and Codex manual multi-agent mode.
+
+### Memory Sources
+
+- `openspec/changes/sbk-universal-sidecar/proposal.md`
+- `openspec/changes/sbk-universal-sidecar/design.md`
+- `openspec/changes/sbk-universal-sidecar/tasks.md`
+- `config/platform-capabilities.json`
+- `scripts/workflow-skill-parity-gate.ps1`
+- `.trellis/scripts/multi_agent/start.py`
+- `docs/06-多项目类型接入与配置指南.md`
+
+### Disclosure Level
+
+index-then-detail
+
+### Source IDs
+
+S201, S202, S203, S204, S205, S206, S207
+
+### Main Changes
+
+- Added platform capability matrix config and `sbk capabilities` output command.
+- Added `workflow-skill-parity-gate.ps1` and integrated it into verify and doctor flows.
+- Added Codex manual mode handling for multi-agent start/status.
+- Synced skill surfaces between `.codex`, `.agents`, and `.claude`.
+- Added Claude trellis command entries for `memory-context` and `semantic-rename`.
+- Added e2e tests for parity gate and Codex manual-mode startup.
+- Updated onboarding docs with parity matrix and gate runbook.
+
+### Verification
+
+- `powershell -ExecutionPolicy Bypass -File ./scripts/sbk.ps1 capabilities`
+- `powershell -ExecutionPolicy Bypass -File ./scripts/workflow-skill-parity-gate.ps1`
+- `npm run test:e2e -- tests/e2e/workflow-skill-parity-gate.e2e.test.ts tests/e2e/multi-agent-codex-manual.e2e.test.ts`

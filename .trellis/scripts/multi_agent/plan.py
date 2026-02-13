@@ -77,7 +77,7 @@ def main() -> int:
     parser.add_argument("--requirement", "-r", required=True, help="Requirement description")
     parser.add_argument(
         "--platform", "-p",
-        choices=["claude", "cursor", "iflow", "opencode"],
+        choices=["claude", "cursor", "iflow", "opencode", "codex"],
         default=DEFAULT_PLATFORM,
         help="Platform to use (default: claude)"
     )
@@ -99,12 +99,19 @@ def main() -> int:
 
     project_root = get_repo_root()
 
-    # Check plan agent exists (path varies by platform)
-    plan_md = adapter.get_agent_path("plan", project_root)
-    if not plan_md.is_file():
-        log_error(f"plan agent not found at {plan_md}")
-        log_info(f"Platform: {platform}")
-        return 1
+    # Check required platform assets
+    if adapter.supports_cli_agents:
+        plan_md = adapter.get_agent_path("plan", project_root)
+        if not plan_md.is_file():
+            log_error(f"plan agent not found at {plan_md}")
+            log_info(f"Platform: {platform}")
+            return 1
+    else:
+        skills_dir = adapter.get_config_dir(project_root) / "skills"
+        if not skills_dir.is_dir():
+            log_error(f"skills directory not found at {skills_dir}")
+            log_info(f"Platform: {platform}")
+            return 1
 
     ensure_developer(project_root)
 
@@ -151,80 +158,113 @@ def main() -> int:
     log_success(f"Task directory: {task_dir}")
 
     # =============================================================================
-    # Step 2: Prepare and Start Plan Agent
+    # Step 2: Prepare and Start Plan Agent (or manual mode)
     # =============================================================================
-    log_info("Step 2: Starting Plan Agent in background...")
-
     log_file = task_dir_abs / ".plan-log"
     log_file.touch()
 
-    # Get proxy environment variables
-    https_proxy = os.environ.get("https_proxy", "")
-    http_proxy = os.environ.get("http_proxy", "")
-    all_proxy = os.environ.get("all_proxy", "")
+    if adapter.supports_cli_agents:
+        log_info("Step 2: Starting Plan Agent in background...")
 
-    # Start agent in background (cross-platform, no shell script needed)
-    env = os.environ.copy()
-    env["PLAN_TASK_NAME"] = task_name
-    env["PLAN_DEV_TYPE"] = dev_type
-    env["PLAN_TASK_DIR"] = task_dir
-    env["PLAN_REQUIREMENT"] = requirement
-    env["https_proxy"] = https_proxy
-    env["http_proxy"] = http_proxy
-    env["all_proxy"] = all_proxy
+        # Get proxy environment variables
+        https_proxy = os.environ.get("https_proxy", "")
+        http_proxy = os.environ.get("http_proxy", "")
+        all_proxy = os.environ.get("all_proxy", "")
 
-    # Set non-interactive env var based on platform
-    env.update(adapter.get_non_interactive_env())
+        # Start agent in background (cross-platform, no shell script needed)
+        env = os.environ.copy()
+        env["PLAN_TASK_NAME"] = task_name
+        env["PLAN_DEV_TYPE"] = dev_type
+        env["PLAN_TASK_DIR"] = task_dir
+        env["PLAN_REQUIREMENT"] = requirement
+        env["https_proxy"] = https_proxy
+        env["http_proxy"] = http_proxy
+        env["all_proxy"] = all_proxy
 
-    # Build CLI command using adapter
-    cli_cmd = adapter.build_run_command(
-        agent="plan",  # Will be mapped to "trellis-plan" for OpenCode
-        prompt=f"Start planning for task: {task_name}",
-        skip_permissions=True,
-        verbose=True,
-        json_output=True,
-    )
+        # Set non-interactive env var based on platform
+        env.update(adapter.get_non_interactive_env())
 
-    with log_file.open("w") as log_f:
-        # Use shell=False for cross-platform compatibility
-        # creationflags for Windows, start_new_session for Unix
-        popen_kwargs = {
-            "stdout": log_f,
-            "stderr": subprocess.STDOUT,
-            "cwd": str(project_root),
-            "env": env,
-        }
-        if sys.platform == "win32":
-            popen_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
-        else:
-            popen_kwargs["start_new_session"] = True
+        # Build CLI command using adapter
+        cli_cmd = adapter.build_run_command(
+            agent="plan",  # Will be mapped to "trellis-plan" for OpenCode
+            prompt=f"Start planning for task: {task_name}",
+            skip_permissions=True,
+            verbose=True,
+            json_output=True,
+        )
 
-        process = subprocess.Popen(cli_cmd, **popen_kwargs)
-    agent_pid = process.pid
+        with log_file.open("w") as log_f:
+            # Use shell=False for cross-platform compatibility
+            # creationflags for Windows, start_new_session for Unix
+            popen_kwargs = {
+                "stdout": log_f,
+                "stderr": subprocess.STDOUT,
+                "cwd": str(project_root),
+                "env": env,
+            }
+            if sys.platform == "win32":
+                popen_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+            else:
+                popen_kwargs["start_new_session"] = True
 
-    log_success(f"Plan Agent started (PID: {agent_pid})")
+            process = subprocess.Popen(cli_cmd, **popen_kwargs)
+        agent_pid = process.pid
 
-    # =============================================================================
-    # Summary
-    # =============================================================================
-    print()
-    print(f"{Colors.GREEN}=== Plan Agent Running ==={Colors.NC}")
-    print()
-    print(f"  Task:  {task_name}")
-    print(f"  Type:  {dev_type}")
-    print(f"  Dir:   {task_dir}")
-    print(f"  Log:   {log_file}")
-    print(f"  PID:   {agent_pid}")
-    print()
-    print(f"{Colors.YELLOW}To monitor:{Colors.NC}")
-    print(f"  tail -f {log_file}")
-    print()
-    print(f"{Colors.YELLOW}To check status:{Colors.NC}")
-    print(f"  ps -p {agent_pid}")
-    print(f"  ls -la {task_dir}")
-    print()
-    print(f"{Colors.YELLOW}After completion, run:{Colors.NC}")
-    print(f"  python3 ./.trellis/scripts/multi_agent/start.py {task_dir}")
+        log_success(f"Plan Agent started (PID: {agent_pid})")
+
+        # =============================================================================
+        # Summary (CLI mode)
+        # =============================================================================
+        print()
+        print(f"{Colors.GREEN}=== Plan Agent Running ==={Colors.NC}")
+        print()
+        print(f"  Task:  {task_name}")
+        print(f"  Type:  {dev_type}")
+        print(f"  Dir:   {task_dir}")
+        print(f"  Log:   {log_file}")
+        print(f"  PID:   {agent_pid}")
+        print()
+        print(f"{Colors.YELLOW}To monitor:{Colors.NC}")
+        print(f"  tail -f {log_file}")
+        print()
+        print(f"{Colors.YELLOW}To check status:{Colors.NC}")
+        print(f"  ps -p {agent_pid}")
+        print(f"  ls -la {task_dir}")
+        print()
+        print(f"{Colors.YELLOW}After completion, run:{Colors.NC}")
+        print(f"  python3 ./.trellis/scripts/multi_agent/start.py {task_dir}")
+    else:
+        log_info("Step 2: Preparing manual planning mode...")
+        log_file.write_text(
+            "\n".join(
+                [
+                    "manual-mode=true",
+                    f"platform={platform}",
+                    "note=No background plan agent started.",
+                    "next=Open the repository in your platform and continue planning manually from task directory.",
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        log_success("Manual plan mode prepared (no background process started)")
+
+        # =============================================================================
+        # Summary (manual mode)
+        # =============================================================================
+        print()
+        print(f"{Colors.GREEN}=== Plan Task Prepared (Manual Mode) ==={Colors.NC}")
+        print()
+        print(f"  Task:  {task_name}")
+        print(f"  Type:  {dev_type}")
+        print(f"  Dir:   {task_dir}")
+        print(f"  Log:   {log_file}")
+        print(f"  Mode:  manual")
+        print()
+        print(f"{Colors.YELLOW}Next steps:{Colors.NC}")
+        print(f"  1) Open {task_dir} and draft/update prd.md")
+        print(f"  2) Run: python3 ./.trellis/scripts/multi_agent/start.py {task_dir} --platform {platform}")
 
     return 0
 

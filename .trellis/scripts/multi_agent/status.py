@@ -77,6 +77,20 @@ def is_running(pid: int | str | None) -> bool:
         return False
 
 
+def is_manual_agent(agent: dict) -> bool:
+    """Check whether an agent entry represents manual-mode execution."""
+    platform = str(agent.get("platform", "claude")).lower()
+    pid = agent.get("pid")
+    if platform != "codex":
+        return False
+    if pid is None:
+        return True
+    try:
+        return int(pid) <= 0
+    except (ValueError, TypeError):
+        return True
+
+
 def status_color(status: str) -> str:
     """Get status color."""
     colors = {
@@ -317,12 +331,16 @@ def cmd_list(repo_root: Path) -> int:
         wt = agent.get("worktree_path", "?")
         started = agent.get("started_at", "?")
 
-        if is_running(pid):
+        manual = is_manual_agent(agent)
+        if manual:
+            status_icon = f"{Colors.YELLOW}M{Colors.NC}"
+        elif is_running(pid):
             status_icon = f"{Colors.GREEN}●{Colors.NC}"
         else:
             status_icon = f"{Colors.RED}○{Colors.NC}"
 
-        print(f"  {status_icon} {agent_id} (PID: {pid})")
+        mode_suffix = " [manual]" if manual else ""
+        print(f"  {status_icon} {agent_id} (PID: {pid}){mode_suffix}")
         print(f"    {Colors.DIM}Worktree: {wt}{Colors.NC}")
         print(f"    {Colors.DIM}Started:  {started}{Colors.NC}")
         print()
@@ -341,8 +359,9 @@ def cmd_summary(repo_root: Path, filter_assignee: str | None = None) -> int:
 
     registry_file = get_registry_file(repo_root)
 
-    # Count running agents
+    # Count running/manual agents
     running_count = 0
+    manual_count = 0
     total_agents = 0
 
     if registry_file and registry_file.is_file():
@@ -351,7 +370,9 @@ def cmd_summary(repo_root: Path, filter_assignee: str | None = None) -> int:
             agents = data.get("agents", [])
             total_agents = len(agents)
             for agent in agents:
-                if is_running(agent.get("pid")):
+                if is_manual_agent(agent):
+                    manual_count += 1
+                elif is_running(agent.get("pid")):
                     running_count += 1
 
     # Task queue stats
@@ -359,13 +380,14 @@ def cmd_summary(repo_root: Path, filter_assignee: str | None = None) -> int:
 
     print(f"{Colors.BLUE}=== Multi-Agent Status ==={Colors.NC}")
     print(
-        f"  Agents:  {Colors.GREEN}{running_count}{Colors.NC} running / {total_agents} registered"
+        f"  Agents:  {Colors.GREEN}{running_count}{Colors.NC} running / {Colors.YELLOW}{manual_count}{Colors.NC} manual / {total_agents} registered"
     )
     print(f"  Tasks:   {format_task_stats(task_stats)}")
     print()
 
     # Process tasks
     running_tasks = []
+    manual_tasks = []
     stopped_tasks = []
     regular_tasks = []
 
@@ -410,7 +432,31 @@ def cmd_summary(repo_root: Path, filter_assignee: str | None = None) -> int:
             started = agent_info.get("started_at")
             agent_platform = agent_info.get("platform", "claude")
 
-            if is_running(pid):
+            if is_manual_agent(agent_info):
+                task_dir_rel = agent_info.get("task_dir", "")
+                worktree_task_json = Path(worktree) / task_dir_rel / "task.json"
+                phase_source = task_json
+                if worktree_task_json.is_file():
+                    phase_source = worktree_task_json
+
+                phase_info_str = get_phase_info(phase_source)
+                elapsed = calc_elapsed(started)
+                worktree_data = _read_json_file(phase_source)
+                branch = worktree_data.get("branch", "N/A") if worktree_data else "N/A"
+                session_id_file = Path(worktree) / ".session-id"
+                manual_tasks.append(
+                    {
+                        "name": name,
+                        "priority": priority,
+                        "assignee": assignee,
+                        "phase_info": phase_info_str,
+                        "elapsed": elapsed,
+                        "branch": branch,
+                        "worktree": worktree,
+                        "session_id_file": session_id_file,
+                    }
+                )
+            elif is_running(pid):
                 # Running agent
                 task_dir_rel = agent_info.get("task_dir", "")
                 worktree_task_json = Path(worktree) / task_dir_rel / "task.json"
@@ -497,6 +543,28 @@ def cmd_summary(repo_root: Path, filter_assignee: str | None = None) -> int:
             print(f"  PID:      {Colors.DIM}{t['pid']}{Colors.NC}")
             print()
 
+    # Output manual tasks
+    if manual_tasks:
+        print(f"{Colors.YELLOW}Manual Agents (Codex):{Colors.NC}")
+        for t in manual_tasks:
+            priority_color = (
+                Colors.RED
+                if t["priority"] == "P0"
+                else (Colors.YELLOW if t["priority"] == "P1" else Colors.BLUE)
+            )
+            print(
+                f"{Colors.YELLOW}M{Colors.NC} {Colors.CYAN}{t['name']}{Colors.NC} {Colors.YELLOW}[manual]{Colors.NC} {priority_color}[{t['priority']}]{Colors.NC} @{t['assignee']}"
+            )
+            print(f"  Phase:    {t['phase_info']}")
+            print(f"  Elapsed:  {t['elapsed']}")
+            print(f"  Branch:   {Colors.DIM}{t['branch']}{Colors.NC}")
+            print(f"  Worktree: {Colors.DIM}{t['worktree']}{Colors.NC}")
+            print(f"  Next:     {Colors.DIM}cd {t['worktree']} && codex{Colors.NC}")
+            if t["session_id_file"].is_file():
+                session_id = t["session_id_file"].read_text(encoding="utf-8").strip()
+                print(f"  Session:  {Colors.DIM}{session_id}{Colors.NC}")
+            print()
+
     # Output stopped agents
     if stopped_tasks:
         print(f"{Colors.RED}Stopped Agents:{Colors.NC}")
@@ -527,7 +595,7 @@ def cmd_summary(repo_root: Path, filter_assignee: str | None = None) -> int:
             print()
 
     # Separator
-    if (running_tasks or stopped_tasks) and regular_tasks:
+    if (running_tasks or manual_tasks or stopped_tasks) and regular_tasks:
         print(f"{Colors.DIM}───────────────────────────────────────{Colors.NC}")
         print()
 
@@ -560,7 +628,7 @@ def cmd_summary(repo_root: Path, filter_assignee: str | None = None) -> int:
                 f"  {color}●{Colors.NC} {t['name']} ({t['status']}) {priority_color}[{t['priority']}]{Colors.NC}"
             )
 
-    if running_tasks:
+    if running_tasks or manual_tasks:
         print()
         print(f"{Colors.DIM}─────────────────────────────────────{Colors.NC}")
         print(f"{Colors.DIM}Use --progress <name> for quick activity view{Colors.NC}")
@@ -601,7 +669,11 @@ def cmd_detail(target: str, repo_root: Path) -> int:
     print()
 
     # Status
-    if is_running(pid):
+    if is_manual_agent(agent):
+        print(f"  Status:    {Colors.YELLOW}Manual{Colors.NC}")
+        print()
+        print(f"  {Colors.YELLOW}Continue:{Colors.NC} cd {worktree} && codex")
+    elif is_running(pid):
         print(f"  Status:    {Colors.GREEN}Running{Colors.NC}")
     else:
         print(f"  Status:    {Colors.RED}Stopped{Colors.NC}")

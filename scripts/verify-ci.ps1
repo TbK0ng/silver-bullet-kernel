@@ -119,6 +119,15 @@ try {
       -WorkingDirectory $sbkRoot
   }
 
+  $skillParityScriptPath = Join-Path $PSScriptRoot "workflow-skill-parity-gate.ps1"
+  Invoke-Step `
+    -Name "workflow skill parity gate" `
+    -Command "powershell -ExecutionPolicy Bypass -File ./scripts/workflow-skill-parity-gate.ps1" `
+    -Action {
+    & $skillParityScriptPath
+  } `
+    -WorkingDirectory $sbkRoot
+
   $ciCommands = @(Get-SbkVerifyCommands -Runtime $runtime -Mode "ci")
   foreach ($command in $ciCommands) {
     Invoke-Step `

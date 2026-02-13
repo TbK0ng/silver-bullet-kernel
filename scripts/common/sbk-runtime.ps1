@@ -335,3 +335,114 @@ function Get-SbkVerifyCommands {
 
   return @($commands | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) })
 }
+
+function Get-SbkPlatformCapabilities {
+  param(
+    [Parameter(Mandatory = $true)][string]$SbkRoot,
+    [string]$TargetRepoRoot = "",
+    [string]$PlatformOverride = ""
+  )
+
+  $capabilitiesPath = Join-Path $SbkRoot "config\\platform-capabilities.json"
+  $capabilitiesConfig = Read-SbkJsonFile -Path $capabilitiesPath
+
+  if ($null -eq $capabilitiesConfig) {
+    $capabilitiesConfig = [PSCustomObject]@{
+      version = 1
+      defaultPlatform = "claude"
+      platforms = @(
+        [PSCustomObject]@{
+          name = "claude"
+          displayName = "Claude Code"
+          supportsCliAgents = $true
+          supportsSessionIdOnCreate = $true
+          supportsResume = $true
+          supportsSkipPermissions = $true
+          manualMode = $false
+          resumeHint = "claude --resume <session-id>"
+        },
+        [PSCustomObject]@{
+          name = "codex"
+          displayName = "Codex"
+          supportsCliAgents = $false
+          supportsSessionIdOnCreate = $false
+          supportsResume = $false
+          supportsSkipPermissions = $false
+          manualMode = $true
+          resumeHint = "Open worktree in Codex and continue from .trellis/.current-task"
+        }
+      )
+      detection = [PSCustomObject]@{
+        directories = @(
+          [PSCustomObject]@{ name = "claude"; path = ".claude" },
+          [PSCustomObject]@{ name = "codex"; path = ".agents/skills" }
+        )
+      }
+    }
+  }
+
+  $platforms = @(Get-SbkPropertyValue -Object $capabilitiesConfig -Name "platforms")
+  $defaultPlatformRaw = [string](Get-SbkPropertyValue -Object $capabilitiesConfig -Name "defaultPlatform")
+  $defaultPlatform = if ([string]::IsNullOrWhiteSpace($defaultPlatformRaw)) { "claude" } else { $defaultPlatformRaw.ToLowerInvariant() }
+  $selectedPlatformName = ""
+
+  if (-not [string]::IsNullOrWhiteSpace($PlatformOverride)) {
+    $selectedPlatformName = $PlatformOverride
+  } elseif (-not [string]::IsNullOrWhiteSpace($env:SBK_PLATFORM)) {
+    $selectedPlatformName = $env:SBK_PLATFORM
+  } elseif (-not [string]::IsNullOrWhiteSpace($env:TRELLIS_PLATFORM)) {
+    $selectedPlatformName = $env:TRELLIS_PLATFORM
+  }
+
+  $targetRoot = if (-not [string]::IsNullOrWhiteSpace($TargetRepoRoot)) {
+    Resolve-SbkPath -BasePath $SbkRoot -Path $TargetRepoRoot
+  } else {
+    $SbkRoot
+  }
+
+  if ([string]::IsNullOrWhiteSpace($selectedPlatformName)) {
+    $detection = Get-SbkPropertyValue -Object $capabilitiesConfig -Name "detection"
+    $detectionDirs = @(Get-SbkPropertyValue -Object $detection -Name "directories")
+    foreach ($entry in $detectionDirs) {
+      $entryName = [string](Get-SbkPropertyValue -Object $entry -Name "name")
+      $entryPath = [string](Get-SbkPropertyValue -Object $entry -Name "path")
+      if ([string]::IsNullOrWhiteSpace($entryName) -or [string]::IsNullOrWhiteSpace($entryPath)) {
+        continue
+      }
+
+      $candidatePath = Join-Path $targetRoot ($entryPath -replace "/", "\\")
+      if (Test-Path $candidatePath) {
+        $selectedPlatformName = $entryName
+        break
+      }
+    }
+  }
+
+  if ([string]::IsNullOrWhiteSpace($selectedPlatformName)) {
+    $selectedPlatformName = $defaultPlatform
+  }
+  $selectedPlatformName = $selectedPlatformName.ToLowerInvariant()
+
+  $selectedPlatform = $platforms | Where-Object { [string](Get-SbkPropertyValue -Object $_ -Name "name") -eq $selectedPlatformName } | Select-Object -First 1
+  if ($null -eq $selectedPlatform) {
+    $selectedPlatform = $platforms | Where-Object { [string](Get-SbkPropertyValue -Object $_ -Name "name") -eq $defaultPlatform } | Select-Object -First 1
+  }
+  if ($null -eq $selectedPlatform) {
+    $selectedPlatform = $platforms | Select-Object -First 1
+  }
+
+  $resolvedPlatformName = [string](Get-SbkPropertyValue -Object $selectedPlatform -Name "name")
+  if ([string]::IsNullOrWhiteSpace($resolvedPlatformName)) {
+    $resolvedPlatformName = $defaultPlatform
+  }
+
+  return [PSCustomObject]@{
+    path = $capabilitiesPath
+    version = [int](Get-SbkPropertyValue -Object $capabilitiesConfig -Name "version")
+    defaultPlatform = $defaultPlatform
+    selectedPlatformName = $resolvedPlatformName
+    selectedPlatform = $selectedPlatform
+    platforms = @($platforms)
+    targetRepoRoot = $targetRoot
+  }
+}

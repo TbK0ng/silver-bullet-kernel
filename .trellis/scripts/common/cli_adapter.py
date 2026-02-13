@@ -219,8 +219,10 @@ class CLIAdapter:
             cmd.append(prompt)
 
         elif self.platform == "codex":
-            cmd = ["codex", "exec"]
-            cmd.append(prompt)
+            raise ValueError(
+                "Codex is configured for manual mode in multi-agent start; "
+                "CLI auto-run is not supported."
+            )
 
         else:  # claude
             cmd = ["claude", "-p"]
@@ -254,7 +256,9 @@ class CLIAdapter:
         if self.platform == "opencode":
             return ["opencode", "run", "--session", session_id]
         elif self.platform == "codex":
-            return ["codex", "resume", session_id]
+            raise ValueError(
+                "Codex manual mode does not support session-based CLI resume."
+            )
         else:
             return ["claude", "--resume", session_id]
 
@@ -268,6 +272,14 @@ class CLIAdapter:
         Returns:
             Command string for display
         """
+        if self.platform == "codex":
+            if cwd:
+                return (
+                    f"cd {cwd} && codex  # manual mode: continue from "
+                    ".trellis/.current-task"
+                )
+            return "codex  # manual mode: continue from .trellis/.current-task"
+
         cmd = self.build_resume_command(session_id)
         cmd_str = " ".join(cmd)
 
@@ -304,6 +316,8 @@ class CLIAdapter:
             return "opencode"
         elif self.is_cursor:
             return "cursor"  # Note: Cursor is IDE-only, no CLI
+        elif self.platform == "codex":
+            return "codex"
         else:
             return "claude"
 
@@ -312,7 +326,7 @@ class CLIAdapter:
         """Check if platform supports running agents via CLI.
 
         Claude Code and OpenCode support CLI agent execution.
-        Cursor is IDE-only and doesn't support CLI agents.
+        Cursor/iflow/codex run in manual mode in this workflow.
         """
         return self.platform in ("claude", "opencode")
 
@@ -326,6 +340,7 @@ class CLIAdapter:
 
         Claude Code: Yes (--session-id)
         OpenCode: No (auto-generated, extract from logs)
+        Codex: No (manual mode)
         """
         return self.platform == "claude"
 

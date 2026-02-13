@@ -9,12 +9,12 @@ This script:
 1. Creates worktree (if not exists) with dependency install
 2. Copies environment files (from worktree.yaml config)
 3. Sets .current-task in worktree
-4. Starts claude agent in background
+4. Starts platform agent in background (or prepares manual mode)
 5. Registers agent to registry.json
 
 Prerequisites:
     - task.json must exist with 'branch' field
-    - agents/dispatch.md must exist (in .claude/, .cursor/, .iflow/, or .opencode/)
+    - agents/dispatch.md must exist for CLI platforms (.claude/, .cursor/, .iflow/, or .opencode/)
 
 Configuration: .trellis/worktree.yaml
 """
@@ -124,7 +124,7 @@ def main() -> int:
     parser.add_argument("task_dir", help="Task directory path")
     parser.add_argument(
         "--platform", "-p",
-        choices=["claude", "cursor", "iflow", "opencode"],
+        choices=["claude", "cursor", "iflow", "opencode", "codex"],
         default=DEFAULT_PLATFORM,
         help="Platform to use (default: claude)"
     )
@@ -155,11 +155,18 @@ def main() -> int:
         log_error(f"task.json not found at {task_json_path}")
         return 1
 
-    dispatch_md = adapter.get_agent_path("dispatch", project_root)
-    if not dispatch_md.is_file():
-        log_error(f"dispatch.md not found at {dispatch_md}")
-        log_info(f"Platform: {platform}")
-        return 1
+    if adapter.supports_cli_agents:
+        dispatch_md = adapter.get_agent_path("dispatch", project_root)
+        if not dispatch_md.is_file():
+            log_error(f"dispatch.md not found at {dispatch_md}")
+            log_info(f"Platform: {platform}")
+            return 1
+    else:
+        skills_dir = adapter.get_config_dir(project_root) / "skills"
+        if not skills_dir.is_dir():
+            log_error(f"skills directory not found at {skills_dir}")
+            log_info(f"Platform: {platform}")
+            return 1
 
     config_file = get_worktree_config(project_root)
     if not config_file.is_file():
@@ -328,7 +335,7 @@ def main() -> int:
     log_success(f"Current task set: {task_dir_relative}")
 
     # =============================================================================
-    # Step 3: Prepare and Start Claude Agent
+    # Step 3: Prepare and Start Agent (or manual mode)
     # =============================================================================
     log_info(f"Step 3: Starting {adapter.cli_name} agent...")
 
@@ -341,80 +348,98 @@ def main() -> int:
 
     log_file.touch()
 
-    # Generate session ID for resume support (Claude Code only)
-    # OpenCode generates its own session ID, we'll extract it from logs later
-    if adapter.supports_session_id_on_create:
-        session_id = str(uuid.uuid4()).lower()
-        session_id_file.write_text(session_id, encoding="utf-8")
-        log_info(f"Session ID: {session_id}")
+    if adapter.supports_cli_agents:
+        # Generate session ID for resume support (Claude Code only)
+        # OpenCode generates its own session ID, we'll extract it from logs later
+        if adapter.supports_session_id_on_create:
+            session_id = str(uuid.uuid4()).lower()
+            session_id_file.write_text(session_id, encoding="utf-8")
+            log_info(f"Session ID: {session_id}")
+        else:
+            session_id = None  # Will be extracted from logs after startup
+            log_info("Session ID will be extracted from logs after startup")
+
+        # Get proxy environment variables
+        https_proxy = os.environ.get("https_proxy", "")
+        http_proxy = os.environ.get("http_proxy", "")
+        all_proxy = os.environ.get("all_proxy", "")
+
+        # Start agent in background (cross-platform, no shell script needed)
+        env = os.environ.copy()
+        env["https_proxy"] = https_proxy
+        env["http_proxy"] = http_proxy
+        env["all_proxy"] = all_proxy
+
+        # Set non-interactive env var based on platform
+        env.update(adapter.get_non_interactive_env())
+
+        # Build CLI command using adapter
+        # Note: Use explicit prompt to avoid confusion with CI/CD pipelines
+        # Also remind the model to follow its agent definition for better cross-model compatibility
+        cli_cmd = adapter.build_run_command(
+            agent="dispatch",
+            prompt="Follow your agent instructions to execute the task workflow. Start by reading .trellis/.current-task to get the task directory, then execute each action in task.json next_action array in order.",
+            session_id=session_id if adapter.supports_session_id_on_create else None,
+            skip_permissions=True,
+            verbose=True,
+            json_output=True,
+        )
+
+        with log_file.open("w") as log_f:
+            # Use shell=False for cross-platform compatibility
+            # creationflags for Windows, start_new_session for Unix
+            popen_kwargs = {
+                "stdout": log_f,
+                "stderr": subprocess.STDOUT,
+                "cwd": worktree_path,
+                "env": env,
+            }
+            if sys.platform == "win32":
+                popen_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+            else:
+                popen_kwargs["start_new_session"] = True
+
+            process = subprocess.Popen(cli_cmd, **popen_kwargs)
+        agent_pid = process.pid
+
+        log_success(f"Agent started with PID: {agent_pid}")
+
+        # For OpenCode: extract session ID from logs after startup
+        if not adapter.supports_session_id_on_create:
+            import time
+            log_info("Waiting for session ID from logs...")
+            # Wait a bit for the log to have session ID
+            for _ in range(10):  # Try for up to 5 seconds
+                time.sleep(0.5)
+                try:
+                    log_content = log_file.read_text(encoding="utf-8", errors="replace")
+                    session_id = adapter.extract_session_id_from_log(log_content)
+                    if session_id:
+                        session_id_file.write_text(session_id, encoding="utf-8")
+                        log_success(f"Session ID extracted: {session_id}")
+                        break
+                except Exception:
+                    pass
+            else:
+                log_warn("Could not extract session ID from logs")
+                session_id = "unknown"
     else:
-        session_id = None  # Will be extracted from logs after startup
-        log_info("Session ID will be extracted from logs after startup")
-
-    # Get proxy environment variables
-    https_proxy = os.environ.get("https_proxy", "")
-    http_proxy = os.environ.get("http_proxy", "")
-    all_proxy = os.environ.get("all_proxy", "")
-
-    # Start agent in background (cross-platform, no shell script needed)
-    env = os.environ.copy()
-    env["https_proxy"] = https_proxy
-    env["http_proxy"] = http_proxy
-    env["all_proxy"] = all_proxy
-
-    # Set non-interactive env var based on platform
-    env.update(adapter.get_non_interactive_env())
-
-    # Build CLI command using adapter
-    # Note: Use explicit prompt to avoid confusion with CI/CD pipelines
-    # Also remind the model to follow its agent definition for better cross-model compatibility
-    cli_cmd = adapter.build_run_command(
-        agent="dispatch",
-        prompt="Follow your agent instructions to execute the task workflow. Start by reading .trellis/.current-task to get the task directory, then execute each action in task.json next_action array in order.",
-        session_id=session_id if adapter.supports_session_id_on_create else None,
-        skip_permissions=True,
-        verbose=True,
-        json_output=True,
-    )
-
-    with log_file.open("w") as log_f:
-        # Use shell=False for cross-platform compatibility
-        # creationflags for Windows, start_new_session for Unix
-        popen_kwargs = {
-            "stdout": log_f,
-            "stderr": subprocess.STDOUT,
-            "cwd": worktree_path,
-            "env": env,
-        }
-        if sys.platform == "win32":
-            popen_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
-        else:
-            popen_kwargs["start_new_session"] = True
-
-        process = subprocess.Popen(cli_cmd, **popen_kwargs)
-    agent_pid = process.pid
-
-    log_success(f"Agent started with PID: {agent_pid}")
-
-    # For OpenCode: extract session ID from logs after startup
-    if not adapter.supports_session_id_on_create:
-        import time
-        log_info("Waiting for session ID from logs...")
-        # Wait a bit for the log to have session ID
-        for _ in range(10):  # Try for up to 5 seconds
-            time.sleep(0.5)
-            try:
-                log_content = log_file.read_text(encoding="utf-8", errors="replace")
-                session_id = adapter.extract_session_id_from_log(log_content)
-                if session_id:
-                    session_id_file.write_text(session_id, encoding="utf-8")
-                    log_success(f"Session ID extracted: {session_id}")
-                    break
-            except Exception:
-                pass
-        else:
-            log_warn("Could not extract session ID from logs")
-            session_id = "unknown"
+        agent_pid = 0
+        session_id = "manual"
+        session_id_file.write_text(session_id, encoding="utf-8")
+        log_file.write_text(
+            "\n".join(
+                [
+                    "manual-mode=true",
+                    "platform=codex",
+                    "note=No background CLI process started.",
+                    "next=Open this worktree in Codex and continue from .trellis/.current-task",
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        log_success("Manual mode prepared (no background process started)")
 
     # =============================================================================
     # Step 4: Register to Registry (in main repo, not worktree)
@@ -446,13 +471,18 @@ def main() -> int:
     print(f"  Log:       {log_file}")
     print(f"  Registry:  {registry_get_file(project_root)}")
     print()
-    print(f"{Colors.YELLOW}To monitor:{Colors.NC} tail -f {log_file}")
-    print(f"{Colors.YELLOW}To stop:{Colors.NC}    kill {agent_pid}")
-    if session_id and session_id != "unknown":
-        resume_cmd = adapter.get_resume_command_str(session_id, cwd=worktree_path)
-        print(f"{Colors.YELLOW}To resume:{Colors.NC}  {resume_cmd}")
+    if adapter.supports_cli_agents:
+        print(f"{Colors.YELLOW}To monitor:{Colors.NC} tail -f {log_file}")
+        print(f"{Colors.YELLOW}To stop:{Colors.NC}    kill {agent_pid}")
+        if session_id and session_id != "unknown":
+            resume_cmd = adapter.get_resume_command_str(session_id, cwd=worktree_path)
+            print(f"{Colors.YELLOW}To resume:{Colors.NC}  {resume_cmd}")
+        else:
+            print(f"{Colors.YELLOW}To resume:{Colors.NC}  (session ID not available)")
     else:
-        print(f"{Colors.YELLOW}To resume:{Colors.NC}  (session ID not available)")
+        print(f"{Colors.YELLOW}Mode:{Colors.NC}       manual")
+        print(f"{Colors.YELLOW}To continue:{Colors.NC} cd {worktree_path} && codex")
+        print(f"{Colors.YELLOW}Verify hint:{Colors.NC} npm run sbk -- verify:fast")
 
     return 0
 

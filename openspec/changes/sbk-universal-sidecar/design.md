@@ -6,10 +6,14 @@ SBK already enforces policy-as-code, OpenSpec traceability, and worktree/session
 
 **Goals:**
 - Provide a single `sbk` command entrypoint for core operations.
+- Provide an explicit platform capability matrix (`claude`/`codex`/others) exposed by command.
+- Extend `sbk` entrypoint with Trellis high-leverage workflows (`explore`, `improve-ut`, `migrate-specs`, `parallel`) as tool-style subcommands.
 - Add first-class adapters for Node/TS, Python, Go, Java, Rust.
 - Keep strict governance rules intact by default.
 - Allow configuration overrides through explicit runtime config files.
 - Enforce docs updates whenever workflow/runtime contracts change.
+- Keep Claude and Codex distribution surfaces in parity via deterministic gate checks.
+- Keep Trellis-derived backend/guides/unit-test specifications available so command and skill workflows have complete source-of-truth references.
 
 **Non-Goals:**
 - Replace OpenSpec with a different planning system.
@@ -49,6 +53,36 @@ Add deterministic gate (`scripts/workflow-docs-sync-gate.ps1`) and integrate it 
 
 Rationale: user requirement explicitly demands implementation/docs synchronization.
 
+### Decision 5: Platform capability matrix is config-driven
+Introduce `config/platform-capabilities.json` and expose it through `sbk capabilities`.
+
+Rationale: avoid hidden platform assumptions in scripts and make parity differences explicit and testable.
+
+### Decision 6: Codex multi-agent path uses manual mode
+For `--platform codex`, prepare worktree/context/registry but do not spawn background CLI process.
+
+Rationale: Codex does not provide the same session-oriented CLI controls as Claude; manual mode preserves workflow completeness without fake process semantics.
+
+### Decision 7: Skill/command parity gate blocks drift
+Add deterministic gate (`scripts/workflow-skill-parity-gate.ps1`) and integrate it into verify/doctor.
+
+Rationale: parity must be enforced automatically, not by convention.
+
+### Decision 8: `sbk` delegates advanced workflows to focused scripts
+Use `sbk` as unified entry, but keep advanced flows (`parallel`, `improve-ut`, `migrate-specs`, `explore`) implemented as routed script behaviors with argument forwarding.
+
+Rationale: keeps orchestration policy in one place while preserving reusable scripts for local debugging and CI.
+
+### Decision 9: Python invocation resolution is fallback-based
+For script dispatch requiring Python, resolve runtime command in order: `python`, `py -3`, then `uv run python`.
+
+Rationale: target projects vary widely; fallback resolution preserves portability without forcing local PATH conventions.
+
+### Decision 10: Spec migration remains explicit and non-destructive
+`sbk migrate-specs` runs OpenSpec sync/validation commands and reports pending deltas; it does not auto-archive changes.
+
+Rationale: preserves governance review boundaries while still providing a single-command migration helper.
+
 ## Risks / Trade-offs
 
 - [Risk] Adapter auto-detect may pick wrong ecosystem in mixed-language repos.
@@ -57,6 +91,12 @@ Rationale: user requirement explicitly demands implementation/docs synchronizati
   - Mitigation: keep `node-ts` default with backward-compatible commands.
 - [Risk] Docs sync heuristics can produce false positives.
   - Mitigation: constrain trigger paths and required docs map; keep mapping declarative.
+- [Risk] Skill parity gate may fail when adding platform-specific capabilities.
+  - Mitigation: keep explicit allowlist/mapping for OpenSpec command namespace (`openspec-*` -> `opsx/*`).
+- [Risk] Codex manual mode may be mistaken for stopped agent.
+  - Mitigation: status output labels manual mode explicitly and prints next-step command.
+- [Risk] New subcommands can drift from skill/command docs.
+  - Mitigation: update docs runbook and parity gate together with command additions.
 
 ## Migration Plan
 

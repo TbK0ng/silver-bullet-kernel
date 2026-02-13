@@ -39,6 +39,10 @@ function Invoke-Diagnostics {
       action = { & (Join-Path $PSScriptRoot "workflow-docs-sync-gate.ps1") -Mode local -NoReport -Quiet }
     },
     @{
+      name = "workflow-skill-parity-gate"
+      action = { & (Join-Path $PSScriptRoot "workflow-skill-parity-gate.ps1") -NoReport -Quiet }
+    },
+    @{
       name = "git-status"
       action = { git -C $RepoRoot status -sb *> $null }
     }

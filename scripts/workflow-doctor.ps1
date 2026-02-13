@@ -70,10 +70,12 @@ $requiredPaths = @(
   "scripts/memory-context.ps1",
   "scripts/workflow-policy-gate.ps1",
   "scripts/workflow-docs-sync-gate.ps1",
+  "scripts/workflow-skill-parity-gate.ps1",
   "scripts/workflow-indicator-gate.ps1",
   "scripts/sbk.ps1",
   "scripts/common/sbk-runtime.ps1",
   "sbk.config.json",
+  "config/platform-capabilities.json",
   "config/adapters/node-ts.json",
   "workflow-policy.json",
   "docs/README.md"
@@ -150,6 +152,20 @@ Add-Check -Checks $checks `
   -Passed $docsSyncGatePassed `
   -Details $docsSyncGateDetails `
   -Remediation "Update docs mapped by sbk docs sync policy, then run: npm run workflow:docs-sync."
+
+$skillParityGatePassed = $true
+$skillParityGateDetails = "passed"
+try {
+  & (Join-Path $repoRoot "scripts\\workflow-skill-parity-gate.ps1") -NoReport -Quiet
+} catch {
+  $skillParityGatePassed = $false
+  $skillParityGateDetails = $_.Exception.Message
+}
+Add-Check -Checks $checks `
+  -Name "Workflow skill parity gate healthy" `
+  -Passed $skillParityGatePassed `
+  -Details $skillParityGateDetails `
+  -Remediation "Sync .agents/.codex/.claude skill and command capabilities, then run: npm run workflow:skill-parity."
 
 $overallPassed = (@($checks | Where-Object { -not $_.passed }).Count -eq 0)
 $timestamp = [DateTimeOffset]::UtcNow.ToString("o")

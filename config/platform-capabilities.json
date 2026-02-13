@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "defaultPlatform": "claude",
+  "platforms": [
+    {
+      "name": "claude",
+      "displayName": "Claude Code",
+      "supportsCliAgents": true,
+      "supportsSessionIdOnCreate": true,
+      "supportsResume": true,
+      "supportsSkipPermissions": true,
+      "manualMode": false,
+      "resumeHint": "claude --resume <session-id>"
+    },
+    {
+      "name": "opencode",
+      "displayName": "OpenCode",
+      "supportsCliAgents": true,
+      "supportsSessionIdOnCreate": false,
+      "supportsResume": true,
+      "supportsSkipPermissions": false,
+      "manualMode": false,
+      "resumeHint": "opencode run --session <session-id>"
+    },
+    {
+      "name": "codex",
+      "displayName": "Codex",
+      "supportsCliAgents": false,
+      "supportsSessionIdOnCreate": false,
+      "supportsResume": false,
+      "supportsSkipPermissions": false,
+      "manualMode": true,
+      "resumeHint": "Open worktree in Codex and continue from .trellis/.current-task"
+    },
+    {
+      "name": "cursor",
+      "displayName": "Cursor",
+      "supportsCliAgents": false,
+      "supportsSessionIdOnCreate": false,
+      "supportsResume": false,
+      "supportsSkipPermissions": false,
+      "manualMode": true,
+      "resumeHint": "Open worktree in Cursor and continue from task context"
+    },
+    {
+      "name": "iflow",
+      "displayName": "iFlow",
+      "supportsCliAgents": false,
+      "supportsSessionIdOnCreate": false,
+      "supportsResume": false,
+      "supportsSkipPermissions": false,
+      "manualMode": true,
+      "resumeHint": "Open worktree in iFlow and continue from task context"
+    }
+  ],
+  "detection": {
+    "directories": [
+      {
+        "name": "opencode",
+        "path": ".opencode"
+      },
+      {
+        "name": "iflow",
+        "path": ".iflow"
+      },
+      {
+        "name": "cursor",
+        "path": ".cursor"
+      },
+      {
+        "name": "claude",
+        "path": ".claude"
+      },
+      {
+        "name": "codex",
+        "path": ".agents/skills"
+      }
+    ]
+  }
+}

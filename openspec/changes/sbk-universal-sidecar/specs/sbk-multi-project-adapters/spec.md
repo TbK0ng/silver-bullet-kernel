@@ -25,3 +25,21 @@ The kernel SHALL expose a single `sbk` command contract for core workflow action
 - **WHEN** contributor invokes `sbk` subcommands for doctor/policy/change/session
 - **THEN** dispatcher routes to existing scripts with parameter forwarding
 - **AND** exits non-zero when the delegated operation fails
+
+#### Scenario: Contributor runs multi-agent orchestration through `sbk parallel`
+- **WHEN** contributor invokes `sbk parallel <plan|start|status|cleanup> ...`
+- **THEN** dispatcher executes `.trellis/scripts/multi_agent/*.py` with forwarded arguments
+- **AND** codex platform path remains manual-mode compatible while claude path remains session-capable
+
+### Requirement: Python Runtime Dispatch Fallback
+The kernel SHALL resolve Python command execution for script delegation across heterogeneous project environments.
+
+#### Scenario: Machine lacks `python` command
+- **WHEN** `sbk` needs to execute a Python workflow script and `python` is unavailable
+- **THEN** runtime attempts supported fallbacks (`py -3`, then `uv run python`)
+- **AND** command fails with a clear actionable error if no Python runtime can be resolved
+
+#### Scenario: Contributor inspects platform capability matrix
+- **WHEN** contributor invokes `sbk capabilities`
+- **THEN** dispatcher prints matrix fields for each supported platform
+- **AND** selected platform resolution follows runtime detection/override rules

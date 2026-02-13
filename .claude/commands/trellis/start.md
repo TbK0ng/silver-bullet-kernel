@@ -246,6 +246,9 @@ If yes, resume from the appropriate step (usually Step 7 or 8).
 |---------|-------------|
 | `/trellis:start` | Begin a session (this command) |
 | `/trellis:parallel` | Complex tasks needing isolated worktree |
+| `/trellis:brainstorm` | Explore requirements before implementation |
+| `/trellis:improve-ut` | Improve test coverage and run UT validation |
+| `/trellis:migrate-specs` | Sync OpenSpec delta specs into canonical specs |
 | `/trellis:finish-work` | Before committing changes |
 | `/trellis:record-session` | After completing a task |
 
