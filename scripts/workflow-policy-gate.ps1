@@ -115,7 +115,8 @@ function Get-BranchDeltaInfo {
     }
   }
 
-  $baseSha = (git -C $RepoRoot rev-parse --verify --quiet $resolvedBaseRef | Select-Object -First 1).Trim()
+  $baseShaRaw = [string](git -C $RepoRoot rev-parse --verify --quiet $resolvedBaseRef | Select-Object -First 1)
+  $baseSha = $baseShaRaw.Trim()
   if ([string]::IsNullOrWhiteSpace($baseSha)) {
     return [ordered]@{
       available = $false

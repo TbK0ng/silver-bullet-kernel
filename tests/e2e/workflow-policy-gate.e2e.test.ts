@@ -5,9 +5,15 @@ import { spawnSync } from "node:child_process";
 import { afterEach, describe, expect, it } from "vitest";
 
 function run(command: string, args: string[], cwd: string) {
+  const env = { ...process.env };
+  // Keep test repos isolated from caller-level CI base-ref settings.
+  delete env.WORKFLOW_BASE_REF;
+  delete env.GITHUB_BASE_REF;
+
   return spawnSync(command, args, {
     cwd,
     encoding: "utf8",
+    env,
   });
 }
 
