@@ -1,3 +1,8 @@
+---
+name: memory-context
+description: Use when you need reliable context with minimum token load through progressive disclosure.
+---
+
 # Memory Context (Progressive Disclosure)
 
 Use this skill when you need reliable context with minimum token load.
