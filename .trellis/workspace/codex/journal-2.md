@@ -66,3 +66,47 @@ S001, S002, S003, S004
 - `npm run workflow:policy`
 - `npm run verify:fast`
 - `npm run test:e2e`
+
+## Session 4: Usability Closure and Verification Alignment
+
+**Date**: 2026-02-13  
+**Task**: fix-usability-closure
+
+### Summary
+
+Closed usability and governance drift gaps found during full review of the
+silver-bullet extensions over the Trellis baseline.
+
+### Memory Sources
+
+- `openspec/changes/fix-usability-closure/proposal.md`
+- `openspec/changes/fix-usability-closure/design.md`
+- `openspec/changes/fix-usability-closure/tasks.md`
+- `scripts/memory-context.ps1`
+- `scripts/workflow-doctor.ps1`
+
+### Disclosure Level
+
+index-then-detail
+
+### Source IDs
+
+S001, S002, S003, S004, S005
+
+### Main Changes
+
+- Fixed memory context branchless invocation behavior and added non-`sbk-*` regression coverage.
+- Excluded `.venv/**` from lint scan to remove virtualenv false-positive failures.
+- Corrected `workflow:gate` command mapping to indicator gate implementation.
+- Updated PowerShell doctor checks to current docs topology and working flags.
+- Added baseline artifact `.secrets.baseline` for healthy doctor status.
+- Restricted CI workflow verification to PR flow to match strict branch governance model.
+
+### Verification
+
+- `npm run memory:context -- -Stage index`
+- `npm run lint`
+- `npm run typecheck`
+- `npm run test:e2e`
+- `npm run workflow:gate`
+- `npm run workflow:doctor`

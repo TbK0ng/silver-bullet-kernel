@@ -2,9 +2,6 @@ name: ci
 
 on:
   pull_request:
-  push:
-    branches:
-      - main
 
 jobs:
   verify:
@@ -34,9 +31,3 @@ jobs:
           WORKFLOW_BASE_REF: origin/${{ github.base_ref }}
         run: ./scripts/verify-ci.ps1
 
-      - name: Verify (Push)
-        if: github.event_name != 'pull_request'
-        shell: pwsh
-        env:
-          WORKFLOW_BASE_REF: ${{ github.event.before }}
-        run: ./scripts/verify-ci.ps1

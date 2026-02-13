@@ -1,6 +1,6 @@
 ﻿{
-    "generatedAt":  "2026-02-12T12:26:02.5129798+00:00",
-    "overallPassed":  true,
+    "generatedAt":  "2026-02-13T13:28:55.7250011+00:00",
+    "overallPassed":  false,
     "checks":  [
                    {
                        "remediation":  "Install Node.js \u003e= 20.19.0",
@@ -16,75 +16,75 @@
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\.trellis\\spec\\guides\\constitution.md",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\.trellis\\spec\\guides\\constitution.md",
                        "name":  "Path exists: .trellis/spec/guides/constitution.md",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\.trellis\\spec\\guides\\memory-governance.md",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\.trellis\\spec\\guides\\memory-governance.md",
                        "name":  "Path exists: .trellis/spec/guides/memory-governance.md",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\.codex\\skills",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\.codex\\skills",
                        "name":  "Path exists: .codex/skills",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\.codex\\skills\\memory-context\\SKILL.md",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\.codex\\skills\\memory-context\\SKILL.md",
                        "name":  "Path exists: .codex/skills/memory-context/SKILL.md",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\openspec\\specs",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\openspec\\specs",
                        "name":  "Path exists: openspec/specs",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\scripts\\verify-ci.ps1",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\scripts\\verify-ci.ps1",
                        "name":  "Path exists: scripts/verify-ci.ps1",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\scripts\\collect-metrics.ps1",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\scripts\\collect-metrics.ps1",
                        "name":  "Path exists: scripts/collect-metrics.ps1",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\scripts\\memory-context.ps1",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\scripts\\memory-context.ps1",
                        "name":  "Path exists: scripts/memory-context.ps1",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\scripts\\workflow-policy-gate.ps1",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\scripts\\workflow-policy-gate.ps1",
                        "name":  "Path exists: scripts/workflow-policy-gate.ps1",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\scripts\\workflow-indicator-gate.ps1",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\scripts\\workflow-indicator-gate.ps1",
                        "name":  "Path exists: scripts/workflow-indicator-gate.ps1",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\workflow-policy.json",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\workflow-policy.json",
                        "name":  "Path exists: workflow-policy.json",
                        "passed":  true
                    },
                    {
                        "remediation":  "Regenerate or restore missing workflow asset.",
-                       "details":  "E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\xxx_docs\\00-index.md",
+                       "details":  "E:\\docc\\silver-bullet-kernel\\xxx_docs\\00-index.md",
                        "name":  "Path exists: xxx_docs/00-index.md",
-                       "passed":  true
+                       "passed":  false
                    },
                    {
                        "remediation":  "Ensure openspec structure exists and is readable.",
@@ -94,7 +94,7 @@
                    },
                    {
                        "remediation":  "Run: npm run verify:fast or npm run verify:ci",
-                       "details":  "path=E:\\docc\\trellis-worktrees\\sbk-codex-strict-plan13-philosophy\\.metrics\\\\verify-runs.jsonl",
+                       "details":  "path=E:\\docc\\silver-bullet-kernel\\.metrics\\\\verify-runs.jsonl",
                        "name":  "Verify telemetry present",
                        "passed":  true
                    },

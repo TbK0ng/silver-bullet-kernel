@@ -112,7 +112,7 @@ function Resolve-ChangeName {
   param(
     [Parameter(Mandatory = $true)][string]$RepoRoot,
     [Parameter(Mandatory = $false)][string]$RequestedChange,
-    [Parameter(Mandatory = $true)][string]$BranchChange
+    [Parameter(Mandatory = $false)][AllowEmptyString()][string]$BranchChange = ""
   )
 
   if (-not [string]::IsNullOrWhiteSpace($RequestedChange)) {
@@ -143,8 +143,10 @@ $coreSources = @(
   ".trellis/spec/guides/memory-governance.md",
   ".trellis/spec/guides/quality-gates.md",
   "workflow-policy.json",
-  "xxx_docs/09-plan-traceability.md",
-  "xxx_docs/10-memory-governance-and-observability.md"
+  "xxx_docs/README.md",
+  "README.md",
+  "AGENTS.md",
+  ".trellis/workflow.md"
 )
 
 foreach ($source in $coreSources) {

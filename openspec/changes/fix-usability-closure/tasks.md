@@ -1,0 +1,12 @@
+## 1. Verification and Memory Usability Closure
+
+### Task Evidence
+
+| ID | Status | Files | Action | Verify | Done |
+| --- | --- | --- | --- | --- | --- |
+| 1.1 | [x] | `scripts/memory-context.ps1`, `tests/e2e/memory-context.e2e.test.ts` | Fix non-`sbk-*` branch handling in memory context and add regression coverage. | `npm run memory:context -- -Stage index`, `npm test` | Index stage now works on `main`, and e2e includes non-`sbk-*` branch scenario. |
+| 1.2 | [x] | `eslint.config.js` | Ensure verify entry points are runnable with local virtualenv artifacts present. | `npm run lint` | ESLint ignores `.venv/**`, removing virtualenv JS false positives from verify flow. |
+| 1.3 | [x] | `package.json` | Align `workflow:gate` command semantics with indicator gate docs and runtime. | `npm run workflow:gate` | `workflow:gate` now invokes `scripts/workflow-indicator-gate.ps1` directly. |
+| 1.4 | [x] | `scripts/workflow-doctor.ps1`, `.github/workflows/ci.yml` | Remove doctor path drift and resolve CI trigger conflict with strict branch policy. | `rg -n "xxx_docs/README.md|param\\(" scripts/workflow-doctor.ps1 && rg -n "pull_request" .github/workflows/ci.yml` | Doctor now checks `xxx_docs/README.md`, honors `-NoReport/-Quiet`, and CI verifies via PR flow only. |
+| 1.5 | [x] | `openspec/changes/fix-usability-closure/*` | Keep change artifacts complete and validated for governance traceability. | `openspec validate --all --strict --no-interactive` | OpenSpec strict validation passes with proposal/design/tasks and spec deltas. |
+| 1.6 | [x] | `.secrets.baseline`, `.trellis/workspace/codex/journal-2.md` | Add baseline artifact and owner-scoped session evidence to close diagnostics and disclosure requirements. | `npm run workflow:doctor:json` | Workflow doctor now reports `overall_status: healthy`; owner evidence includes disclosure metadata markers. |

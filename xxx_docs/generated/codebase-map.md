@@ -1,6 +1,6 @@
 ﻿# Codebase Map
 
-- generated_at: 2026-02-12 16:55:54
+- generated_at: 2026-02-13 21:55:49
 - repo_root: E:\docc\silver-bullet-kernel
 
 ## Top-Level
@@ -11,19 +11,24 @@
 - dir: .github
 - file: .gitignore
 - dir: .metrics
+- file: .secrets.baseline
 - dir: .trellis
+- dir: .venv
 - file: AGENTS.md
 - file: CLAUDE.md
 - file: eslint.config.js
 - dir: openspec
 - file: package.json
 - file: package-lock.json
+- file: pyproject.toml
 - file: README.md
 - dir: scripts
 - dir: src
 - dir: tests
 - file: tsconfig.json
+- file: uv.lock
 - file: vitest.config.ts
+- file: workflow-policy.json
 - dir: xxx_docs
 
 ## Tracked Files
@@ -75,6 +80,7 @@
 - .claude/hooks/ralph-loop.py
 - .claude/hooks/session-start.py
 - .claude/settings.json
+- .claude/skills/memory-context/SKILL.md
 - .claude/skills/openspec-apply-change/SKILL.md
 - .claude/skills/openspec-archive-change/SKILL.md
 - .claude/skills/openspec-bulk-archive-change/SKILL.md
@@ -94,6 +100,7 @@
 - .codex/skills/create-command/SKILL.md
 - .codex/skills/finish-work/SKILL.md
 - .codex/skills/integrate-skill/SKILL.md
+- .codex/skills/memory-context/SKILL.md
 - .codex/skills/onboard/SKILL.md
 - .codex/skills/openspec-apply-change/SKILL.md
 - .codex/skills/openspec-archive-change/SKILL.md
@@ -106,6 +113,7 @@
 - .codex/skills/openspec-sync-specs/SKILL.md
 - .codex/skills/openspec-verify-change/SKILL.md
 - .codex/skills/record-session/SKILL.md
+- .codex/skills/semantic-rename/SKILL.md
 - .codex/skills/start/SKILL.md
 - .codex/skills/update-spec/SKILL.md
 - .github/workflows/ci.yml
@@ -113,19 +121,28 @@
 - .trellis/.gitignore
 - .trellis/.template-hashes.json
 - .trellis/.version
+- .trellis/gotchas/ai-memory-limits.md
+- .trellis/gotchas/index.md
+- .trellis/metrics/daily/.gitkeep
+- .trellis/metrics/weekly/.gitkeep
+- .trellis/policy.yaml
 - .trellis/scripts/__init__.py
 - .trellis/scripts/add_session.py
+- .trellis/scripts/collect_metrics.py
 - .trellis/scripts/common/__init__.py
 - .trellis/scripts/common/cli_adapter.py
 - .trellis/scripts/common/developer.py
 - .trellis/scripts/common/git_context.py
 - .trellis/scripts/common/paths.py
 - .trellis/scripts/common/phase.py
+- .trellis/scripts/common/policy_loader.py
 - .trellis/scripts/common/registry.py
 - .trellis/scripts/common/task_queue.py
 - .trellis/scripts/common/task_utils.py
 - .trellis/scripts/common/worktree.py
 - .trellis/scripts/create_bootstrap.py
+- .trellis/scripts/doctor.py
+- .trellis/scripts/generate_report.py
 - .trellis/scripts/get_context.py
 - .trellis/scripts/get_developer.py
 - .trellis/scripts/init_developer.py
@@ -135,6 +152,8 @@
 - .trellis/scripts/multi_agent/plan.py
 - .trellis/scripts/multi_agent/start.py
 - .trellis/scripts/multi_agent/status.py
+- .trellis/scripts/policy_gate.py
+- .trellis/scripts/secret_scan.py
 - .trellis/scripts/task.py
 - .trellis/spec/backend/database-guidelines.md
 - .trellis/spec/backend/directory-structure.md
@@ -158,14 +177,25 @@
 - .trellis/spec/guides/quality-gates.md
 - .trellis/spec/guides/worktree-policy.md
 - .trellis/workflow.md
+- .trellis/workspace/codex/index.md
+- .trellis/workspace/codex/journal-1.md
+- .trellis/workspace/codex/journal-2.md
 - .trellis/workspace/index.md
 - .trellis/workspace/sample-owner/index.md
 - .trellis/workspace/sample-owner/journal-1.md
+- .trellis/workspace/sample-owner/journal-2.md
 - .trellis/worktree.yaml
 - AGENTS.md
 - CLAUDE.md
 - README.md
 - eslint.config.js
+- openspec/changes/archive/2026-02-12-add-workflow-doctor-and-advanced-metrics/.openspec.yaml
+- openspec/changes/archive/2026-02-12-add-workflow-doctor-and-advanced-metrics/design.md
+- openspec/changes/archive/2026-02-12-add-workflow-doctor-and-advanced-metrics/proposal.md
+- openspec/changes/archive/2026-02-12-add-workflow-doctor-and-advanced-metrics/specs/workflow-docs-system/spec.md
+- openspec/changes/archive/2026-02-12-add-workflow-doctor-and-advanced-metrics/specs/workflow-doctor/spec.md
+- openspec/changes/archive/2026-02-12-add-workflow-doctor-and-advanced-metrics/specs/workflow-observability/spec.md
+- openspec/changes/archive/2026-02-12-add-workflow-doctor-and-advanced-metrics/tasks.md
 - openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/.openspec.yaml
 - openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/design.md
 - openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/proposal.md
@@ -173,6 +203,13 @@
 - openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/specs/codex-workflow-kernel/spec.md
 - openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/specs/workflow-docs-system/spec.md
 - openspec/changes/archive/2026-02-12-bootstrap-codex-workflow-kernel/tasks.md
+- openspec/changes/archive/2026-02-12-close-gap-13-thought-enforcement/.openspec.yaml
+- openspec/changes/archive/2026-02-12-close-gap-13-thought-enforcement/design.md
+- openspec/changes/archive/2026-02-12-close-gap-13-thought-enforcement/proposal.md
+- openspec/changes/archive/2026-02-12-close-gap-13-thought-enforcement/specs/codex-workflow-kernel/spec.md
+- openspec/changes/archive/2026-02-12-close-gap-13-thought-enforcement/specs/workflow-docs-system/spec.md
+- openspec/changes/archive/2026-02-12-close-gap-13-thought-enforcement/specs/workflow-observability/spec.md
+- openspec/changes/archive/2026-02-12-close-gap-13-thought-enforcement/tasks.md
 - openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/.openspec.yaml
 - openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/design.md
 - openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/proposal.md
@@ -182,41 +219,86 @@
 - openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/specs/workflow-docs-system/spec.md
 - openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/specs/workflow-observability/spec.md
 - openspec/changes/archive/2026-02-12-complete-phase4-phase5-governance/tasks.md
+- openspec/changes/archive/2026-02-12-enforce-workflow-policy-gates/.openspec.yaml
+- openspec/changes/archive/2026-02-12-enforce-workflow-policy-gates/design.md
+- openspec/changes/archive/2026-02-12-enforce-workflow-policy-gates/proposal.md
+- openspec/changes/archive/2026-02-12-enforce-workflow-policy-gates/specs/codex-workflow-kernel/spec.md
+- openspec/changes/archive/2026-02-12-enforce-workflow-policy-gates/specs/memory-governance-policy/spec.md
+- openspec/changes/archive/2026-02-12-enforce-workflow-policy-gates/specs/workflow-docs-system/spec.md
+- openspec/changes/archive/2026-02-12-enforce-workflow-policy-gates/specs/workflow-doctor/spec.md
+- openspec/changes/archive/2026-02-12-enforce-workflow-policy-gates/specs/workflow-observability/spec.md
+- openspec/changes/archive/2026-02-12-enforce-workflow-policy-gates/tasks.md
+- openspec/changes/archive/2026-02-12-harden-fail-closed-owner-worktree-gates/.openspec.yaml
+- openspec/changes/archive/2026-02-12-harden-fail-closed-owner-worktree-gates/design.md
+- openspec/changes/archive/2026-02-12-harden-fail-closed-owner-worktree-gates/proposal.md
+- openspec/changes/archive/2026-02-12-harden-fail-closed-owner-worktree-gates/specs/codex-workflow-kernel/spec.md
+- openspec/changes/archive/2026-02-12-harden-fail-closed-owner-worktree-gates/specs/memory-governance-policy/spec.md
+- openspec/changes/archive/2026-02-12-harden-fail-closed-owner-worktree-gates/specs/workflow-docs-system/spec.md
+- openspec/changes/archive/2026-02-12-harden-fail-closed-owner-worktree-gates/tasks.md
+- openspec/changes/archive/2026-02-12-strict-plan13-philosophy/.openspec.yaml
+- openspec/changes/archive/2026-02-12-strict-plan13-philosophy/design.md
+- openspec/changes/archive/2026-02-12-strict-plan13-philosophy/proposal.md
+- openspec/changes/archive/2026-02-12-strict-plan13-philosophy/specs/codex-workflow-kernel/spec.md
+- openspec/changes/archive/2026-02-12-strict-plan13-philosophy/specs/memory-governance-policy/spec.md
+- openspec/changes/archive/2026-02-12-strict-plan13-philosophy/specs/workflow-docs-system/spec.md
+- openspec/changes/archive/2026-02-12-strict-plan13-philosophy/specs/workflow-observability/spec.md
+- openspec/changes/archive/2026-02-12-strict-plan13-philosophy/specs/workflow-security-policy/spec.md
+- openspec/changes/archive/2026-02-12-strict-plan13-philosophy/tasks.md
 - openspec/specs/appdemo-task-api/spec.md
 - openspec/specs/codex-workflow-kernel/spec.md
 - openspec/specs/memory-governance-policy/spec.md
 - openspec/specs/session-recovery-proof/spec.md
 - openspec/specs/workflow-docs-system/spec.md
+- openspec/specs/workflow-doctor/spec.md
 - openspec/specs/workflow-observability/spec.md
+- openspec/specs/workflow-security-policy/spec.md
 - package-lock.json
 - package.json
+- pyproject.toml
 - scripts/appdemo-smoke.ps1
 - scripts/collect-metrics.ps1
 - scripts/common/verify-telemetry.ps1
 - scripts/map-codebase.ps1
+- scripts/memory-context.ps1
+- scripts/semantic-rename.ts
+- scripts/update-token-cost.ps1
 - scripts/verify-ci.ps1
 - scripts/verify-fast.ps1
+- scripts/verify-loop.ps1
 - scripts/verify.ps1
+- scripts/workflow-doctor.ps1
+- scripts/workflow-indicator-gate.ps1
+- scripts/workflow-policy-gate.ps1
 - src/app.ts
 - src/server.ts
 - tests/e2e/app.e2e.test.ts
+- tests/e2e/memory-context.e2e.test.ts
+- tests/e2e/semantic-rename.e2e.test.ts
+- tests/e2e/workflow-policy-gate.e2e.test.ts
 - tsconfig.json
+- uv.lock
 - vitest.config.ts
-- xxx_docs/00-index.md
-- xxx_docs/01-setup-and-bootstrap.md
-- xxx_docs/02-brownfield-onboarding.md
-- xxx_docs/03-codex-daily-sop.md
-- xxx_docs/04-two-person-collaboration.md
-- xxx_docs/05-quality-gates-and-ci.md
-- xxx_docs/06-best-practices.md
-- xxx_docs/07-appdemo-validation-report.md
-- xxx_docs/08-troubleshooting.md
-- xxx_docs/09-plan-traceability.md
-- xxx_docs/10-memory-governance-and-observability.md
+- workflow-policy.json
+- "xxx_docs/01-\351\205\215\347\275\256\346\214\207\345\215\227.md"
+- "xxx_docs/02-\345\221\275\344\273\244\345\217\202\350\200\203.md"
+- "xxx_docs/03-\345\270\270\350\247\201\351\227\256\351\242\230.md"
+- xxx_docs/README.md
 - xxx_docs/generated/codebase-map.md
+- xxx_docs/generated/workflow-doctor.json
+- xxx_docs/generated/workflow-doctor.md
+- xxx_docs/generated/workflow-indicator-gate.json
+- xxx_docs/generated/workflow-indicator-gate.md
 - xxx_docs/generated/workflow-metrics-latest.json
 - xxx_docs/generated/workflow-metrics-weekly.md
+- xxx_docs/generated/workflow-policy-gate.json
+- xxx_docs/generated/workflow-policy-gate.md
 
 ## Untracked Files
 
-- (none)
+- .secrets.baseline
+- openspec/changes/fix-usability-closure/.openspec.yaml
+- openspec/changes/fix-usability-closure/design.md
+- openspec/changes/fix-usability-closure/proposal.md
+- openspec/changes/fix-usability-closure/specs/codex-workflow-kernel/spec.md
+- openspec/changes/fix-usability-closure/specs/memory-governance-policy/spec.md
+- openspec/changes/fix-usability-closure/tasks.md

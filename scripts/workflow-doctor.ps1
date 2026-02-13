@@ -1,3 +1,8 @@
+param(
+  [switch]$NoReport,
+  [switch]$Quiet
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
@@ -66,7 +71,7 @@ $requiredPaths = @(
   "scripts/workflow-policy-gate.ps1",
   "scripts/workflow-indicator-gate.ps1",
   "workflow-policy.json",
-  "xxx_docs/00-index.md"
+  "xxx_docs/README.md"
 )
 
 foreach ($p in $requiredPaths) {
@@ -146,26 +151,30 @@ $summary = @{
   checks = $checksForJson
 }
 
-$lines = @()
-$lines += "# Workflow Doctor Report"
-$lines += ""
-$lines += "- generated_at_utc: $([DateTimeOffset]::UtcNow.ToString("u"))"
-$lines += "- overall_status: $(if ($overallPassed) { "PASS" } else { "DEGRADED" })"
-$lines += ""
-$lines += "## Checks"
-$lines += ""
-$lines += "| Check | Status | Details | Remediation |"
-$lines += "| --- | --- | --- | --- |"
-foreach ($c in $checks) {
-  $status = if ($c.passed) { "PASS" } else { "FAIL" }
-  $lines += "| $($c.name) | $status | $($c.details) | $($c.remediation) |"
+if (-not $NoReport) {
+  $lines = @()
+  $lines += "# Workflow Doctor Report"
+  $lines += ""
+  $lines += "- generated_at_utc: $([DateTimeOffset]::UtcNow.ToString("u"))"
+  $lines += "- overall_status: $(if ($overallPassed) { "PASS" } else { "DEGRADED" })"
+  $lines += ""
+  $lines += "## Checks"
+  $lines += ""
+  $lines += "| Check | Status | Details | Remediation |"
+  $lines += "| --- | --- | --- | --- |"
+  foreach ($c in $checks) {
+    $status = if ($c.passed) { "PASS" } else { "FAIL" }
+    $lines += "| $($c.name) | $status | $($c.details) | $($c.remediation) |"
+  }
+
+  Set-Content -Path $reportMd -Encoding UTF8 -Value $lines
+  Set-Content -Path $reportJson -Encoding UTF8 -Value ($summary | ConvertTo-Json -Depth 8)
+
+  if (-not $Quiet) {
+    Write-Host "Wrote report: $reportMd"
+    Write-Host "Wrote summary: $reportJson"
+  }
 }
-
-Set-Content -Path $reportMd -Encoding UTF8 -Value $lines
-Set-Content -Path $reportJson -Encoding UTF8 -Value ($summary | ConvertTo-Json -Depth 8)
-
-Write-Host "Wrote report: $reportMd"
-Write-Host "Wrote summary: $reportJson"
 
 if (-not $overallPassed) {
   throw "workflow doctor failed: one or more checks are not healthy"

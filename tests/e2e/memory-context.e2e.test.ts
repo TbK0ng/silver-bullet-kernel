@@ -42,8 +42,10 @@ describe("memory context progressive disclosure", () => {
     writeFile(path.join(repoDir, ".trellis", "spec", "guides", "constitution.md"), "# Constitution");
     writeFile(path.join(repoDir, ".trellis", "spec", "guides", "memory-governance.md"), "# Memory Governance");
     writeFile(path.join(repoDir, ".trellis", "spec", "guides", "quality-gates.md"), "# Quality Gates");
-    writeFile(path.join(repoDir, "xxx_docs", "09-plan-traceability.md"), "# Traceability");
-    writeFile(path.join(repoDir, "xxx_docs", "10-memory-governance-and-observability.md"), "# Observability");
+    writeFile(path.join(repoDir, ".trellis", "workflow.md"), "# Workflow");
+    writeFile(path.join(repoDir, "xxx_docs", "README.md"), "# Docs Home");
+    writeFile(path.join(repoDir, "README.md"), "# Repo Readme");
+    writeFile(path.join(repoDir, "AGENTS.md"), "# Agents");
     writeFile(path.join(repoDir, ".trellis", "workspace", "codex", "index.md"), "# Codex Index");
     writeFile(path.join(repoDir, ".trellis", "workspace", "codex", "journal-1.md"), "## Session 1");
 
@@ -114,4 +116,46 @@ describe("memory context progressive disclosure", () => {
       .filter((line) => line.trim().length > 0);
     expect(auditLines.length).toBeGreaterThanOrEqual(2);
   }, 30000);
+
+  it("supports index stage on non-sbk branches without explicit change", () => {
+    const repoDir = fs.mkdtempSync(path.join(os.tmpdir(), "sbk-memory-context-default-"));
+    tempDirs.push(repoDir);
+
+    writeFile(
+      path.join(repoDir, "scripts", "memory-context.ps1"),
+      fs.readFileSync(path.join(process.cwd(), "scripts", "memory-context.ps1"), "utf8"),
+    );
+    writeFile(
+      path.join(repoDir, "workflow-policy.json"),
+      fs.readFileSync(path.join(process.cwd(), "workflow-policy.json"), "utf8"),
+    );
+
+    writeFile(path.join(repoDir, ".trellis", "spec", "guides", "constitution.md"), "# Constitution");
+    writeFile(path.join(repoDir, ".trellis", "spec", "guides", "memory-governance.md"), "# Memory Governance");
+    writeFile(path.join(repoDir, ".trellis", "spec", "guides", "quality-gates.md"), "# Quality Gates");
+    writeFile(path.join(repoDir, ".trellis", "workflow.md"), "# Workflow");
+    writeFile(path.join(repoDir, "xxx_docs", "README.md"), "# Docs Home");
+    writeFile(path.join(repoDir, "README.md"), "# Repo Readme");
+    writeFile(path.join(repoDir, "AGENTS.md"), "# Agents");
+
+    run("git", ["init"], repoDir);
+    run("git", ["config", "user.email", "test@example.com"], repoDir);
+    run("git", ["config", "user.name", "sbk-test"], repoDir);
+    run("git", ["add", "."], repoDir);
+    run("git", ["commit", "-m", "init"], repoDir);
+
+    const pwsh = process.platform === "win32" ? "powershell.exe" : "pwsh";
+    const indexRun = run(
+      pwsh,
+      ["-ExecutionPolicy", "Bypass", "-File", "./scripts/memory-context.ps1", "-Stage", "index"],
+      repoDir,
+    );
+
+    expect(indexRun.status).toBe(0);
+    const payload = JSON.parse(indexRun.stdout);
+    expect(payload.stage).toBe("index");
+    expect(payload.branch).not.toMatch(/^sbk-/);
+    expect(payload.count).toBeGreaterThan(0);
+    expect(payload.sources[0].id).toMatch(/^S\d{3}$/);
+  });
 });
