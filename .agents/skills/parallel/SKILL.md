@@ -1,3 +1,7 @@
+---
+name: parallel
+description: "Run multi-agent parallel workflow through Trellis plan/start/status pipeline."
+---
 # Multi-Agent Parallel Workflow
 
 Use this skill when work should be parallelized through Trellis multi-agent pipeline.
