@@ -67,7 +67,7 @@ function Get-SbkAdapterManifests {
     return @()
   }
 
-  $items = @(Get-ChildItem -Path $AdaptersRoot -File -Filter "*.json" | Sort-Object -Property Name)
+  $items = @(Get-ChildItem -Path $AdaptersRoot -Recurse -File -Filter "*.json" | Sort-Object -Property FullName)
   $adapters = @()
   foreach ($item in $items) {
     $parsed = Read-SbkJsonFile -Path $item.FullName
@@ -77,7 +77,19 @@ function Get-SbkAdapterManifests {
 
     $parsedName = [string](Get-SbkPropertyValue -Object $parsed -Name "name")
     if ([string]::IsNullOrWhiteSpace($parsedName)) {
-      $parsed | Add-Member -NotePropertyName "name" -NotePropertyValue $item.BaseName
+      continue
+    }
+
+    $hasDetect = $null -ne (Get-SbkPropertyValue -Object $parsed -Name "detect")
+    $hasImplementation = $null -ne (Get-SbkPropertyValue -Object $parsed -Name "implementation")
+    $hasVerify = $null -ne (Get-SbkPropertyValue -Object $parsed -Name "verify")
+    if (-not ($hasDetect -and $hasImplementation -and $hasVerify)) {
+      continue
+    }
+
+    $existingManifestPath = Get-SbkPropertyValue -Object $parsed -Name "manifestPath"
+    if ($null -eq $existingManifestPath -or [string]::IsNullOrWhiteSpace([string]$existingManifestPath)) {
+      $parsed | Add-Member -NotePropertyName "manifestPath" -NotePropertyValue $item.FullName -Force
     }
 
     $adapters += $parsed
@@ -230,6 +242,18 @@ function Get-SbkRuntimeContext {
       name = "node-ts"
       implementation = [PSCustomObject]@{ pathPrefixes = @(); pathFiles = @() }
       verify = [PSCustomObject]@{ fast = @(); full = @(); ci = @() }
+      capabilities = [PSCustomObject]@{
+        semantic = [PSCustomObject]@{
+          rename = [PSCustomObject]@{ supported = $true; backend = "typescript-language-service"; deterministic = $true }
+          referenceMap = [PSCustomObject]@{ supported = $true; backend = "typescript-language-service"; deterministic = $true }
+          safeDeleteCandidates = [PSCustomObject]@{ supported = $true; backend = "typescript-language-service"; deterministic = $true }
+        }
+      }
+      sdk = [PSCustomObject]@{
+        source = "builtin"
+        validated = $true
+        validationStatus = "certified"
+      }
     }
   }
 
@@ -283,6 +307,7 @@ function Get-SbkRuntimeContext {
 
   $implementationConfig = Get-SbkPropertyValue -Object $resolvedAdapter -Name "implementation"
   $verifyConfig = Get-SbkPropertyValue -Object $resolvedAdapter -Name "verify"
+  $resolvedAdapterCapabilities = Get-SbkPropertyValue -Object $resolvedAdapter -Name "capabilities"
 
   $implementationPrefixes = @()
   $implementationFiles = @()
@@ -298,6 +323,19 @@ function Get-SbkRuntimeContext {
     $verifyFast = @((Get-SbkPropertyValue -Object $verifyConfig -Name "fast") | ForEach-Object { [string]$_ })
     $verifyFull = @((Get-SbkPropertyValue -Object $verifyConfig -Name "full") | ForEach-Object { [string]$_ })
     $verifyCi = @((Get-SbkPropertyValue -Object $verifyConfig -Name "ci") | ForEach-Object { [string]$_ })
+  }
+
+  $adapterSdk = Get-SbkPropertyValue -Object $resolvedAdapter -Name "sdk"
+  $adapterSource = [string](Get-SbkPropertyValue -Object $adapterSdk -Name "source")
+  $adapterValidated = $true
+  $adapterValidatedRaw = Get-SbkPropertyValue -Object $adapterSdk -Name "validated"
+  if ($null -ne $adapterValidatedRaw) {
+    $adapterValidated = [bool]$adapterValidatedRaw
+  }
+  if ($profileName.Equals("strict", [System.StringComparison]::OrdinalIgnoreCase) -and
+    $adapterSource.Equals("plugin", [System.StringComparison]::OrdinalIgnoreCase) -and
+    -not $adapterValidated) {
+    throw "strict profile blocked unvalidated adapter '$resolvedAdapterName'. run 'sbk adapter validate/register' first."
   }
 
   return [PSCustomObject]@{
@@ -316,6 +354,8 @@ function Get-SbkRuntimeContext {
       full = @($verifyFull)
       ci = @($verifyCi)
     }
+    resolvedAdapter = $resolvedAdapter
+    resolvedAdapterCapabilities = $resolvedAdapterCapabilities
     docsSync = $docsSync
   }
 }

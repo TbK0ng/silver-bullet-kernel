@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "generatedAt": "2026-02-13T00:00:00Z",
+  "adapters": [
+    {
+      "name": "node-ts",
+      "source": "builtin",
+      "validated": true,
+      "manifestPath": "config/adapters/node-ts.json"
+    },
+    {
+      "name": "python",
+      "source": "builtin",
+      "validated": true,
+      "manifestPath": "config/adapters/python.json"
+    },
+    {
+      "name": "go",
+      "source": "builtin",
+      "validated": true,
+      "manifestPath": "config/adapters/go.json"
+    },
+    {
+      "name": "java",
+      "source": "builtin",
+      "validated": true,
+      "manifestPath": "config/adapters/java.json"
+    },
+    {
+      "name": "rust",
+      "source": "builtin",
+      "validated": true,
+      "manifestPath": "config/adapters/rust.json"
+    }
+  ]
+}

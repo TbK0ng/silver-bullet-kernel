@@ -14,8 +14,13 @@ function Show-Usage {
   Write-Host "Commands:"
   Write-Host "  init --owner <name> [--project-type backend|frontend|fullstack]"
   Write-Host "  greenfield [--adapter node-ts|python|go|java|rust] [--project-name <name>] [--project-type backend|frontend|fullstack] [--no-language-stubs] [--force]"
-  Write-Host "  install [--target-repo-root <path>] [--preset minimal|full] [--overwrite] [--skip-package-scripts]"
-  Write-Host "  upgrade [--target-repo-root <path>] [--preset minimal|full] [--skip-package-scripts]"
+  Write-Host "  blueprint [list|apply|verify] ..."
+  Write-Host "  intake [analyze|plan|verify] ..."
+  Write-Host "  adapter [list|validate|register|doctor] ..."
+  Write-Host "  semantic [rename|reference-map|safe-delete-candidates] ..."
+  Write-Host "  fleet [collect|report|doctor] ..."
+  Write-Host "  install [--target-repo-root <path>] [--preset minimal|full] [--channel stable|beta] [--overwrite] [--skip-package-scripts]"
+  Write-Host "  upgrade [--target-repo-root <path>] [--preset minimal|full] [--channel stable|beta] [--skip-package-scripts]"
   Write-Host "  capabilities [--platform <name>] [--target-repo-root <path>]"
   Write-Host "  explore [--change <id>]"
   Write-Host "  improve-ut [--skip-validation]"
@@ -355,10 +360,31 @@ switch ($command) {
     Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "greenfield-bootstrap.ps1") -ScriptArgs $scriptArgs
     break
   }
+  "blueprint" {
+    Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "sbk-blueprint.ps1") -ScriptArgs $rest
+    break
+  }
+  "intake" {
+    Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "sbk-intake.ps1") -ScriptArgs $rest
+    break
+  }
+  "adapter" {
+    Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "sbk-adapter.ps1") -ScriptArgs $rest
+    break
+  }
+  "semantic" {
+    Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "sbk-semantic.ps1") -ScriptArgs $rest
+    break
+  }
+  "fleet" {
+    Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "sbk-fleet.ps1") -ScriptArgs $rest
+    break
+  }
   "install" {
     $scriptArgs = Convert-SbkScriptArgs -RawArgs $rest -TokenMap @{
       "--target-repo-root" = "-TargetRepoRoot"
       "--preset" = "-Preset"
+      "--channel" = "-Channel"
       "--overwrite" = "-Overwrite"
       "--skip-package-scripts" = "-SkipPackageScriptInjection"
     }
@@ -369,6 +395,7 @@ switch ($command) {
     $scriptArgs = Convert-SbkScriptArgs -RawArgs $rest -TokenMap @{
       "--target-repo-root" = "-TargetRepoRoot"
       "--preset" = "-Preset"
+      "--channel" = "-Channel"
       "--skip-package-scripts" = "-SkipPackageScriptInjection"
     }
     if (-not ($scriptArgs -contains "-Overwrite")) {

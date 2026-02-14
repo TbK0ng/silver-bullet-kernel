@@ -29,5 +29,29 @@
     "ci": [
       "go test ./..."
     ]
+  },
+  "capabilities": {
+    "semantic": {
+      "rename": {
+        "supported": true,
+        "backend": "gopls",
+        "deterministic": true
+      },
+      "referenceMap": {
+        "supported": false,
+        "backend": "gopls",
+        "deterministic": false
+      },
+      "safeDeleteCandidates": {
+        "supported": false,
+        "backend": "gopls",
+        "deterministic": false
+      }
+    }
+  },
+  "sdk": {
+    "source": "builtin",
+    "validated": true,
+    "validationStatus": "certified"
   }
 }

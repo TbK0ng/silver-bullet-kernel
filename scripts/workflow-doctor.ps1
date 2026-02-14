@@ -73,10 +73,18 @@ $requiredPaths = @(
   "scripts/workflow-skill-parity-gate.ps1",
   "scripts/workflow-indicator-gate.ps1",
   "scripts/sbk.ps1",
+  "scripts/sbk-blueprint.ps1",
+  "scripts/sbk-intake.ps1",
+  "scripts/sbk-adapter.ps1",
+  "scripts/sbk-semantic.ps1",
+  "scripts/sbk-fleet.ps1",
   "scripts/common/sbk-runtime.ps1",
   "sbk.config.json",
   "config/platform-capabilities.json",
   "config/adapters/node-ts.json",
+  "config/adapters/registry.json",
+  "config/blueprints/registry.json",
+  "config/release/channels/stable.json",
   "workflow-policy.json",
   "docs/README.md"
 )

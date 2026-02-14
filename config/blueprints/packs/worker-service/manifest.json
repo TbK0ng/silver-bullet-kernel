@@ -1,0 +1,46 @@
+{
+  "name": "worker-service",
+  "version": "1.0.0",
+  "channel": "stable",
+  "description": "Production baseline for asynchronous worker services.",
+  "supportedAdapters": [
+    "node-ts",
+    "python",
+    "go",
+    "java",
+    "rust"
+  ],
+  "postValidateScript": "validate.ps1",
+  "requiredArtifacts": [
+    "README.md",
+    ".github/workflows/ci.yml",
+    ".sbk/verify-map.json",
+    "SECURITY.md",
+    "docs/runbooks/operations.md",
+    "docs/release-readiness-checklist.md",
+    "docs/architecture/adr/0001-initial-architecture.md",
+    "docs/architecture/service-boundaries.md",
+    "docs/architecture/dependency-contracts.md",
+    "docs/architecture/job-contracts.md",
+    "openspec/changes/bootstrap-worker-service/proposal.md"
+  ],
+  "templates": [
+    { "templateId": "root-readme", "target": "README.md" },
+    { "templateId": "ci-workflow", "target": ".github/workflows/ci.yml" },
+    { "templateId": "verify-map", "target": ".sbk/verify-map.json" },
+    { "templateId": "security-policy", "target": "SECURITY.md" },
+    { "templateId": "runbook-ops", "target": "docs/runbooks/operations.md" },
+    { "templateId": "release-readiness", "target": "docs/release-readiness-checklist.md" },
+    {
+      "templateId": "architecture-adr",
+      "target": "docs/architecture/adr/0001-initial-architecture.md"
+    },
+    { "templateId": "architecture-boundaries", "target": "docs/architecture/service-boundaries.md" },
+    { "templateId": "architecture-dependencies", "target": "docs/architecture/dependency-contracts.md" },
+    { "templateId": "worker-job-contracts", "target": "docs/architecture/job-contracts.md" },
+    {
+      "templateId": "openspec-bootstrap-proposal",
+      "target": "openspec/changes/bootstrap-worker-service/proposal.md"
+    }
+  ]
+}

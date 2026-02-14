@@ -33,5 +33,29 @@
     "ci": [
       "mvn -q verify"
     ]
+  },
+  "capabilities": {
+    "semantic": {
+      "rename": {
+        "supported": true,
+        "backend": "jdtls",
+        "deterministic": true
+      },
+      "referenceMap": {
+        "supported": false,
+        "backend": "jdtls",
+        "deterministic": false
+      },
+      "safeDeleteCandidates": {
+        "supported": false,
+        "backend": "jdtls",
+        "deterministic": false
+      }
+    }
+  },
+  "sdk": {
+    "source": "builtin",
+    "validated": true,
+    "validationStatus": "certified"
   }
 }

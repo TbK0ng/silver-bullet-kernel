@@ -1,6 +1,7 @@
 param(
   [string]$TargetRepoRoot = ".",
   [ValidateSet("minimal", "full")][string]$Preset = "full",
+  [ValidateSet("stable", "beta")][string]$Channel = "stable",
   [switch]$Overwrite,
   [switch]$SkipPackageScriptInjection
 )
@@ -20,7 +21,7 @@ if (-not (Test-Path $targetRoot)) {
   throw "target repository path does not exist: $targetRoot"
 }
 
-$stats = [ordered]@{
+$stats = @{
   copied = 0
   overwritten = 0
   skipped = 0
@@ -32,6 +33,218 @@ function Normalize-RelativePath {
   )
 
   return ($Path -replace "\\", "/").Trim("/")
+}
+
+function Parse-SemVer {
+  param(
+    [Parameter(Mandatory = $true)][string]$Version
+  )
+
+  $regex = "^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?:-(?<prerelease>[0-9A-Za-z\.-]+))?$"
+  $match = [regex]::Match($Version, $regex)
+  if (-not $match.Success) {
+    throw "invalid semantic version: $Version"
+  }
+
+  return [PSCustomObject]@{
+    major = [int]$match.Groups["major"].Value
+    minor = [int]$match.Groups["minor"].Value
+    patch = [int]$match.Groups["patch"].Value
+    prerelease = [string]$match.Groups["prerelease"].Value
+  }
+}
+
+function Compare-SemVer {
+  param(
+    [Parameter(Mandatory = $true)][string]$Left,
+    [Parameter(Mandatory = $true)][string]$Right
+  )
+
+  $l = Parse-SemVer -Version $Left
+  $r = Parse-SemVer -Version $Right
+
+  foreach ($property in @("major", "minor", "patch")) {
+    if ($l.$property -lt $r.$property) {
+      return -1
+    }
+    if ($l.$property -gt $r.$property) {
+      return 1
+    }
+  }
+
+  if ([string]::IsNullOrWhiteSpace($l.prerelease) -and [string]::IsNullOrWhiteSpace($r.prerelease)) {
+    return 0
+  }
+  if ([string]::IsNullOrWhiteSpace($l.prerelease) -and -not [string]::IsNullOrWhiteSpace($r.prerelease)) {
+    return 1
+  }
+  if (-not [string]::IsNullOrWhiteSpace($l.prerelease) -and [string]::IsNullOrWhiteSpace($r.prerelease)) {
+    return -1
+  }
+
+  return [string]::Compare($l.prerelease, $r.prerelease, [System.StringComparison]::OrdinalIgnoreCase)
+}
+
+function Get-ReleaseManifest {
+  param(
+    [Parameter(Mandatory = $true)][string]$Root,
+    [Parameter(Mandatory = $true)][ValidateSet("stable", "beta")][string]$SelectedChannel
+  )
+
+  $path = Join-Path $Root ("config\\release\\channels\\{0}.json" -f $SelectedChannel)
+  if (-not (Test-Path $path -PathType Leaf)) {
+    throw "release manifest missing: $path"
+  }
+  $manifest = Get-Content -Path $path -Encoding UTF8 -Raw | ConvertFrom-Json
+  if ($null -eq $manifest) {
+    throw "invalid release manifest: $path"
+  }
+  return [PSCustomObject]@{
+    path = $path
+    value = $manifest
+  }
+}
+
+function Read-TargetReleaseManifest {
+  param(
+    [Parameter(Mandatory = $true)][string]$Root
+  )
+
+  $path = Join-Path $Root ".sbk\\release-manifest.json"
+  if (-not (Test-Path $path -PathType Leaf)) {
+    return $null
+  }
+
+  $manifest = Get-Content -Path $path -Encoding UTF8 -Raw | ConvertFrom-Json
+  if ($null -eq $manifest) {
+    return $null
+  }
+  return [PSCustomObject]@{
+    path = $path
+    value = $manifest
+  }
+}
+
+function Test-ChannelCompatibility {
+  param(
+    [Parameter(Mandatory = $true)]$CurrentManifest,
+    [Parameter(Mandatory = $false)]$PreviousManifest
+  )
+
+  if ($null -eq $PreviousManifest) {
+    return [PSCustomObject]@{
+      safe = $true
+      reason = "initial channel bootstrap"
+    }
+  }
+
+  $currentChannel = [string]$CurrentManifest.channel
+  $currentVersion = [string]$CurrentManifest.version
+  $previousChannel = [string]$PreviousManifest.channel
+  $previousVersion = [string]$PreviousManifest.version
+
+  $compatibility = $CurrentManifest.compatibility
+  $allowChannels = @($compatibility.allowFromChannels | ForEach-Object { [string]$_ })
+  if ($allowChannels.Count -gt 0 -and -not ($allowChannels -contains $previousChannel)) {
+    return [PSCustomObject]@{
+      safe = $false
+      reason = ("channel transition blocked: {0} -> {1}" -f $previousChannel, $currentChannel)
+    }
+  }
+
+  $allowMajors = @($compatibility.allowFromMajor | ForEach-Object { [int]$_ })
+  $previousParsed = Parse-SemVer -Version $previousVersion
+  if ($allowMajors.Count -gt 0 -and -not ($allowMajors -contains $previousParsed.major)) {
+    return [PSCustomObject]@{
+      safe = $false
+      reason = ("major compatibility blocked: from {0} (major={1})" -f $previousVersion, $previousParsed.major)
+    }
+  }
+
+  $minFromVersion = [string]$compatibility.minFromVersion
+  if (-not [string]::IsNullOrWhiteSpace($minFromVersion)) {
+    if ((Compare-SemVer -Left $previousVersion -Right $minFromVersion) -lt 0) {
+      return [PSCustomObject]@{
+        safe = $false
+        reason = ("minimum compatible source version is {0}, but current target is {1}" -f $minFromVersion, $previousVersion)
+      }
+    }
+  }
+
+  if ($previousChannel.Equals($currentChannel, [System.StringComparison]::OrdinalIgnoreCase)) {
+    if ((Compare-SemVer -Left $currentVersion -Right $previousVersion) -lt 0) {
+      return [PSCustomObject]@{
+        safe = $false
+        reason = ("version downgrade blocked within channel {0}: {1} -> {2}" -f $currentChannel, $previousVersion, $currentVersion)
+      }
+    }
+  }
+
+  return [PSCustomObject]@{
+    safe = $true
+    reason = "channel transition is compatible"
+  }
+}
+
+function Write-ReleaseAudit {
+  param(
+    [Parameter(Mandatory = $true)][string]$DestinationRoot,
+    [Parameter(Mandatory = $true)]$CurrentManifest,
+    [Parameter(Mandatory = $false)]$PreviousManifest,
+    [Parameter(Mandatory = $true)]$Compatibility
+  )
+
+  $sbkDir = Join-Path $DestinationRoot ".sbk"
+  if (-not (Test-Path $sbkDir)) {
+    New-Item -ItemType Directory -Path $sbkDir -Force | Out-Null
+  }
+  $metricsDir = Join-Path $DestinationRoot ".metrics"
+  if (-not (Test-Path $metricsDir)) {
+    New-Item -ItemType Directory -Path $metricsDir -Force | Out-Null
+  }
+
+  $previousSummary = $null
+  if ($null -ne $PreviousManifest) {
+    $previousPublishedAt = ""
+    $publishedProperty = $PreviousManifest.PSObject.Properties | Where-Object { $_.Name -eq "publishedAt" } | Select-Object -First 1
+    if ($null -ne $publishedProperty) {
+      $previousPublishedAt = [string]$publishedProperty.Value
+    } else {
+      $generatedProperty = $PreviousManifest.PSObject.Properties | Where-Object { $_.Name -eq "generatedAt" } | Select-Object -First 1
+      if ($null -ne $generatedProperty) {
+        $previousPublishedAt = [string]$generatedProperty.Value
+      }
+    }
+
+    $previousSummary = [ordered]@{
+      channel = [string]$PreviousManifest.channel
+      version = [string]$PreviousManifest.version
+      publishedAt = $previousPublishedAt
+    }
+  }
+
+  $rollout = [ordered]@{
+    generatedAt = [DateTimeOffset]::UtcNow.ToString("o")
+    channel = [string]$CurrentManifest.channel
+    version = [string]$CurrentManifest.version
+    manifestName = [string]$CurrentManifest.name
+    previous = $previousSummary
+    transition = [ordered]@{
+      safe = [bool]$Compatibility.safe
+      reason = [string]$Compatibility.reason
+      fromChannel = if ($null -eq $previousSummary) { "" } else { [string]$previousSummary.channel }
+      toChannel = [string]$CurrentManifest.channel
+      fromVersion = if ($null -eq $previousSummary) { "" } else { [string]$previousSummary.version }
+      toVersion = [string]$CurrentManifest.version
+    }
+    migrationNotes = @($CurrentManifest.migrationNotes | ForEach-Object { [string]$_ })
+  }
+
+  $manifestPath = Join-Path $sbkDir "release-manifest.json"
+  Set-Content -Path $manifestPath -Value ($rollout | ConvertTo-Json -Depth 20) -Encoding UTF8
+
+  $auditPath = Join-Path $metricsDir "channel-rollout-audit.jsonl"
+  Add-Content -Path $auditPath -Value ($rollout | ConvertTo-Json -Depth 20)
 }
 
 function Resolve-SourceFile {
@@ -108,7 +321,14 @@ function Get-MinimalPresetFiles {
     ".claude/agents/dispatch.md",
     ".github/workflows/ci.yml",
     "scripts/sbk.ps1",
+    "scripts/sbk-blueprint.ps1",
+    "scripts/sbk-intake.ps1",
+    "scripts/sbk-adapter.ps1",
+    "scripts/sbk-semantic.ps1",
+    "scripts/sbk-fleet.ps1",
     "scripts/sbk-install.ps1",
+    "scripts/semantic-rename.ts",
+    "scripts/semantic-python.py",
     "scripts/common/sbk-runtime.ps1",
     "scripts/common/verify-telemetry.ps1",
     "scripts/verify-fast.ps1",
@@ -119,8 +339,13 @@ function Get-MinimalPresetFiles {
     "scripts/workflow-indicator-gate.ps1",
     "scripts/workflow-doctor.ps1",
     "scripts/memory-context.ps1",
+    "config/adapters/registry.json",
     "openspec/specs/codex-workflow-kernel/spec.md",
     "openspec/specs/workflow-security-policy/spec.md"
+  )
+  $relativeDirs = @(
+    "config/blueprints",
+    "config/release/channels"
   )
 
   $files = @()
@@ -134,7 +359,25 @@ function Get-MinimalPresetFiles {
       relative = Normalize-RelativePath -Path $relative
     }
   }
-  return @($files)
+
+  foreach ($relativeDir in $relativeDirs) {
+    $files += Get-FilesFromRelativeDirectory -Root $Root -RelativeDirectory $relativeDir
+  }
+
+  $unique = @{}
+  foreach ($item in $files) {
+    $key = Normalize-RelativePath -Path ([string]$item.relative)
+    if (Is-ExcludedRelativePath -RelativePath $key) {
+      continue
+    }
+    if (-not $unique.ContainsKey($key)) {
+      $unique[$key] = [PSCustomObject]@{
+        source = [string]$item.source
+        relative = $key
+      }
+    }
+  }
+  return @($unique.Values | Sort-Object -Property relative)
 }
 
 function Get-FullPresetFiles {
@@ -314,6 +557,29 @@ $filesToCopy = if ($Preset -eq "minimal") {
   Get-FullPresetFiles -Root $sbkRoot
 }
 
+$releaseManifest = Get-ReleaseManifest -Root $sbkRoot -SelectedChannel $Channel
+$existingReleaseManifest = Read-TargetReleaseManifest -Root $targetRoot
+$existingComparable = $null
+if ($null -ne $existingReleaseManifest) {
+  if ($null -ne $existingReleaseManifest.value.channel -and
+    $null -ne $existingReleaseManifest.value.version) {
+    $existingComparable = $existingReleaseManifest.value
+  } else {
+    $transition = $existingReleaseManifest.value.transition
+    if ($null -ne $transition) {
+      $existingComparable = [PSCustomObject]@{
+        channel = [string]$transition.toChannel
+        version = [string]$transition.toVersion
+        publishedAt = [string]$existingReleaseManifest.value.generatedAt
+      }
+    }
+  }
+}
+$compatibility = Test-ChannelCompatibility -CurrentManifest $releaseManifest.value -PreviousManifest $existingComparable
+if (-not [bool]$compatibility.safe) {
+  throw ("unsafe channel transition blocked: {0}" -f $compatibility.reason)
+}
+
 Copy-FilesToTarget -Files $filesToCopy -DestinationRoot $targetRoot -AllowOverwrite ([bool]$Overwrite) -Summary $stats
 
 $packageSummary = [PSCustomObject]@{
@@ -325,8 +591,15 @@ if (-not $SkipPackageScriptInjection) {
   $packageSummary = Update-PackageScripts -RepoRoot $targetRoot
 }
 
-Write-Host ("[sbk-install] preset={0} target={1}" -f $Preset, $targetRoot)
+Write-ReleaseAudit `
+  -DestinationRoot $targetRoot `
+  -CurrentManifest $releaseManifest.value `
+  -PreviousManifest $existingComparable `
+  -Compatibility $compatibility
+
+Write-Host ("[sbk-install] preset={0} channel={1} target={2}" -f $Preset, $Channel, $targetRoot)
 Write-Host ("[sbk-install] files_total={0} copied={1} overwritten={2} skipped={3}" -f $filesToCopy.Count, $stats.copied, $stats.overwritten, $stats.skipped)
+Write-Host ("[sbk-install] channel_transition_safe={0} reason={1}" -f $compatibility.safe, $compatibility.reason)
 if ($SkipPackageScriptInjection) {
   Write-Host "[sbk-install] package script injection skipped by flag"
 } elseif ($packageSummary.packageFound) {

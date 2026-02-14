@@ -1,0 +1,20 @@
+{
+  "name": "silver-bullet-kernel",
+  "version": "0.3.0",
+  "channel": "stable",
+  "publishedAt": "2026-02-13T00:00:00Z",
+  "compatibility": {
+    "allowFromChannels": [
+      "stable",
+      "beta"
+    ],
+    "allowFromMajor": [
+      0
+    ],
+    "minFromVersion": "0.1.0"
+  },
+  "migrationNotes": [
+    "Review workflow-policy and docs-sync required docs before rollout.",
+    "Re-run sbk verify:ci after applying stable channel update."
+  ]
+}

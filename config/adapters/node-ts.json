@@ -48,5 +48,29 @@
       "npm run test:e2e",
       "npm run build"
     ]
+  },
+  "capabilities": {
+    "semantic": {
+      "rename": {
+        "supported": true,
+        "backend": "typescript-language-service",
+        "deterministic": true
+      },
+      "referenceMap": {
+        "supported": true,
+        "backend": "typescript-language-service",
+        "deterministic": true
+      },
+      "safeDeleteCandidates": {
+        "supported": true,
+        "backend": "typescript-language-service",
+        "deterministic": true
+      }
+    }
+  },
+  "sdk": {
+    "source": "builtin",
+    "validated": true,
+    "validationStatus": "certified"
   }
 }

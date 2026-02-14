@@ -1,0 +1,48 @@
+{
+  "name": "monorepo-service",
+  "version": "1.0.0-beta.1",
+  "channel": "beta",
+  "description": "Production baseline for monorepo service platform setups.",
+  "supportedAdapters": [
+    "node-ts",
+    "python",
+    "go",
+    "java",
+    "rust"
+  ],
+  "postValidateScript": "validate.ps1",
+  "requiredArtifacts": [
+    "README.md",
+    ".github/workflows/ci.yml",
+    ".sbk/verify-map.json",
+    "SECURITY.md",
+    "docs/runbooks/operations.md",
+    "docs/release-readiness-checklist.md",
+    "docs/architecture/adr/0001-initial-architecture.md",
+    "docs/architecture/service-boundaries.md",
+    "docs/architecture/dependency-contracts.md",
+    "docs/architecture/monorepo-topology.md",
+    "pnpm-workspace.yaml",
+    "openspec/changes/bootstrap-monorepo-service/proposal.md"
+  ],
+  "templates": [
+    { "templateId": "root-readme", "target": "README.md" },
+    { "templateId": "ci-workflow", "target": ".github/workflows/ci.yml" },
+    { "templateId": "verify-map", "target": ".sbk/verify-map.json" },
+    { "templateId": "security-policy", "target": "SECURITY.md" },
+    { "templateId": "runbook-ops", "target": "docs/runbooks/operations.md" },
+    { "templateId": "release-readiness", "target": "docs/release-readiness-checklist.md" },
+    {
+      "templateId": "architecture-adr",
+      "target": "docs/architecture/adr/0001-initial-architecture.md"
+    },
+    { "templateId": "architecture-boundaries", "target": "docs/architecture/service-boundaries.md" },
+    { "templateId": "architecture-dependencies", "target": "docs/architecture/dependency-contracts.md" },
+    { "templateId": "monorepo-topology", "target": "docs/architecture/monorepo-topology.md" },
+    { "templateId": "pnpm-workspace", "target": "pnpm-workspace.yaml" },
+    {
+      "templateId": "openspec-bootstrap-proposal",
+      "target": "openspec/changes/bootstrap-monorepo-service/proposal.md"
+    }
+  ]
+}

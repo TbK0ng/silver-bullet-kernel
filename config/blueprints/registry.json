@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "defaultChannel": "stable",
+  "packsRoot": "config/blueprints/packs",
+  "packs": [
+    {
+      "name": "api-service",
+      "displayName": "API Service",
+      "channel": "stable",
+      "version": "1.0.0",
+      "manifestPath": "config/blueprints/packs/api-service/manifest.json"
+    },
+    {
+      "name": "worker-service",
+      "displayName": "Worker Service",
+      "channel": "stable",
+      "version": "1.0.0",
+      "manifestPath": "config/blueprints/packs/worker-service/manifest.json"
+    },
+    {
+      "name": "cli-tool",
+      "displayName": "CLI Tool",
+      "channel": "stable",
+      "version": "1.0.0",
+      "manifestPath": "config/blueprints/packs/cli-tool/manifest.json"
+    },
+    {
+      "name": "monorepo-service",
+      "displayName": "Monorepo Service",
+      "channel": "beta",
+      "version": "1.0.0-beta.1",
+      "manifestPath": "config/blueprints/packs/monorepo-service/manifest.json"
+    }
+  ]
+}

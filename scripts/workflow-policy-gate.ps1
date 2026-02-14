@@ -670,6 +670,93 @@ function Join-PathsForDetails {
   return ($picked -join ", ") + $suffix
 }
 
+function Test-IntakeReadinessArtifact {
+  param(
+    [Parameter(Mandatory = $true)][string]$RepoRoot
+  )
+
+  $path = Join-Path $RepoRoot ".metrics\\intake-readiness.json"
+  if (-not (Test-Path $path -PathType Leaf)) {
+    return [ordered]@{
+      available = $false
+      passed = $false
+      details = "missing intake readiness artifact"
+      remediation = "Run `sbk intake analyze`, `sbk intake plan`, and `sbk intake verify --profile strict` before strict rollout."
+    }
+  }
+
+  $doc = Read-SbkJsonFile -Path $path
+  if ($null -eq $doc) {
+    return [ordered]@{
+      available = $false
+      passed = $false
+      details = "invalid intake readiness JSON"
+      remediation = "Re-run `sbk intake verify --profile strict` to regenerate readiness artifact."
+    }
+  }
+
+  $passed = [bool](Get-SbkPropertyValue -Object $doc -Name "passed")
+  $profile = [string](Get-SbkPropertyValue -Object $doc -Name "profile")
+  $violations = @((Get-SbkPropertyValue -Object $doc -Name "violations") | ForEach-Object { [string]$_ })
+
+  return [ordered]@{
+    available = $true
+    passed = ($passed -and $profile.Equals("strict", [System.StringComparison]::OrdinalIgnoreCase))
+    details = ("profile={0}; passed={1}; violations={2}" -f $profile, $passed, (Join-PathsForDetails -Paths $violations -MaxItems 5))
+    remediation = "Address intake blockers and rerun strict readiness verify."
+  }
+}
+
+function Test-ReleaseChannelManifest {
+  param(
+    [Parameter(Mandatory = $true)][string]$RepoRoot
+  )
+
+  $path = Join-Path $RepoRoot ".sbk\\release-manifest.json"
+  if (-not (Test-Path $path -PathType Leaf)) {
+    return [ordered]@{
+      available = $false
+      passed = $true
+      details = "release manifest missing (check skipped)"
+      remediation = "Install/upgrade via `sbk install|upgrade --channel <stable|beta>` to record rollout metadata."
+    }
+  }
+
+  $manifest = Read-SbkJsonFile -Path $path
+  if ($null -eq $manifest) {
+    return [ordered]@{
+      available = $true
+      passed = $false
+      details = "release manifest invalid JSON"
+      remediation = "Re-run channel install/upgrade to rewrite `.sbk/release-manifest.json`."
+    }
+  }
+
+  $transition = Get-SbkPropertyValue -Object $manifest -Name "transition"
+  if ($null -eq $transition) {
+    return [ordered]@{
+      available = $true
+      passed = $false
+      details = "release manifest missing transition block"
+      remediation = "Use channel-aware install/upgrade to regenerate release manifest with transition metadata."
+    }
+  }
+
+  $safe = [bool](Get-SbkPropertyValue -Object $transition -Name "safe")
+  $reason = [string](Get-SbkPropertyValue -Object $transition -Name "reason")
+  $fromChannel = [string](Get-SbkPropertyValue -Object $transition -Name "fromChannel")
+  $toChannel = [string](Get-SbkPropertyValue -Object $transition -Name "toChannel")
+  $fromVersion = [string](Get-SbkPropertyValue -Object $transition -Name "fromVersion")
+  $toVersion = [string](Get-SbkPropertyValue -Object $transition -Name "toVersion")
+
+  return [ordered]@{
+    available = $true
+    passed = $safe
+    details = ("safe={0}; reason={1}; from={2}/{3}; to={4}/{5}" -f $safe, $reason, $fromChannel, $fromVersion, $toChannel, $toVersion)
+    remediation = "Block merge and rerun `sbk upgrade --channel <stable|beta>` with a compatible channel transition."
+  }
+}
+
 $configPath = Join-Path $repoRoot "workflow-policy.json"
 if (-not (Test-Path $configPath)) {
   throw "workflow policy config missing: $configPath"
@@ -745,6 +832,11 @@ if ($orchestratorForbiddenTools.Count -eq 0) {
   $orchestratorForbiddenTools = @("Write", "Edit", "MultiEdit")
 }
 
+$intakeGateEnabled = ($null -ne $config.intakeGate) -and [bool]$config.intakeGate.enabled
+$intakeRequireStrictReadinessArtifact = $intakeGateEnabled -and [bool]$config.intakeGate.requireStrictReadinessArtifact
+$releaseChannelGateEnabled = ($null -ne $config.releaseChannels) -and [bool]$config.releaseChannels.enabled
+$releaseChannelSafetyRequired = $releaseChannelGateEnabled -and [bool]$config.releaseChannels.enforceChannelSafety
+
 $currentBranch = Get-CurrentBranchName -RepoRoot $repoRoot
 $branchIdentity = Get-BranchIdentity -BranchName $currentBranch -BranchPattern $branchPattern
 $gitDirInfo = Get-GitDirInfo -RepoRoot $repoRoot -LinkedMarker $linkedMarker
@@ -771,6 +863,26 @@ $workingHasAnyChangeArtifacts = @($workingTreeFiles | Where-Object {
   }).Count -gt 0
 
 $checks = New-Object 'System.Collections.Generic.List[object]'
+
+if ($intakeRequireStrictReadinessArtifact -and $runtime.profile.Equals("strict", [System.StringComparison]::OrdinalIgnoreCase)) {
+  $intakeStatus = Test-IntakeReadinessArtifact -RepoRoot $repoRoot
+  Add-Check -Checks $checks `
+    -Name "Strict profile requires intake readiness artifact" `
+    -Severity "fail" `
+    -Passed ([bool]$intakeStatus.passed) `
+    -Details ([string]$intakeStatus.details) `
+    -Remediation ([string]$intakeStatus.remediation)
+}
+
+if ($releaseChannelSafetyRequired) {
+  $releaseStatus = Test-ReleaseChannelManifest -RepoRoot $repoRoot
+  Add-Check -Checks $checks `
+    -Name "Release channel transition remains compatible and safe" `
+    -Severity "fail" `
+    -Passed ([bool]$releaseStatus.passed) `
+    -Details ([string]$releaseStatus.details) `
+    -Remediation ([string]$releaseStatus.remediation)
+}
 
 if ([bool]$config.workflowGate.requireActiveChangeForImplementationEdits) {
   $activeOrArchiveOk = ($activeChanges.Count -gt 0) -or $workingHasArchiveArtifacts

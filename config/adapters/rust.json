@@ -36,5 +36,29 @@
       "cargo clippy --all-targets --all-features -- -D warnings",
       "cargo test --all-features"
     ]
+  },
+  "capabilities": {
+    "semantic": {
+      "rename": {
+        "supported": true,
+        "backend": "rust-analyzer",
+        "deterministic": true
+      },
+      "referenceMap": {
+        "supported": false,
+        "backend": "rust-analyzer",
+        "deterministic": false
+      },
+      "safeDeleteCandidates": {
+        "supported": false,
+        "backend": "rust-analyzer",
+        "deterministic": false
+      }
+    }
+  },
+  "sdk": {
+    "source": "builtin",
+    "validated": true,
+    "validationStatus": "certified"
   }
 }

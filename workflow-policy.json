@@ -100,6 +100,34 @@
       "MultiEdit"
     ]
   },
+  "intakeGate": {
+    "enabled": true,
+    "requireStrictReadinessArtifact": false,
+    "thresholds": {
+      "lite": {
+        "maxOverallRisk": 80,
+        "maxDimensionRisk": 95
+      },
+      "balanced": {
+        "maxOverallRisk": 65,
+        "maxDimensionRisk": 80
+      },
+      "strict": {
+        "maxOverallRisk": 45,
+        "maxDimensionRisk": 60,
+        "requiredArtifacts": [
+          "workflow-policy.json",
+          "sbk.config.json",
+          "openspec/specs",
+          "docs"
+        ]
+      }
+    }
+  },
+  "releaseChannels": {
+    "enabled": true,
+    "enforceChannelSafety": true
+  },
   "indicatorGate": {
     "maxFailureRateLast7Days": 5,
     "maxLeadTimeHoursP90": 72,

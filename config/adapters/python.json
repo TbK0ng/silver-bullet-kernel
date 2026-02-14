@@ -37,5 +37,29 @@
       "mypy .",
       "python -m pytest --maxfail=1"
     ]
+  },
+  "capabilities": {
+    "semantic": {
+      "rename": {
+        "supported": true,
+        "backend": "python-ast",
+        "deterministic": true
+      },
+      "referenceMap": {
+        "supported": false,
+        "backend": "python-ast",
+        "deterministic": false
+      },
+      "safeDeleteCandidates": {
+        "supported": false,
+        "backend": "python-ast",
+        "deterministic": false
+      }
+    }
+  },
+  "sdk": {
+    "source": "builtin",
+    "validated": true,
+    "validationStatus": "certified"
   }
 }
