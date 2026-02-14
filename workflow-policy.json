@@ -102,7 +102,7 @@
   },
   "intakeGate": {
     "enabled": true,
-    "requireStrictReadinessArtifact": false,
+    "requireStrictReadinessArtifact": true,
     "thresholds": {
       "lite": {
         "maxOverallRisk": 80,

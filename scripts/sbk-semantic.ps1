@@ -13,8 +13,8 @@ function Show-Usage {
   Write-Host ""
   Write-Host "Operations:"
   Write-Host "  rename --file <path> --line <n> --column <n> --new-name <name> [--dry-run] [--adapter <name>] [--target-repo-root <path>]"
-  Write-Host "  reference-map [unsupported in this build]"
-  Write-Host "  safe-delete-candidates [unsupported in this build]"
+  Write-Host "  reference-map --file <path> --line <n> --column <n> [--max-results <n>] [--adapter <name>] [--target-repo-root <path>]"
+  Write-Host "  safe-delete-candidates --file <path> --line <n> --column <n> [--max-results <n>] [--adapter <name>] [--target-repo-root <path>]"
 }
 
 function Resolve-TargetRepoRoot {
@@ -47,19 +47,41 @@ function Get-PythonRuntimeCommand {
   return $null
 }
 
-function Invoke-NodeTsRename {
+function Invoke-NodeTsSemanticOperation {
   param(
-    [Parameter(Mandatory = $true)][string]$TargetRepoRoot,
+    [Parameter(Mandatory = $true)][ValidateSet("rename", "reference-map", "safe-delete-candidates")][string]$Operation,
     [Parameter(Mandatory = $true)][string]$File,
     [Parameter(Mandatory = $true)][int]$Line,
     [Parameter(Mandatory = $true)][int]$Column,
-    [Parameter(Mandatory = $true)][string]$NewName,
-    [Parameter(Mandatory = $true)][bool]$DryRun
+    [string]$NewName = "",
+    [Parameter(Mandatory = $true)][bool]$DryRun,
+    [Parameter(Mandatory = $true)][int]$MaxResults
   )
 
   $scriptPath = Join-Path $repoRoot "scripts\\semantic-rename.ts"
   if (-not (Test-Path $scriptPath -PathType Leaf)) {
     throw "semantic-rename.ts backend missing: $scriptPath"
+  }
+
+  $args = @(
+    "tsx",
+    $scriptPath,
+    "--operation",
+    $Operation,
+    "--file",
+    $File,
+    "--line",
+    "$Line",
+    "--column",
+    "$Column",
+    "--maxResults",
+    "$MaxResults"
+  )
+  if ($Operation -eq "rename") {
+    $args += @("--newName", $NewName)
+  }
+  if ($DryRun) {
+    $args += "--dryRun"
   }
 
   $output = ""
@@ -68,69 +90,36 @@ function Invoke-NodeTsRename {
     if ($null -eq $nodeCommand) {
       throw "node runtime not found for TypeScript semantic backend"
     }
-    $args = @(
-      $env:npm_execpath,
-      "exec",
-      "--",
-      "tsx",
-      $scriptPath,
-      "--file",
-      $File,
-      "--line",
-      "$Line",
-      "--column",
-      "$Column",
-      "--newName",
-      $NewName
-    )
-    if ($DryRun) {
-      $args += "--dryRun"
-    }
-    $output = & $nodeCommand.Source @args 2>&1
-    if (($LASTEXITCODE -is [int]) -and $LASTEXITCODE -ne 0) {
-      throw ("typescript backend failed: {0}" -f ($output -join "`n"))
-    }
+    $output = & $nodeCommand.Source $env:npm_execpath "exec" "--" @args 2>&1
   } elseif (Get-Command npx -ErrorAction SilentlyContinue) {
-    $args = @(
-      "tsx",
-      $scriptPath,
-      "--file",
-      $File,
-      "--line",
-      "$Line",
-      "--column",
-      "$Column",
-      "--newName",
-      $NewName
-    )
-    if ($DryRun) {
-      $args += "--dryRun"
-    }
     $output = & npx @args 2>&1
-    if (($LASTEXITCODE -is [int]) -and $LASTEXITCODE -ne 0) {
-      throw ("typescript backend failed: {0}" -f ($output -join "`n"))
-    }
   } else {
     throw "cannot execute TypeScript semantic backend (npm exec / npx unavailable)"
+  }
+
+  if (($LASTEXITCODE -is [int]) -and $LASTEXITCODE -ne 0) {
+    throw ("typescript semantic backend failed: {0}" -f ($output -join "`n"))
   }
 
   $raw = ($output | Out-String).Trim()
   return ($raw | ConvertFrom-Json)
 }
 
-function Invoke-PythonRename {
+function Invoke-PythonSemanticOperation {
   param(
+    [Parameter(Mandatory = $true)][ValidateSet("rename", "reference-map", "safe-delete-candidates")][string]$Operation,
     [Parameter(Mandatory = $true)][string]$TargetRepoRoot,
     [Parameter(Mandatory = $true)][string]$File,
     [Parameter(Mandatory = $true)][int]$Line,
     [Parameter(Mandatory = $true)][int]$Column,
-    [Parameter(Mandatory = $true)][string]$NewName,
-    [Parameter(Mandatory = $true)][bool]$DryRun
+    [string]$NewName = "",
+    [Parameter(Mandatory = $true)][bool]$DryRun,
+    [Parameter(Mandatory = $true)][int]$MaxResults
   )
 
   $runtime = Get-PythonRuntimeCommand
   if ($null -eq $runtime) {
-    throw "python backend unavailable: install python/py/uv for semantic rename"
+    throw "python runtime unavailable: install python/py/uv"
   }
 
   $scriptPath = Join-Path $repoRoot "scripts\\semantic-python.py"
@@ -138,61 +127,93 @@ function Invoke-PythonRename {
     throw "semantic-python.py backend missing: $scriptPath"
   }
 
-  $args = @($runtime.args + @(
+  $args = @(
+    $runtime.args + @(
       $scriptPath,
+      "--operation",
+      $Operation,
+      "--targetRepoRoot",
+      $TargetRepoRoot,
       "--file",
       $File,
       "--line",
       "$Line",
       "--column",
       "$Column",
-      "--newName",
-      $NewName
-    ))
+      "--maxResults",
+      "$MaxResults"
+    )
+  )
+  if ($Operation -eq "rename") {
+    $args += @("--newName", $NewName)
+  }
   if ($DryRun) {
     $args += "--dryRun"
   }
 
   $output = & $runtime.command @args 2>&1
   if (($LASTEXITCODE -is [int]) -and $LASTEXITCODE -ne 0) {
-    throw ("python backend failed: {0}" -f ($output -join "`n"))
+    throw ("python semantic backend failed: {0}" -f ($output -join "`n"))
   }
   $raw = ($output | Out-String).Trim()
   return ($raw | ConvertFrom-Json)
 }
 
-function Invoke-FailClosedExternalBackend {
+function Invoke-IndexedSemanticOperation {
   param(
-    [Parameter(Mandatory = $true)][string]$Adapter,
-    [Parameter(Mandatory = $true)][string]$Backend
+    [Parameter(Mandatory = $true)][ValidateSet("go", "java", "rust")][string]$Language,
+    [Parameter(Mandatory = $true)][ValidateSet("rename", "reference-map", "safe-delete-candidates")][string]$Operation,
+    [Parameter(Mandatory = $true)][string]$TargetRepoRoot,
+    [Parameter(Mandatory = $true)][string]$File,
+    [Parameter(Mandatory = $true)][int]$Line,
+    [Parameter(Mandatory = $true)][int]$Column,
+    [string]$NewName = "",
+    [Parameter(Mandatory = $true)][bool]$DryRun,
+    [Parameter(Mandatory = $true)][int]$MaxResults
   )
 
-  $tool = ""
-  $hint = ""
-  switch ($Adapter) {
-    "go" {
-      $tool = "gopls"
-      $hint = "install gopls and configure deterministic rename wiring"
-    }
-    "java" {
-      $tool = "jdtls"
-      $hint = "install jdtls and configure deterministic rename wiring"
-    }
-    "rust" {
-      $tool = "rust-analyzer"
-      $hint = "install rust-analyzer and configure deterministic rename wiring"
-    }
-    default {
-      $tool = $Backend
-      $hint = "configure semantic backend command for this adapter"
-    }
+  $runtime = Get-PythonRuntimeCommand
+  if ($null -eq $runtime) {
+    throw "python runtime unavailable: install python/py/uv for symbol-index backend"
   }
 
-  if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
-    throw "semantic backend unavailable for adapter '$Adapter': required tool '$tool' not found; $hint"
+  $scriptPath = Join-Path $repoRoot "scripts\\semantic-index.py"
+  if (-not (Test-Path $scriptPath -PathType Leaf)) {
+    throw "semantic-index.py backend missing: $scriptPath"
   }
 
-  throw "semantic backend '$tool' detected but deterministic invocation contract is not configured; fail-closed"
+  $args = @(
+    $runtime.args + @(
+      $scriptPath,
+      "--operation",
+      $Operation,
+      "--language",
+      $Language,
+      "--targetRepoRoot",
+      $TargetRepoRoot,
+      "--file",
+      $File,
+      "--line",
+      "$Line",
+      "--column",
+      "$Column",
+      "--maxResults",
+      "$MaxResults"
+    )
+  )
+  if ($Operation -eq "rename") {
+    $args += @("--newName", $NewName)
+  }
+  if ($DryRun) {
+    $args += "--dryRun"
+  }
+
+  $output = & $runtime.command @args 2>&1
+  if (($LASTEXITCODE -is [int]) -and $LASTEXITCODE -ne 0) {
+    throw ("symbol-index semantic backend failed: {0}" -f ($output -join "`n"))
+  }
+  $raw = ($output | Out-String).Trim()
+  return ($raw | ConvertFrom-Json)
 }
 
 function Write-SemanticReports {
@@ -209,8 +230,27 @@ function Write-SemanticReports {
   $reportPath = Join-Path $metricsDir "semantic-operation-report.json"
   $auditPath = Join-Path $metricsDir "semantic-operation-audit.jsonl"
 
-  Set-Content -Path $reportPath -Value ($Payload | ConvertTo-Json -Depth 20) -Encoding UTF8
-  Add-Content -Path $auditPath -Value ($Payload | ConvertTo-Json -Depth 20)
+  Set-Content -Path $reportPath -Value ($Payload | ConvertTo-Json -Depth 30) -Encoding UTF8
+  Add-Content -Path $auditPath -Value ($Payload | ConvertTo-Json -Depth 30)
+}
+
+function Get-OperationCapability {
+  param(
+    [Parameter(Mandatory = $true)]$Runtime,
+    [Parameter(Mandatory = $true)][ValidateSet("rename", "reference-map", "safe-delete-candidates")][string]$Operation
+  )
+
+  $semantic = Get-SbkPropertyValue -Object (Get-SbkPropertyValue -Object (Get-SbkPropertyValue -Object $Runtime -Name "resolvedAdapter") -Name "capabilities") -Name "semantic"
+  if ($null -eq $semantic) {
+    throw "adapter '$($Runtime.adapter)' has no semantic capability metadata"
+  }
+
+  switch ($Operation) {
+    "rename" { return Get-SbkPropertyValue -Object $semantic -Name "rename" }
+    "reference-map" { return Get-SbkPropertyValue -Object $semantic -Name "referenceMap" }
+    "safe-delete-candidates" { return Get-SbkPropertyValue -Object $semantic -Name "safeDeleteCandidates" }
+    default { return $null }
+  }
 }
 
 if ($null -eq $CommandArgs -or $CommandArgs.Count -eq 0) {
@@ -232,6 +272,7 @@ $line = 0
 $column = 0
 $newName = ""
 $dryRun = $false
+$maxResults = 200
 
 for ($i = 0; $i -lt $rest.Count; $i++) {
   $token = [string]$rest[$i]
@@ -276,7 +317,28 @@ for ($i = 0; $i -lt $rest.Count; $i++) {
       $dryRun = $true
       continue
     }
+    "--max-results" {
+      if (($i + 1) -lt $rest.Count) { $maxResults = [int]$rest[$i + 1]; $i++ }
+      continue
+    }
+    "--maxResults" {
+      if (($i + 1) -lt $rest.Count) { $maxResults = [int]$rest[$i + 1]; $i++ }
+      continue
+    }
   }
+}
+
+if ($operation -notin @("rename", "reference-map", "safe-delete-candidates")) {
+  throw "unknown semantic operation: $operation"
+}
+if ([string]::IsNullOrWhiteSpace($file) -or $line -le 0 -or $column -le 0) {
+  throw "semantic operation requires --file, --line, --column"
+}
+if ($operation -eq "rename" -and [string]::IsNullOrWhiteSpace($newName)) {
+  throw "semantic rename requires --new-name"
+}
+if ($maxResults -le 0) {
+  throw "max-results must be a positive integer"
 }
 
 $targetRepoRoot = Resolve-TargetRepoRoot -Path $targetRepoRootRaw
@@ -300,86 +362,96 @@ $payload = [ordered]@{
 }
 
 try {
-  switch ($operation.ToLowerInvariant()) {
-    "rename" {
-      if ([string]::IsNullOrWhiteSpace($file) -or $line -le 0 -or $column -le 0 -or [string]::IsNullOrWhiteSpace($newName)) {
-        throw "semantic rename requires --file, --line, --column, --new-name"
-      }
+  $capability = Get-OperationCapability -Runtime $runtime -Operation $operation
+  if ($null -eq $capability) {
+    throw "adapter '$($runtime.adapter)' has no '$operation' capability declaration"
+  }
+  $supported = [bool](Get-SbkPropertyValue -Object $capability -Name "supported")
+  $backend = [string](Get-SbkPropertyValue -Object $capability -Name "backend")
+  if (-not $supported) {
+    throw "semantic operation '$operation' is unsupported for adapter '$($runtime.adapter)'"
+  }
+  $payload.backend = $backend
 
-      $semantic = Get-SbkPropertyValue -Object (Get-SbkPropertyValue -Object (Get-SbkPropertyValue -Object $runtime -Name "resolvedAdapter") -Name "capabilities") -Name "semantic"
-      if ($null -eq $semantic) {
-        throw "adapter '$($runtime.adapter)' has no semantic capability metadata"
-      }
-
-      $renameCapability = Get-SbkPropertyValue -Object $semantic -Name "rename"
-      $supported = [bool](Get-SbkPropertyValue -Object $renameCapability -Name "supported")
-      $backend = [string](Get-SbkPropertyValue -Object $renameCapability -Name "backend")
-      if (-not $supported) {
-        throw "semantic rename unsupported for adapter '$($runtime.adapter)'"
-      }
-      $payload.backend = $backend
-
-      $result = $null
-      switch ($runtime.adapter) {
-        "node-ts" {
-          $result = Invoke-NodeTsRename `
-            -TargetRepoRoot $targetRepoRoot `
-            -File $file `
-            -Line $line `
-            -Column $column `
-            -NewName $newName `
-            -DryRun $dryRun
-        }
-        "python" {
-          $result = Invoke-PythonRename `
-            -TargetRepoRoot $targetRepoRoot `
-            -File $file `
-            -Line $line `
-            -Column $column `
-            -NewName $newName `
-            -DryRun $dryRun
-        }
-        "go" {
-          Invoke-FailClosedExternalBackend -Adapter "go" -Backend $backend
-        }
-        "java" {
-          Invoke-FailClosedExternalBackend -Adapter "java" -Backend $backend
-        }
-        "rust" {
-          Invoke-FailClosedExternalBackend -Adapter "rust" -Backend $backend
-        }
-        default {
-          throw "no semantic rename backend registered for adapter '$($runtime.adapter)'"
-        }
-      }
-
-      $payload.status = "passed"
-      $payload.reason = "operation completed"
-      $payload.result = $result
-      $payload.remediation = @("none")
-      Write-SemanticReports -TargetRepoRoot $targetRepoRoot -Payload $payload
-      Write-Host ($payload | ConvertTo-Json -Depth 20)
-      break
+  $result = $null
+  switch ($runtime.adapter) {
+    "node-ts" {
+      $result = Invoke-NodeTsSemanticOperation `
+        -Operation $operation `
+        -File $file `
+        -Line $line `
+        -Column $column `
+        -NewName $newName `
+        -DryRun $dryRun `
+        -MaxResults $maxResults
     }
-    "reference-map" {
-      throw "reference-map operation is declared but not enabled in this build; fail-closed"
+    "python" {
+      $result = Invoke-PythonSemanticOperation `
+        -Operation $operation `
+        -TargetRepoRoot $targetRepoRoot `
+        -File $file `
+        -Line $line `
+        -Column $column `
+        -NewName $newName `
+        -DryRun $dryRun `
+        -MaxResults $maxResults
     }
-    "safe-delete-candidates" {
-      throw "safe-delete-candidates operation is declared but not enabled in this build; fail-closed"
+    "go" {
+      $result = Invoke-IndexedSemanticOperation `
+        -Language "go" `
+        -Operation $operation `
+        -TargetRepoRoot $targetRepoRoot `
+        -File $file `
+        -Line $line `
+        -Column $column `
+        -NewName $newName `
+        -DryRun $dryRun `
+        -MaxResults $maxResults
+    }
+    "java" {
+      $result = Invoke-IndexedSemanticOperation `
+        -Language "java" `
+        -Operation $operation `
+        -TargetRepoRoot $targetRepoRoot `
+        -File $file `
+        -Line $line `
+        -Column $column `
+        -NewName $newName `
+        -DryRun $dryRun `
+        -MaxResults $maxResults
+    }
+    "rust" {
+      $result = Invoke-IndexedSemanticOperation `
+        -Language "rust" `
+        -Operation $operation `
+        -TargetRepoRoot $targetRepoRoot `
+        -File $file `
+        -Line $line `
+        -Column $column `
+        -NewName $newName `
+        -DryRun $dryRun `
+        -MaxResults $maxResults
     }
     default {
-      throw "unknown semantic operation: $operation"
+      throw "no semantic backend registered for adapter '$($runtime.adapter)'"
     }
   }
+
+  $payload.status = "passed"
+  $payload.reason = "operation completed"
+  $payload.result = $result
+  $payload.remediation = @("none")
+  Write-SemanticReports -TargetRepoRoot $targetRepoRoot -Payload $payload
+  Write-Host ($payload | ConvertTo-Json -Depth 30)
 } catch {
   $payload.status = "failed"
   $payload.reason = $_.Exception.Message
   $payload.remediation = @(
-    "Check adapter semantic capability metadata in config/adapters/*.json.",
-    "Use adapter-specific backend tooling or switch to supported adapter.",
-    "Re-run with --dry-run after backend dependencies are available."
+    "Check semantic capability metadata in config/adapters/*.json.",
+    "Ensure backend prerequisites are installed (node/python where required).",
+    "Re-run with --dry-run to inspect deterministic output before applying."
   )
   Write-SemanticReports -TargetRepoRoot $targetRepoRoot -Payload $payload
-  Write-Host ($payload | ConvertTo-Json -Depth 20)
+  Write-Host ($payload | ConvertTo-Json -Depth 30)
   throw
 }

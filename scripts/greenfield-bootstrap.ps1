@@ -2,6 +2,7 @@ param(
   [ValidateSet("node-ts", "python", "go", "java", "rust")][string]$Adapter = "node-ts",
   [string]$ProjectName = "",
   [ValidateSet("backend", "frontend", "fullstack")][string]$ProjectType = "fullstack",
+  [string]$TargetRepoRoot = ".",
   [switch]$NoLanguageStubs,
   [switch]$Force
 )
@@ -10,9 +11,18 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$targetRoot = if ([System.IO.Path]::IsPathRooted($TargetRepoRoot)) {
+  $TargetRepoRoot
+} else {
+  Join-Path $repoRoot ($TargetRepoRoot -replace "/", "\")
+}
+if (-not (Test-Path $targetRoot)) {
+  New-Item -ItemType Directory -Path $targetRoot -Force | Out-Null
+}
+$targetRoot = (Resolve-Path $targetRoot).Path
 
 if ([string]::IsNullOrWhiteSpace($ProjectName)) {
-  $ProjectName = Split-Path $repoRoot -Leaf
+  $ProjectName = Split-Path $targetRoot -Leaf
 }
 
 $projectSlug = ($ProjectName.ToLowerInvariant() -replace "[^a-z0-9-]", "-").Trim("-")
@@ -347,7 +357,7 @@ function Update-SbkConfig {
 $projectArtifacts = Get-ProjectArtifactTemplates -Name $ProjectName -Type $ProjectType
 foreach ($relativePath in $projectArtifacts.Keys) {
   Write-ScaffoldFile `
-    -Root $repoRoot `
+    -Root $targetRoot `
     -RelativePath $relativePath `
     -Content ([string]$projectArtifacts[$relativePath]) `
     -Overwrite ([bool]$Force) `
@@ -358,7 +368,7 @@ if (-not $NoLanguageStubs) {
   $languageTemplates = Get-LanguageStubTemplates -SelectedAdapter $Adapter -Name $ProjectName -Slug $projectSlug
   foreach ($relativePath in $languageTemplates.Keys) {
     Write-ScaffoldFile `
-      -Root $repoRoot `
+      -Root $targetRoot `
       -RelativePath $relativePath `
       -Content ([string]$languageTemplates[$relativePath]) `
       -Overwrite ([bool]$Force) `
@@ -366,8 +376,9 @@ if (-not $NoLanguageStubs) {
   }
 }
 
-Update-SbkConfig -Root $repoRoot -SelectedAdapter $Adapter -Overwrite ([bool]$Force) -Summary $stats
+Update-SbkConfig -Root $targetRoot -SelectedAdapter $Adapter -Overwrite ([bool]$Force) -Summary $stats
 
 Write-Host ("[greenfield] adapter={0} project_name={1} project_type={2}" -f $Adapter, $ProjectName, $ProjectType)
+Write-Host ("[greenfield] target_repo_root={0}" -f $targetRoot)
 Write-Host ("[greenfield] language_stubs={0}" -f (-not $NoLanguageStubs))
 Write-Host ("[greenfield] created={0} updated={1} skipped={2}" -f $stats.created, $stats.updated, $stats.skipped)

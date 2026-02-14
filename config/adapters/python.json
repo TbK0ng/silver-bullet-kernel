@@ -42,18 +42,18 @@
     "semantic": {
       "rename": {
         "supported": true,
-        "backend": "python-ast",
+        "backend": "python-token-index",
         "deterministic": true
       },
       "referenceMap": {
-        "supported": false,
-        "backend": "python-ast",
-        "deterministic": false
+        "supported": true,
+        "backend": "python-token-index",
+        "deterministic": true
       },
       "safeDeleteCandidates": {
-        "supported": false,
-        "backend": "python-ast",
-        "deterministic": false
+        "supported": true,
+        "backend": "python-token-index",
+        "deterministic": true
       }
     }
   },

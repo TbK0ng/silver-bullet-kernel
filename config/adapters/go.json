@@ -34,18 +34,18 @@
     "semantic": {
       "rename": {
         "supported": true,
-        "backend": "gopls",
+        "backend": "symbol-index",
         "deterministic": true
       },
       "referenceMap": {
-        "supported": false,
-        "backend": "gopls",
-        "deterministic": false
+        "supported": true,
+        "backend": "symbol-index",
+        "deterministic": true
       },
       "safeDeleteCandidates": {
-        "supported": false,
-        "backend": "gopls",
-        "deterministic": false
+        "supported": true,
+        "backend": "symbol-index",
+        "deterministic": true
       }
     }
   },

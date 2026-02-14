@@ -41,18 +41,18 @@
     "semantic": {
       "rename": {
         "supported": true,
-        "backend": "rust-analyzer",
+        "backend": "symbol-index",
         "deterministic": true
       },
       "referenceMap": {
-        "supported": false,
-        "backend": "rust-analyzer",
-        "deterministic": false
+        "supported": true,
+        "backend": "symbol-index",
+        "deterministic": true
       },
       "safeDeleteCandidates": {
-        "supported": false,
-        "backend": "rust-analyzer",
-        "deterministic": false
+        "supported": true,
+        "backend": "symbol-index",
+        "deterministic": true
       }
     }
   },

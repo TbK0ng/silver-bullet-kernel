@@ -630,7 +630,7 @@ function Invoke-Plan {
   $riskModel = Get-SbkPropertyValue -Object $RiskProfile -Name "riskModel"
   $thresholds = Get-SbkPropertyValue -Object $riskModel -Name "thresholds"
   $overall = [double](Get-SbkPropertyValue -Object $riskModel -Name "overallRiskScore")
-  $dimensions = @((Get-SbkPropertyValue -Object $riskModel -Name "dimensions"))
+  $dimensions = @((Get-SbkPropertyValue -Object $riskModel -Name "dimensions") | ForEach-Object { $_ })
 
   $phases = @()
   foreach ($profile in @("lite", "balanced", "strict")) {
@@ -745,7 +745,7 @@ function Invoke-Verify {
 
   $riskModel = Get-SbkPropertyValue -Object $RiskProfile -Name "riskModel"
   $overall = [double](Get-SbkPropertyValue -Object $riskModel -Name "overallRiskScore")
-  $dimensions = @((Get-SbkPropertyValue -Object $riskModel -Name "dimensions"))
+  $dimensions = @((Get-SbkPropertyValue -Object $riskModel -Name "dimensions") | ForEach-Object { $_ })
   $threshold = Get-SbkPropertyValue -Object (Get-SbkPropertyValue -Object $riskModel -Name "thresholds") -Name $Profile
   if ($null -eq $threshold) {
     throw "missing threshold for profile '$Profile'"
@@ -772,7 +772,7 @@ function Invoke-Verify {
     }
   }
 
-  $phase = @((Get-SbkPropertyValue -Object $Plan -Name "phases") | Where-Object { [string]$_.profile -eq $Profile } | Select-Object -First 1)
+  $phase = @((Get-SbkPropertyValue -Object $Plan -Name "phases") | ForEach-Object { $_ } | Where-Object { [string]$_.profile -eq $Profile } | Select-Object -First 1)
   if ($phase.Count -gt 0 -and [bool]$phase[0].blockers.Count -gt 0) {
     foreach ($blocker in @($phase[0].blockers)) {
       $violations += "plan blocker: $blocker"

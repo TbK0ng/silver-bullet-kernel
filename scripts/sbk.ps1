@@ -13,7 +13,8 @@ function Show-Usage {
   Write-Host ""
   Write-Host "Commands:"
   Write-Host "  init --owner <name> [--project-type backend|frontend|fullstack]"
-  Write-Host "  greenfield [--adapter node-ts|python|go|java|rust] [--project-name <name>] [--project-type backend|frontend|fullstack] [--no-language-stubs] [--force]"
+  Write-Host "  greenfield [--adapter node-ts|python|go|java|rust] [--project-name <name>] [--project-type backend|frontend|fullstack] [--target-repo-root <path>] [--no-language-stubs] [--force]"
+  Write-Host "  flow run [--target-repo-root <path>] [--decision-mode auto|ask] [--scenario auto|greenfield|brownfield] [--adapter <name>] [--profile strict|balanced|lite] [--project-name <name>] [--project-type backend|frontend|fullstack] [--blueprint <name|none>] [--channel stable|beta] [--preset minimal|full] [--with-install] [--skip-verify] [--fleet-roots <path1,path2,...>]"
   Write-Host "  blueprint [list|apply|verify] ..."
   Write-Host "  intake [analyze|plan|verify] ..."
   Write-Host "  adapter [list|validate|register|doctor] ..."
@@ -354,10 +355,15 @@ switch ($command) {
       "--adapter" = "-Adapter"
       "--project-name" = "-ProjectName"
       "--project-type" = "-ProjectType"
+      "--target-repo-root" = "-TargetRepoRoot"
       "--no-language-stubs" = "-NoLanguageStubs"
       "--force" = "-Force"
     }
     Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "greenfield-bootstrap.ps1") -ScriptArgs $scriptArgs
+    break
+  }
+  "flow" {
+    Invoke-ScriptCommand -ScriptPath (Join-Path $PSScriptRoot "sbk-flow.ps1") -ScriptArgs $rest
     break
   }
   "blueprint" {

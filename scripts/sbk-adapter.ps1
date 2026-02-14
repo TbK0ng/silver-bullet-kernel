@@ -68,9 +68,9 @@ function Validate-AdapterPack {
 
   $errors = @()
   $metadata = Get-SbkPropertyValue -Object $Pack -Name "metadata"
-  $name = [string](Get-SbkPropertyValue -Object $metadata -Name "name")
+  $adapterName = [string](Get-SbkPropertyValue -Object $metadata -Name "name")
   $version = [string](Get-SbkPropertyValue -Object $metadata -Name "version")
-  if ([string]::IsNullOrWhiteSpace($name)) {
+  if ([string]::IsNullOrWhiteSpace($adapterName)) {
     $errors += "metadata.name is required"
   }
   if ([string]::IsNullOrWhiteSpace($version)) {
@@ -98,14 +98,33 @@ function Validate-AdapterPack {
   }
 
   $semantic = Get-SbkPropertyValue -Object (Get-SbkPropertyValue -Object $Pack -Name "capabilities") -Name "semantic"
-  $renameCapability = Get-SbkPropertyValue -Object $semantic -Name "rename"
-  $renameSupported = Get-SbkPropertyValue -Object $renameCapability -Name "supported"
-  if ($null -eq $renameSupported) {
-    $errors += "capabilities.semantic.rename.supported must be present"
+  if ($null -eq $semantic) {
+    $errors += "capabilities.semantic must be present"
+  } else {
+    $capabilityMap = [ordered]@{
+      rename = "capabilities.semantic.rename"
+      referenceMap = "capabilities.semantic.referenceMap"
+      safeDeleteCandidates = "capabilities.semantic.safeDeleteCandidates"
+    }
+    foreach ($capabilityName in $capabilityMap.Keys) {
+      $operationCapability = Get-SbkPropertyValue -Object $semantic -Name $capabilityName
+      $label = [string]$capabilityMap[$capabilityName]
+      if ($null -eq $operationCapability) {
+        $errors += "$label must be present"
+        continue
+      }
+
+      foreach ($field in @("supported", "backend", "deterministic")) {
+        $candidate = Get-SbkPropertyValue -Object $operationCapability -Name $field
+        if ($null -eq $candidate -or ([string]::IsNullOrWhiteSpace([string]$candidate) -and $field -eq "backend")) {
+          $errors += "$label.$field must be present"
+        }
+      }
+    }
   }
 
   return [ordered]@{
-    name = $name
+    name = $adapterName
     version = $version
     path = $ManifestPath
     valid = ($errors.Count -eq 0)
@@ -235,9 +254,23 @@ function Invoke-AdapterDoctor {
       $missing += "verify.$mode"
     }
   }
-  $renameCapability = Get-SbkPropertyValue -Object (Get-SbkPropertyValue -Object (Get-SbkPropertyValue -Object $adapter -Name "capabilities") -Name "semantic") -Name "rename"
-  if ($null -eq $renameCapability) {
-    $missing += "capabilities.semantic.rename"
+  $semantic = Get-SbkPropertyValue -Object (Get-SbkPropertyValue -Object $adapter -Name "capabilities") -Name "semantic"
+  if ($null -eq $semantic) {
+    $missing += "capabilities.semantic"
+  } else {
+    foreach ($name in @("rename", "referenceMap", "safeDeleteCandidates")) {
+      $operationCapability = Get-SbkPropertyValue -Object $semantic -Name $name
+      if ($null -eq $operationCapability) {
+        $missing += ("capabilities.semantic.{0}" -f $name)
+        continue
+      }
+      foreach ($field in @("supported", "backend", "deterministic")) {
+        $candidate = Get-SbkPropertyValue -Object $operationCapability -Name $field
+        if ($null -eq $candidate -or ([string]::IsNullOrWhiteSpace([string]$candidate) -and $field -eq "backend")) {
+          $missing += ("capabilities.semantic.{0}.{1}" -f $name, $field)
+        }
+      }
+    }
   }
 
   $report = [ordered]@{

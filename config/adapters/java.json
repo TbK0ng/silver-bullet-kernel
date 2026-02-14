@@ -38,18 +38,18 @@
     "semantic": {
       "rename": {
         "supported": true,
-        "backend": "jdtls",
+        "backend": "symbol-index",
         "deterministic": true
       },
       "referenceMap": {
-        "supported": false,
-        "backend": "jdtls",
-        "deterministic": false
+        "supported": true,
+        "backend": "symbol-index",
+        "deterministic": true
       },
       "safeDeleteCandidates": {
-        "supported": false,
-        "backend": "jdtls",
-        "deterministic": false
+        "supported": true,
+        "backend": "symbol-index",
+        "deterministic": true
       }
     }
   },
