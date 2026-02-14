@@ -248,3 +248,41 @@ S201, S202, S203, S204, S205, S206, S207
 - `powershell -ExecutionPolicy Bypass -File ./scripts/sbk.ps1 capabilities`
 - `powershell -ExecutionPolicy Bypass -File ./scripts/workflow-skill-parity-gate.ps1`
 - `npm run test:e2e -- tests/e2e/workflow-skill-parity-gate.e2e.test.ts tests/e2e/multi-agent-codex-manual.e2e.test.ts`
+
+## Session 8: Flow Semantic Autopilot Prerequisite Cleanup
+
+**Date**: 2026-02-14  
+**Task**: flow-semantic-autopilot
+
+### Summary
+
+Validated linked worktree execution path and strict policy prerequisites for the flow-semantic-autopilot implementation.
+
+### Memory Sources
+
+- `openspec/changes/flow-semantic-autopilot/proposal.md`
+- `openspec/changes/flow-semantic-autopilot/design.md`
+- `openspec/changes/flow-semantic-autopilot/tasks.md`
+- `scripts/sbk-flow.ps1`
+- `scripts/sbk-semantic.ps1`
+- `scripts/sbk-intake.ps1`
+
+### Disclosure Level
+
+index-then-detail
+
+### Source IDs
+
+S301, S302, S303, S304, S305, S306
+
+### Main Changes
+
+- Executed the change in linked worktree `.worktrees/flow-semantic-autopilot`.
+- Re-ran strict intake and workflow policy checks after capability changes.
+- Fixed intake object-shape handling for plan/verify generation.
+
+### Verification
+
+- `powershell -ExecutionPolicy Bypass -File ./scripts/sbk.ps1 intake analyze --target-repo-root .`
+- `powershell -ExecutionPolicy Bypass -File ./scripts/sbk.ps1 intake plan --target-repo-root .`
+- `powershell -ExecutionPolicy Bypass -File ./scripts/workflow-policy-gate.ps1 -Mode local`

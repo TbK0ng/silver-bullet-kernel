@@ -48,6 +48,7 @@ function bootstrapAdapterRepo(repoDir: string) {
   copyFromRepo("scripts/sbk-adapter.ps1", repoDir);
   copyFromRepo("scripts/sbk-semantic.ps1", repoDir);
   copyFromRepo("scripts/semantic-python.py", repoDir);
+  copyFromRepo("scripts/semantic-index.py", repoDir);
   copyFromRepo("scripts/semantic-rename.ts", repoDir);
   copyFromRepo("scripts/common/sbk-runtime.ps1", repoDir);
   copyFromRepo("sbk.config.json", repoDir);
@@ -122,7 +123,7 @@ describe("sbk adapter + semantic", () => {
     expect(list.stdout).toContain("source=plugin");
   });
 
-  it("routes python semantic rename and fail-closes unavailable rust backend", () => {
+  it("routes semantic operations for python and deterministic index adapters", () => {
     const repoDir = fs.mkdtempSync(path.join(os.tmpdir(), "sbk-semantic-"));
     tempDirs.push(repoDir);
     bootstrapAdapterRepo(repoDir);
@@ -172,25 +173,93 @@ describe("sbk adapter + semantic", () => {
     expect(report.status).toBe("passed");
     expect(report.adapter).toBe("python");
 
-    runtimeConfig.adapter = "rust";
-    writeFile(path.join(repoDir, "sbk.config.json"), JSON.stringify(runtimeConfig, null, 2));
-    writeFile(path.join(repoDir, "src", "main.rs"), "fn greet() {}\nfn main() { greet(); }\n");
-
-    const renameRust = runSbk(repoDir, [
+    const referenceMap = runSbk(repoDir, [
       "semantic",
-      "rename",
+      "reference-map",
       "--file",
-      "src/main.rs",
+      "src/module.py",
       "--line",
       "1",
       "--column",
-      "4",
-      "--new-name",
-      "greet_user",
+      "7",
       "--target-repo-root",
       repoDir,
     ]);
-    expect(renameRust.status).not.toBe(0);
-    expect(renameRust.stdout + renameRust.stderr).toContain("backend");
-  });
+    expect(referenceMap.status).toBe(0);
+    const refReport = JSON.parse(
+      fs.readFileSync(semanticReportPath, "utf8").replace(/^\uFEFF/, ""),
+    );
+    expect(refReport.status).toBe("passed");
+    expect(refReport.result.operation).toBe("reference-map");
+    expect(refReport.result.summary.totalReferences).toBeGreaterThanOrEqual(2);
+
+    const safeDelete = runSbk(repoDir, [
+      "semantic",
+      "safe-delete-candidates",
+      "--file",
+      "src/module.py",
+      "--line",
+      "1",
+      "--column",
+      "7",
+      "--target-repo-root",
+      repoDir,
+    ]);
+    expect(safeDelete.status).toBe(0);
+    const safeDeleteReport = JSON.parse(
+      fs.readFileSync(semanticReportPath, "utf8").replace(/^\uFEFF/, ""),
+    );
+    expect(safeDeleteReport.status).toBe("passed");
+    expect(safeDeleteReport.result.operation).toBe("safe-delete-candidates");
+
+    const scenarios = [
+      {
+        adapter: "rust",
+        file: "src/main.rs",
+        content: "fn greet() {}\nfn main() { greet(); }\n",
+        line: "1",
+        column: "5",
+      },
+      {
+        adapter: "go",
+        file: "cmd/app/main.go",
+        content: "package main\n\nfunc greet() {}\n\nfunc main() { greet() }\n",
+        line: "3",
+        column: "7",
+      },
+      {
+        adapter: "java",
+        file: "src/main/java/App.java",
+        content:
+          "public class App {\n  static void greet() {}\n  public static void main(String[] args) { greet(); }\n}\n",
+        line: "2",
+        column: "16",
+      },
+    ];
+
+    for (const scenario of scenarios) {
+      runtimeConfig.adapter = scenario.adapter;
+      writeFile(path.join(repoDir, "sbk.config.json"), JSON.stringify(runtimeConfig, null, 2));
+      writeFile(path.join(repoDir, scenario.file), scenario.content);
+
+      const rename = runSbk(repoDir, [
+        "semantic",
+        "rename",
+        "--file",
+        scenario.file,
+        "--line",
+        scenario.line,
+        "--column",
+        scenario.column,
+        "--new-name",
+        "greet_user",
+        "--target-repo-root",
+        repoDir,
+      ]);
+      expect(rename.status).toBe(0);
+
+      const changedContent = fs.readFileSync(path.join(repoDir, scenario.file), "utf8");
+      expect(changedContent).toContain("greet_user");
+    }
+  }, 30000);
 });
