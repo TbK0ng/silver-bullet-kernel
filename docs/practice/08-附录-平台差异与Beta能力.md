@@ -51,10 +51,15 @@ sbk capabilities
 
 ## 4. Beta 能力边界（重点）
 
-## 4.1 你会在哪些地方遇到 Beta
+## 4.1 Beta 触发矩阵（显式/条件）
 
-- 发布通道：`--channel beta`
-- 蓝图：例如 `monorepo-service`（registry 标注为 beta）
+| 触发方式 | 触发类型 | 效果 |
+| --- | --- | --- |
+| `flow run --channel beta` | 条件触发（参数决定） | flow 会放开 beta 资产能力（allow-beta 语义被打开） |
+| `flow run --allow-beta` | 显式高风险触发 | 即使不是 beta 通道，也显式允许使用 beta 资产 |
+| `blueprint apply --allow-beta` | 显式高风险触发 | 允许应用 beta 蓝图（如 `monorepo-service`） |
+
+注意：这些触发只影响“可选资产集”，不会额外隐式触发 explore/new-change/record-session 等流程。
 
 ## 4.2 什么时候可以考虑 Beta
 
@@ -74,11 +79,19 @@ sbk capabilities
 
 ## 5.1 启用示例
 
+推荐（flow 走 beta 通道）：
+
 ```powershell
-sbk flow run --scenario auto --decision-mode auto --channel beta --allow-beta --target-repo-root .
+sbk flow run --scenario auto --decision-mode auto --channel beta --target-repo-root .
 ```
 
-或蓝图：
+显式放开（在 stable 通道下也允许 beta 资产）：
+
+```powershell
+sbk flow run --scenario auto --decision-mode auto --channel stable --allow-beta --target-repo-root .
+```
+
+beta 蓝图：
 
 ```powershell
 sbk blueprint apply --name monorepo-service --allow-beta --target-repo-root . --project-name demo --adapter node-ts

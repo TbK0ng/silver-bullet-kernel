@@ -15,12 +15,20 @@
 4. `docs/04-实践指南-双人协作与故障排查.md`
 5. `docs/05-命令与产物速查表.md`
 6. `docs/06-多项目类型接入与配置指南.md`
+7. `docs/07-命令触发语义对照表.md`
 
 ## 先记住三个核心原则
 
 1. 产物是唯一真相源：需求、设计、任务、证据都落到仓库文件。
 2. 上下文是缓存：会话可以中断，但信息不能只停留在对话里。
 3. 执行是可重入状态机：任何步骤失败都要留下证据并可继续推进。
+
+## 触发语义速记
+
+- 显式触发（需要你直接调用）：`/trellis:start`、`/trellis:record-session`、`sbk explore`、`sbk new-change`、`sbk record-session`。
+- 显式高风险触发（需要明确授权）：`sbk flow run --force`、`sbk flow run --allow-beta`、`sbk migrate-specs --unsafe-overwrite`。
+- 条件触发（由参数/上下文决定）：`sbk flow run` 里的 install/greenfield/verify/fleet 等阶段。
+- AI 自动执行提示词不改变命令语义：AI 可以代你执行步骤，但命令本身不会因此多出隐式阶段。
 
 ## 10 分钟快速起步
 

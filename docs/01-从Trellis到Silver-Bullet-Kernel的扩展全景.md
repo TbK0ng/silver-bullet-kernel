@@ -22,6 +22,11 @@
 - 工作流指导与质量守则（`.trellis/spec/guides/`）。
 - 多 agent、任务与协作辅助（Trellis 自带脚本体系）。
 
+触发语义边界：
+
+- `/trellis:start`、`/trellis:record-session`、`sbk record-session` 都是显式入口，不会被 `flow run` 隐式触发。
+- `sbk flow run` 负责编排条件阶段（例如 `--with-install`、`--skip-verify`、`--fleet-roots`），不负责自动进入 brainstorm/explore。
+
 这解决了“有流程”问题，但还不够解决“流程一定被执行且可验证”。
 
 ## 3. Silver Bullet Kernel 新增了什么
