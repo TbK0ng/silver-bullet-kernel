@@ -8,7 +8,7 @@
 - 从“靠习惯执行流程”升级到“策略即代码（policy-as-code）”。
 - 从“靠感觉改进流程”升级到“指标驱动改进”。
 
-对应工程哲学来自 `E:\docc\ai-coding-workflow-silver-bullet-plan.md` 的三条主线：
+对应工程哲学沿用三条主线：
 
 1. 产物是唯一真相源。
 2. 上下文是缓存。
@@ -18,7 +18,7 @@
 
 在本项目基线里，Trellis 主要负责：
 
-- 会话与规范注入（`.trellis/`、`/trellis:start`、`/trellis:record-session`）。
+- 会话与规范注入（`.trellis/`、`/trellis:start`、`/trellis:record-session`，或 `sbk record-session` 等价入口）。
 - 工作流指导与质量守则（`.trellis/spec/guides/`）。
 - 多 agent、任务与协作辅助（Trellis 自带脚本体系）。
 
@@ -31,7 +31,7 @@
 | 问题 | SBK 扩展方案 | 关键入口 |
 | --- | --- | --- |
 | 流程靠自觉，容易绕过 | 增加强制治理门禁（policy gate） | `scripts/workflow-policy-gate.ps1`, `workflow-policy.json` |
-| 验证执行后难复盘 | 验证遥测与失败诊断留痕 | `scripts/common/verify-telemetry.ps1`, `scripts/verify-*.ps1` |
+| 验证执行后难复盘 | 验证遥测与失败诊断留痕 | `scripts/common/verify-telemetry.ps1`, `scripts/verify-fast.ps1`, `scripts/verify.ps1`, `scripts/verify-loop.ps1` |
 | 失败后反复重试无结构 | 有界 verify/fix 循环 | `scripts/verify-loop.ps1` |
 | 指标改进缺少统一视图 | 周报/快照/阈值门禁 | `scripts/collect-metrics.ps1`, `scripts/workflow-indicator-gate.ps1` |
 | 环境坏了不知道先修哪 | 一键健康诊断 | `scripts/workflow-doctor.ps1`, `scripts/workflow-doctor-json.ps1` |
@@ -53,7 +53,7 @@
 - 分支名必须符合 `sbk-<owner>-<change>`。
 - `<change>` 必须和当前 active change 一致。
 - 本地实现必须在 linked worktree 中进行。
-- 非 trivial 变更要映射到 `openspec/changes/<change>/` 产物。
+- 非 trivial 变更要映射到 `openspec/changes/<change>/` 产物（`<change>` 为占位符，需替换为真实 change slug，例如 `openspec/changes/practice-guides-suite/`）。
 
 这让“谁在做什么、是否按约束执行”变得可自动检查。
 
@@ -73,13 +73,13 @@
 
 本项目已把运行时生成物统一迁移到 `.metrics/`，例如：
 
-- `workflow-policy-gate.md/json`
-- `workflow-indicator-gate.md/json`
-- `workflow-doctor.md/json`
-- `workflow-metrics-weekly.md/json`
-- `verify-runs*.jsonl`
-- `memory-context-audit.jsonl`
-- `codebase-map.md`
+- `.metrics/workflow-policy-gate.md` 与 `.metrics/workflow-policy-gate.json`
+- `.metrics/workflow-indicator-gate.md` 与 `.metrics/workflow-indicator-gate.json`
+- `.metrics/workflow-doctor.md` 与 `.metrics/workflow-doctor.json`
+- `.metrics/workflow-metrics-weekly.md` 与 `.metrics/workflow-metrics-latest.json`
+- `.metrics/verify-runs*.jsonl`
+- `.metrics/memory-context-audit.jsonl`
+- `.metrics/codebase-map.md`
 
 为什么要迁移：
 

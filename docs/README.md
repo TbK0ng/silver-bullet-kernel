@@ -36,4 +36,4 @@ npm run metrics:collect
 
 - `workflow:doctor` 通过（或给出明确修复建议）
 - `verify:fast` 通过
-- `.metrics/` 下生成可追溯报告
+- 执行 `npm run metrics:collect` 后，`.metrics/` 下生成可追溯报告（本地产物，默认不入库）
